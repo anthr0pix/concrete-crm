@@ -1,0 +1,199 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+}
+
+enum JobStatus {
+  LEAD
+  QUOTED
+  SCHEDULED
+  IN_PROGRESS
+  COMPLETED
+  CANCELLED
+}
+
+enum QuoteStatus {
+  DRAFT
+  SENT
+  ACCEPTED
+  DECLINED
+  EXPIRED
+}
+
+enum InvoiceStatus {
+  DRAFT
+  SENT
+  PAID
+  OVERDUE
+  VOID
+}
+
+enum ServiceType {
+  CONCRETE_SEALING
+  PAVER_SEALING
+  DRIVEWAY_SEALING
+  PATIO_SEALING
+  POOL_DECK_SEALING
+  COMMERCIAL_SEALING
+  OTHER
+}
+
+model Customer {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  firstName      String
+  lastName       String
+  email          String?
+  phone          String
+  address        String
+  city           String
+  state          String
+  zip            String
+  notes          String?
+  referralSource String?
+
+  jobs     Job[]
+  quotes   Quote[]
+  invoices Invoice[]
+
+  @@index([lastName])
+  @@index([phone])
+}
+
+model Job {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  customerId  String
+  customer    Customer @relation(fields: [customerId], references: [id])
+
+  title         String
+  description   String?
+  serviceType   ServiceType
+  status        JobStatus   @default(LEAD)
+
+  address       String?
+  city          String?
+  state         String?
+  zip           String?
+
+  scheduledDate DateTime?
+  completedDate DateTime?
+
+  squareFootage Float?
+  notes         String?
+
+  photos   JobPhoto[]
+  quotes   Quote[]
+  invoices Invoice[]
+
+  @@index([customerId])
+  @@index([status])
+  @@index([scheduledDate])
+}
+
+model JobPhoto {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  jobId   String
+  job     Job    @relation(fields: [jobId], references: [id], onDelete: Cascade)
+
+  url      String
+  caption  String?
+  isBefore Boolean @default(true)
+
+  @@index([jobId])
+}
+
+model Quote {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  quoteNumber String      @unique
+  customerId  String
+  customer    Customer    @relation(fields: [customerId], references: [id])
+  jobId       String?
+  job         Job?        @relation(fields: [jobId], references: [id])
+
+  status     QuoteStatus @default(DRAFT)
+  validUntil DateTime?
+
+  lineItems QuoteLineItem[]
+
+  subtotal  Float @default(0)
+  taxRate   Float @default(0)
+  taxAmount Float @default(0)
+  total     Float @default(0)
+
+  notes String?
+
+  invoices Invoice[]
+
+  @@index([customerId])
+  @@index([status])
+}
+
+model QuoteLineItem {
+  id      String @id @default(cuid())
+  quoteId String
+  quote   Quote  @relation(fields: [quoteId], references: [id], onDelete: Cascade)
+
+  description String
+  quantity    Float
+  unitPrice   Float
+  total       Float
+
+  @@index([quoteId])
+}
+
+model Invoice {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  invoiceNumber String        @unique
+  customerId    String
+  customer      Customer      @relation(fields: [customerId], references: [id])
+  jobId         String?
+  job           Job?          @relation(fields: [jobId], references: [id])
+  quoteId       String?
+  quote         Quote?        @relation(fields: [quoteId], references: [id])
+
+  status   InvoiceStatus @default(DRAFT)
+  dueDate  DateTime?
+  paidDate DateTime?
+
+  lineItems InvoiceLineItem[]
+
+  subtotal  Float @default(0)
+  taxRate   Float @default(0)
+  taxAmount Float @default(0)
+  total     Float @default(0)
+
+  notes String?
+
+  @@index([customerId])
+  @@index([status])
+  @@index([dueDate])
+}
+
+model InvoiceLineItem {
+  id        String  @id @default(cuid())
+  invoiceId String
+  invoice   Invoice @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  description String
+  quantity    Float
+  unitPrice   Float
+  total       Float
+
+  @@index([invoiceId])
+}
