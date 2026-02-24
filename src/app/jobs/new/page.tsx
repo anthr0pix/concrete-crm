@@ -3,6 +3,8 @@ import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import JobForm from "@/components/jobs/JobForm";
 
+export const dynamic = "force-dynamic";
+
 export default async function NewJobPage({
   searchParams,
 }: {

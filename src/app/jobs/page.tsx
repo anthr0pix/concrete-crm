@@ -2,20 +2,11 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { JOB_STATUS_LABELS, SERVICE_TYPE_LABELS } from "@/types";
+import { JOB_STATUS_LABELS, SERVICE_TYPE_LABELS, STATUS_COLORS } from "@/types";
 import { JobStatus } from "@prisma/client";
 import { format } from "date-fns";
 
 export const dynamic = "force-dynamic";
-
-const STATUS_COLORS: Record<string, string> = {
-  LEAD: "bg-slate-100 text-slate-700",
-  QUOTED: "bg-blue-100 text-blue-700",
-  SCHEDULED: "bg-yellow-100 text-yellow-700",
-  IN_PROGRESS: "bg-orange-100 text-orange-700",
-  COMPLETED: "bg-green-100 text-green-700",
-  CANCELLED: "bg-red-100 text-red-700",
-};
 
 const STATUS_TABS = ["ALL", ...Object.keys(JOB_STATUS_LABELS)] as const;
 
@@ -36,7 +27,7 @@ export default async function JobsPage({
   });
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
+    <div className="p-4 sm:p-6 max-w-5xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Jobs</h1>
@@ -83,9 +74,9 @@ export default async function JobsPage({
                       {JOB_STATUS_LABELS[job.status]}
                     </span>
                   </div>
-                  <div className="flex items-center gap-4 mt-1 text-sm text-slate-500">
+                  <div className="flex flex-wrap items-center gap-x-4 gap-y-0.5 mt-1 text-sm text-slate-500">
                     <span>{job.customer.firstName} {job.customer.lastName}</span>
-                    <span>{SERVICE_TYPE_LABELS[job.serviceType]}</span>
+                    <span className="hidden sm:inline">{SERVICE_TYPE_LABELS[job.serviceType]}</span>
                     {job.scheduledDate && (
                       <span>{format(new Date(job.scheduledDate), "MMM d, yyyy")}</span>
                     )}

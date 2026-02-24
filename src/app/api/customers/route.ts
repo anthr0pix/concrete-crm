@@ -19,29 +19,40 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const search = searchParams.get("search") ?? "";
 
-  const customers = await prisma.customer.findMany({
-    where: search
-      ? {
-          OR: [
-            { firstName: { contains: search, mode: "insensitive" } },
-            { lastName: { contains: search, mode: "insensitive" } },
-            { phone: { contains: search } },
-            { email: { contains: search, mode: "insensitive" } },
-          ],
-        }
-      : undefined,
-    orderBy: { lastName: "asc" },
-    include: { _count: { select: { jobs: true } } },
-  });
+  try {
+    const customers = await prisma.customer.findMany({
+      where: search
+        ? {
+            OR: [
+              { firstName: { contains: search, mode: "insensitive" } },
+              { lastName: { contains: search, mode: "insensitive" } },
+              { phone: { contains: search } },
+              { email: { contains: search, mode: "insensitive" } },
+            ],
+          }
+        : undefined,
+      orderBy: { lastName: "asc" },
+      include: { _count: { select: { jobs: true } } },
+    });
 
-  return NextResponse.json(customers);
+    return NextResponse.json(customers);
+  } catch (err) {
+    console.error("[GET customers]", err);
+    return NextResponse.json({ error: "Failed to fetch customers." }, { status: 500 });
+  }
 }
 
 export async function POST(request: Request) {
-  const body = await request.json();
+  let body;
+  try { body = await request.json(); } catch { return NextResponse.json({ error: "Invalid JSON" }, { status: 400 }); }
   const parsed = customerSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
 
-  const customer = await prisma.customer.create({ data: parsed.data });
-  return NextResponse.json(customer, { status: 201 });
+  try {
+    const customer = await prisma.customer.create({ data: parsed.data });
+    return NextResponse.json(customer, { status: 201 });
+  } catch (err) {
+    console.error("[POST customer]", err);
+    return NextResponse.json({ error: "Failed to create customer." }, { status: 500 });
+  }
 }

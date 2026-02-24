@@ -3,6 +3,8 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import JobForm from "@/components/jobs/JobForm";
+
+export const dynamic = "force-dynamic";
 import { format } from "date-fns";
 
 export default async function EditJobPage({
@@ -37,8 +39,13 @@ export default async function EditJobPage({
           state: job.state ?? "",
           zip: job.zip ?? "",
           scheduledDate: job.scheduledDate ? format(new Date(job.scheduledDate), "yyyy-MM-dd") : "",
+          resealDueDate: job.resealDueDate ? format(new Date(job.resealDueDate), "yyyy-MM-dd") : "",
           squareFootage: job.squareFootage ?? undefined,
           notes: job.notes ?? "",
+          laborHours: job.laborHours ?? undefined,
+          laborRate: job.laborRate ?? undefined,
+          materialCost: job.materialCost ?? undefined,
+          crewAssignment: job.crewAssignment ?? "",
         }}
       />
     </div>

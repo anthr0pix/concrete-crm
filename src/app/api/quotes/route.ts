@@ -27,41 +27,52 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const customerId = searchParams.get("customerId");
 
-  const quotes = await prisma.quote.findMany({
-    where: customerId ? { customerId } : undefined,
-    orderBy: { createdAt: "desc" },
-    include: {
-      customer: { select: { firstName: true, lastName: true } },
-      lineItems: true,
-    },
-  });
-  return NextResponse.json(quotes);
+  try {
+    const quotes = await prisma.quote.findMany({
+      where: customerId ? { customerId } : undefined,
+      orderBy: { createdAt: "desc" },
+      include: {
+        customer: { select: { firstName: true, lastName: true } },
+        lineItems: true,
+      },
+    });
+    return NextResponse.json(quotes);
+  } catch (err) {
+    console.error("[GET quotes]", err);
+    return NextResponse.json({ error: "Failed to fetch quotes." }, { status: 500 });
+  }
 }
 
 export async function POST(request: Request) {
-  const body = await request.json();
+  let body;
+  try { body = await request.json(); } catch { return NextResponse.json({ error: "Invalid JSON" }, { status: 400 }); }
   const parsed = quoteSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
 
-  const { lineItems, taxRate, validUntil, ...rest } = parsed.data;
-  const subtotal = lineItems.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
-  const taxAmount = subtotal * (taxRate / 100);
-  const total = subtotal + taxAmount;
-  const quoteNumber = await getNextQuoteNumber();
+  try {
+    const { lineItems, taxRate, validUntil, ...rest } = parsed.data;
+    const subtotal = lineItems.reduce((sum, item) => sum + item.quantity * item.unitPrice, 0);
+    const taxAmount = subtotal * (taxRate / 100);
+    const total = subtotal + taxAmount;
+    const quoteNumber = await getNextQuoteNumber();
 
-  const quote = await prisma.quote.create({
-    data: {
-      ...rest,
-      quoteNumber,
-      taxRate,
-      subtotal,
-      taxAmount,
-      total,
-      validUntil: validUntil ? new Date(validUntil) : undefined,
-      lineItems: { create: lineItems.map((item) => ({ ...item, total: item.quantity * item.unitPrice })) },
-    },
-    include: { lineItems: true },
-  });
+    const quote = await prisma.quote.create({
+      data: {
+        ...rest,
+        quoteNumber,
+        taxRate,
+        subtotal,
+        taxAmount,
+        total,
+        validUntil: validUntil ? new Date(validUntil) : undefined,
+        lineItems: { create: lineItems.map((item) => ({ ...item, total: item.quantity * item.unitPrice })) },
+      },
+      include: { lineItems: true },
+    });
 
-  return NextResponse.json(quote, { status: 201 });
+    return NextResponse.json(quote, { status: 201 });
+  } catch (err) {
+    console.error("[POST quote]", err);
+    return NextResponse.json({ error: "Failed to create quote." }, { status: 500 });
+  }
 }

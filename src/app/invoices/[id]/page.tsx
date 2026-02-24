@@ -6,6 +6,7 @@ import { INVOICE_STATUS_LABELS } from "@/types";
 import { format } from "date-fns";
 import InvoiceStatusSelect from "@/components/invoices/InvoiceStatusSelect";
 import MarkPaidButton from "@/components/invoices/MarkPaidButton";
+import PayNowButton from "@/components/invoices/PayNowButton";
 
 export const dynamic = "force-dynamic";
 
@@ -17,7 +18,7 @@ export default async function InvoiceDetailPage({
   const { id } = await params;
   const invoice = await prisma.invoice.findUnique({
     where: { id },
-    include: { customer: true, job: true, quote: true, lineItems: true },
+    include: { customer: true, job: true, quote: true, lineItems: true, paymentEvents: { orderBy: { createdAt: "desc" } } },
   });
   if (!invoice) notFound();
 
@@ -40,7 +41,14 @@ export default async function InvoiceDetailPage({
             <p className="text-sm text-slate-400">Due: {format(new Date(invoice.dueDate), "MMMM d, yyyy")}</p>
           )}
           {invoice.paidDate && (
-            <p className="text-sm text-green-600 font-medium">Paid: {format(new Date(invoice.paidDate), "MMMM d, yyyy")}</p>
+            <p className="text-sm text-green-600 font-medium">
+              Paid: {format(new Date(invoice.paidDate), "MMMM d, yyyy")}
+              {invoice.squarePaymentId && (
+                <span className="ml-2 inline-flex items-center text-xs bg-green-100 text-green-700 px-2 py-0.5 rounded-full">
+                  Paid via Square
+                </span>
+              )}
+            </p>
           )}
           {invoice.job && (
             <p className="text-sm text-slate-400 mt-0.5">
@@ -56,7 +64,10 @@ export default async function InvoiceDetailPage({
         <div className="flex items-center gap-2">
           <InvoiceStatusSelect invoiceId={invoice.id} currentStatus={invoice.status} />
           {invoice.status !== "PAID" && invoice.status !== "VOID" && (
-            <MarkPaidButton invoiceId={invoice.id} />
+            <>
+              <MarkPaidButton invoiceId={invoice.id} />
+              <PayNowButton invoiceId={invoice.id} />
+            </>
           )}
         </div>
       </div>
@@ -105,6 +116,30 @@ export default async function InvoiceDetailPage({
 
       {invoice.notes && (
         <p className="text-sm text-slate-600 bg-slate-50 rounded p-3">{invoice.notes}</p>
+      )}
+
+      {invoice.paymentEvents.length > 0 && (
+        <div className="bg-white border rounded-lg p-4 mt-4">
+          <h2 className="font-semibold mb-3">Payment History</h2>
+          <div className="space-y-2">
+            {invoice.paymentEvents.map((event: { id: string; eventType: string; createdAt: Date; amount: number; status: string }) => (
+              <div key={event.id} className="flex justify-between items-center text-sm border-b last:border-0 pb-2">
+                <div>
+                  <span className="font-medium">{event.eventType}</span>
+                  <span className="text-slate-400 ml-2">{format(new Date(event.createdAt), "MMM d, yyyy h:mm a")}</span>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="font-medium">${event.amount.toFixed(2)}</span>
+                  <span className={`text-xs px-2 py-0.5 rounded-full ${
+                    event.status === "COMPLETED" ? "bg-green-100 text-green-700" :
+                    event.status === "FAILED" ? "bg-red-100 text-red-700" :
+                    "bg-yellow-100 text-yellow-700"
+                  }`}>{event.status}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
       )}
     </div>
   );

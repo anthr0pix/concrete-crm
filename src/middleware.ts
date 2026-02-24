@@ -26,7 +26,15 @@ export async function middleware(request: NextRequest) {
   const { data: { user } } = await supabase.auth.getUser();
 
   const pathname = request.nextUrl.pathname;
-  const isPublicPath = pathname === "/login" || pathname.startsWith("/api/auth/");
+
+  const isPublicPath =
+    pathname === "/login" ||
+    pathname.startsWith("/api/auth/") ||
+    pathname.startsWith("/api/public/") ||
+    pathname.startsWith("/api/portal/") ||
+    pathname.startsWith("/api/square/webhook") ||
+    pathname.startsWith("/api/cron/") ||
+    pathname.startsWith("/portal/");
 
   if (!user && !isPublicPath) {
     const url = request.nextUrl.clone();

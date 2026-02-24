@@ -23,8 +23,13 @@ const schema = z.object({
   state: z.string().optional(),
   zip: z.string().optional(),
   scheduledDate: z.string().optional(),
+  resealDueDate: z.string().optional(),
   squareFootage: z.coerce.number().optional(),
   notes: z.string().optional(),
+  laborHours: z.coerce.number().optional(),
+  laborRate: z.coerce.number().optional(),
+  materialCost: z.coerce.number().optional(),
+  crewAssignment: z.string().optional(),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -110,9 +115,14 @@ export default function JobForm({ customers, defaultValues, jobId }: Props) {
           <Input {...register("scheduledDate")} type="date" />
         </div>
         <div className="space-y-1">
-          <Label>Square Footage</Label>
-          <Input {...register("squareFootage")} type="number" placeholder="0" />
+          <Label>Reseal Due Date</Label>
+          <Input {...register("resealDueDate")} type="date" />
         </div>
+      </div>
+
+      <div className="space-y-1">
+        <Label>Square Footage</Label>
+        <Input {...register("squareFootage")} type="number" placeholder="0" />
       </div>
 
       <div className="space-y-1">
@@ -132,6 +142,28 @@ export default function JobForm({ customers, defaultValues, jobId }: Props) {
         <div className="space-y-1">
           <Label>Zip</Label>
           <Input {...register("zip")} />
+        </div>
+      </div>
+
+      <div className="border-t pt-4 mt-2">
+        <Label className="text-base font-semibold mb-3 block">Job Costing</Label>
+        <div className="grid grid-cols-3 gap-4">
+          <div className="space-y-1">
+            <Label>Labor Hours</Label>
+            <Input {...register("laborHours")} type="number" step="0.5" placeholder="0" />
+          </div>
+          <div className="space-y-1">
+            <Label>Labor Rate ($/hr)</Label>
+            <Input {...register("laborRate")} type="number" step="0.01" placeholder="0.00" />
+          </div>
+          <div className="space-y-1">
+            <Label>Material Cost ($)</Label>
+            <Input {...register("materialCost")} type="number" step="0.01" placeholder="0.00" />
+          </div>
+        </div>
+        <div className="mt-3 space-y-1">
+          <Label>Crew Assignment</Label>
+          <Input {...register("crewAssignment")} placeholder="e.g. Nick + Jake" />
         </div>
       </div>
 

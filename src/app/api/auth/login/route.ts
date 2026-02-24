@@ -1,11 +1,24 @@
 import { NextResponse } from "next/server";
 import { createClient } from "@/lib/supabase/server";
+import { z } from "zod";
+
+const loginSchema = z.object({
+  email: z.string().email(),
+  password: z.string().min(1),
+});
 
 export async function POST(request: Request) {
-  const { email, password } = await request.json();
-  const supabase = await createClient();
+  let body;
+  try { body = await request.json(); } catch { return NextResponse.json({ error: "Invalid JSON" }, { status: 400 }); }
 
-  const { error } = await supabase.auth.signInWithPassword({ email, password });
+  const parsed = loginSchema.safeParse(body);
+  if (!parsed.success) return NextResponse.json({ error: "Invalid email or password" }, { status: 400 });
+
+  const supabase = await createClient();
+  const { error } = await supabase.auth.signInWithPassword({
+    email: parsed.data.email,
+    password: parsed.data.password,
+  });
 
   if (error) {
     return NextResponse.json({ error: "Invalid email or password" }, { status: 401 });

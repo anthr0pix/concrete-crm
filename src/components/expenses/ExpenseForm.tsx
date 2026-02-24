@@ -1,0 +1,192 @@
+"use client";
+
+import { useForm } from "react-hook-form";
+import { zodResolver } from "@hookform/resolvers/zod";
+import { z } from "zod";
+import { useRouter } from "next/navigation";
+import { toast } from "sonner";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { ExpenseCategory } from "@prisma/client";
+import { EXPENSE_CATEGORY_LABELS } from "@/types";
+
+const schema = z.object({
+  date: z.string().min(1, "Required"),
+  category: z.nativeEnum(ExpenseCategory),
+  description: z.string().min(1, "Required"),
+  amount: z.coerce.number().positive("Must be greater than 0"),
+  vendor: z.string().optional(),
+  receiptUrl: z.string().url("Must be a valid URL").optional().or(z.literal("")),
+  jobId: z.string().optional(),
+  notes: z.string().optional(),
+});
+
+type FormData = z.infer<typeof schema>;
+
+interface Props {
+  jobs: Array<{ id: string; title: string }>;
+  defaultValues?: Partial<FormData>;
+  expenseId?: string;
+}
+
+export default function ExpenseForm({ jobs, defaultValues, expenseId }: Props) {
+  const router = useRouter();
+  const isEdit = !!expenseId;
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isSubmitting },
+  } = useForm<FormData>({
+    resolver: zodResolver(schema),
+    defaultValues: {
+      category: "MATERIALS",
+      date: new Date().toISOString().split("T")[0],
+      ...defaultValues,
+    },
+  });
+
+  const onSubmit = async (data: FormData) => {
+    const url = isEdit ? `/api/expenses/${expenseId}` : "/api/expenses";
+    const method = isEdit ? "PATCH" : "POST";
+
+    // Clean up empty optional strings
+    const payload = {
+      ...data,
+      amount: Number(data.amount),
+      vendor: data.vendor || undefined,
+      receiptUrl: data.receiptUrl || undefined,
+      jobId: data.jobId || undefined,
+      notes: data.notes || undefined,
+    };
+
+    const res = await fetch(url, {
+      method,
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(payload),
+    });
+
+    if (!res.ok) {
+      toast.error("Something went wrong.");
+      return;
+    }
+
+    toast.success(isEdit ? "Expense updated" : "Expense created");
+    router.push("/expenses");
+    router.refresh();
+  };
+
+  return (
+    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-1">
+          <Label>Date</Label>
+          <Input {...register("date")} type="date" />
+          {errors.date && (
+            <p className="text-xs text-red-500">{errors.date.message}</p>
+          )}
+        </div>
+        <div className="space-y-1">
+          <Label>Category</Label>
+          <select
+            {...register("category")}
+            className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
+          >
+            {Object.entries(EXPENSE_CATEGORY_LABELS).map(([val, label]) => (
+              <option key={val} value={val}>
+                {label}
+              </option>
+            ))}
+          </select>
+        </div>
+      </div>
+
+      <div className="space-y-1">
+        <Label>Description</Label>
+        <Input
+          {...register("description")}
+          placeholder="e.g. 5-gallon sealer, diesel fuel"
+        />
+        {errors.description && (
+          <p className="text-xs text-red-500">{errors.description.message}</p>
+        )}
+      </div>
+
+      <div className="grid grid-cols-2 gap-4">
+        <div className="space-y-1">
+          <Label>Amount</Label>
+          <div className="relative">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-500">
+              $
+            </span>
+            <Input
+              {...register("amount")}
+              type="number"
+              step="0.01"
+              min="0"
+              placeholder="0.00"
+              className="pl-7"
+            />
+          </div>
+          {errors.amount && (
+            <p className="text-xs text-red-500">{errors.amount.message}</p>
+          )}
+        </div>
+        <div className="space-y-1">
+          <Label>Vendor</Label>
+          <Input
+            {...register("vendor")}
+            placeholder="e.g. Home Depot, Shell"
+          />
+        </div>
+      </div>
+
+      <div className="space-y-1">
+        <Label>Link to Job</Label>
+        <select
+          {...register("jobId")}
+          className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
+        >
+          <option value="">No job</option>
+          {jobs.map((job) => (
+            <option key={job.id} value={job.id}>
+              {job.title}
+            </option>
+          ))}
+        </select>
+      </div>
+
+      <div className="space-y-1">
+        <Label>Receipt URL</Label>
+        <Input
+          {...register("receiptUrl")}
+          type="url"
+          placeholder="https://..."
+        />
+        {errors.receiptUrl && (
+          <p className="text-xs text-red-500">{errors.receiptUrl.message}</p>
+        )}
+      </div>
+
+      <div className="space-y-1">
+        <Label>Notes</Label>
+        <Textarea
+          {...register("notes")}
+          rows={3}
+          placeholder="Additional notes..."
+        />
+      </div>
+
+      <div className="flex gap-3">
+        <Button type="submit" disabled={isSubmitting}>
+          {isSubmitting ? "Saving..." : isEdit ? "Save Changes" : "Add Expense"}
+        </Button>
+        <Button type="button" variant="outline" onClick={() => router.back()}>
+          Cancel
+        </Button>
+      </div>
+    </form>
+  );
+}

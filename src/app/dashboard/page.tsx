@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { Users, Briefcase, FileText, Receipt, TrendingUp, Clock } from "lucide-react";
 import { JOB_STATUS_LABELS, SERVICE_TYPE_LABELS } from "@/types";
-import { format } from "date-fns";
+import { format, startOfMonth, endOfMonth } from "date-fns";
 
 export const dynamic = "force-dynamic";
 
@@ -16,6 +16,10 @@ const STATUS_COLORS: Record<string, string> = {
 };
 
 export default async function DashboardPage() {
+  const now = new Date();
+  const monthStart = startOfMonth(now);
+  const monthEnd = endOfMonth(now);
+
   const [
     totalCustomers,
     jobCounts,
@@ -23,6 +27,8 @@ export default async function DashboardPage() {
     upcomingJobs,
     revenue,
     openInvoices,
+    monthlyPaidInvoices,
+    monthlyCompletedJobs,
   ] = await Promise.all([
     prisma.customer.count(),
     prisma.job.groupBy({ by: ["status"], _count: true }),
@@ -39,6 +45,17 @@ export default async function DashboardPage() {
     }),
     prisma.invoice.aggregate({ where: { status: "PAID" }, _sum: { total: true } }),
     prisma.invoice.aggregate({ where: { status: { in: ["SENT", "OVERDUE"] } }, _sum: { total: true } }),
+    prisma.invoice.findMany({
+      where: { status: "PAID", paidDate: { gte: monthStart, lte: monthEnd } },
+      select: { total: true },
+    }),
+    prisma.job.findMany({
+      where: {
+        status: "COMPLETED",
+        completedDate: { gte: monthStart, lte: monthEnd },
+      },
+      select: { laborHours: true, laborRate: true, materialCost: true },
+    }),
   ]);
 
   const statusMap = Object.fromEntries(jobCounts.map((j) => [j.status, j._count]));
@@ -51,6 +68,19 @@ export default async function DashboardPage() {
     { label: "Revenue Collected", value: `$${(revenue._sum.total ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, icon: TrendingUp, href: "/invoices", color: "text-green-600" },
     { label: "Outstanding", value: `$${(openInvoices._sum.total ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, icon: Receipt, href: "/invoices", color: "text-red-600" },
   ];
+
+  const monthlyRevenue = monthlyPaidInvoices.reduce((sum, inv) => sum + inv.total, 0);
+  const monthlyLabor = monthlyCompletedJobs.reduce(
+    (sum, job) => sum + (job.laborHours ?? 0) * (job.laborRate ?? 0),
+    0
+  );
+  const monthlyMaterials = monthlyCompletedJobs.reduce(
+    (sum, job) => sum + (job.materialCost ?? 0),
+    0
+  );
+  const monthlyProfit = monthlyRevenue - monthlyLabor - monthlyMaterials;
+
+  const fmt = (n: number) => n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
   return (
     <div className="p-6 max-w-5xl mx-auto">
@@ -67,6 +97,29 @@ export default async function DashboardPage() {
             </div>
           </Link>
         ))}
+      </div>
+
+      {/* Monthly Profitability */}
+      <div className="bg-white border rounded-lg p-5 mb-6">
+        <h2 className="font-semibold mb-3">Monthly Profitability</h2>
+        <div className="grid grid-cols-4 gap-4">
+          <div>
+            <p className="text-xs text-slate-400">Revenue</p>
+            <p className="text-lg font-bold text-green-600">${fmt(monthlyRevenue)}</p>
+          </div>
+          <div>
+            <p className="text-xs text-slate-400">Labor</p>
+            <p className="text-lg font-bold text-slate-700">${fmt(monthlyLabor)}</p>
+          </div>
+          <div>
+            <p className="text-xs text-slate-400">Materials</p>
+            <p className="text-lg font-bold text-slate-700">${fmt(monthlyMaterials)}</p>
+          </div>
+          <div>
+            <p className="text-xs text-slate-400">Profit</p>
+            <p className={`text-lg font-bold ${monthlyProfit >= 0 ? "text-green-600" : "text-red-600"}`}>${fmt(monthlyProfit)}</p>
+          </div>
+        </div>
       </div>
 
       {/* Job Status Breakdown */}

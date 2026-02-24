@@ -4,6 +4,8 @@ import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import CustomerForm from "@/components/customers/CustomerForm";
 
+export const dynamic = "force-dynamic";
+
 export default async function EditCustomerPage({
   params,
 }: {

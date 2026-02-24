@@ -17,7 +17,7 @@ export default async function QuoteDetailPage({
   const { id } = await params;
   const quote = await prisma.quote.findUnique({
     where: { id },
-    include: { customer: true, job: true, lineItems: true },
+    include: { customer: true, job: true, lineItems: true, paymentEvents: { orderBy: { createdAt: "desc" } } },
   });
   if (!quote) notFound();
 
@@ -94,6 +94,26 @@ export default async function QuoteDetailPage({
           <span>${quote.total.toFixed(2)}</span>
         </div>
       </div>
+
+      {/* Deposit Info */}
+      {quote.depositAmount && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg p-4 mb-4">
+          <h3 className="font-semibold text-blue-900 text-sm mb-1">Deposit Required</h3>
+          <p className="text-blue-700 text-sm">
+            {quote.depositType === "PERCENTAGE"
+              ? `${quote.depositAmount}% ($${(quote.total * quote.depositAmount / 100).toFixed(2)})`
+              : `$${quote.depositAmount.toFixed(2)}`
+            }
+            {quote.depositPaid ? (
+              <span className="ml-2 inline-flex items-center gap-1 text-green-700 font-semibold">
+                Paid {quote.depositPaidAt && format(new Date(quote.depositPaidAt), "MMM d, yyyy")}
+              </span>
+            ) : (
+              <span className="ml-2 text-amber-600 font-medium">Pending</span>
+            )}
+          </p>
+        </div>
+      )}
 
       {/* Meta */}
       <div className="text-sm text-slate-400 space-y-1">

@@ -10,21 +10,40 @@ const photoSchema = z.object({
 
 export async function POST(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const body = await request.json();
+  let body;
+  try { body = await request.json(); } catch { return NextResponse.json({ error: "Invalid JSON" }, { status: 400 }); }
   const parsed = photoSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
 
-  const photo = await prisma.jobPhoto.create({
-    data: { ...parsed.data, jobId: id },
-  });
-  return NextResponse.json(photo, { status: 201 });
+  try {
+    const job = await prisma.job.findUnique({ where: { id }, select: { id: true } });
+    if (!job) return NextResponse.json({ error: "Job not found" }, { status: 404 });
+
+    const photo = await prisma.jobPhoto.create({
+      data: { ...parsed.data, jobId: id },
+    });
+    return NextResponse.json(photo, { status: 201 });
+  } catch (err) {
+    console.error("[POST photos]", err);
+    return NextResponse.json({ error: "Failed to add photo." }, { status: 500 });
+  }
 }
 
 export async function DELETE(request: Request, { params }: { params: Promise<{ id: string }> }) {
+  const { id } = await params;
   const { searchParams } = new URL(request.url);
   const photoId = searchParams.get("photoId");
   if (!photoId) return NextResponse.json({ error: "photoId required" }, { status: 400 });
 
-  await prisma.jobPhoto.delete({ where: { id: photoId } });
-  return NextResponse.json({ success: true });
+  try {
+    // Verify photo belongs to this job — prevents IDOR
+    const photo = await prisma.jobPhoto.findFirst({ where: { id: photoId, jobId: id } });
+    if (!photo) return NextResponse.json({ error: "Photo not found" }, { status: 404 });
+
+    await prisma.jobPhoto.delete({ where: { id: photoId } });
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error("[DELETE photo]", err);
+    return NextResponse.json({ error: "Failed to delete photo." }, { status: 500 });
+  }
 }

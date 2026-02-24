@@ -23,33 +23,50 @@ export async function GET(request: Request) {
   const status = searchParams.get("status");
   const customerId = searchParams.get("customerId");
 
-  const jobs = await prisma.job.findMany({
-    where: {
-      ...(status ? { status: status as JobStatus } : {}),
-      ...(customerId ? { customerId } : {}),
-    },
-    orderBy: { createdAt: "desc" },
-    include: {
-      customer: { select: { firstName: true, lastName: true, phone: true } },
-      _count: { select: { photos: true } },
-    },
-  });
+  // Validate status enum if provided
+  if (status) {
+    const statusCheck = z.nativeEnum(JobStatus).safeParse(status);
+    if (!statusCheck.success) return NextResponse.json({ error: "Invalid status" }, { status: 400 });
+  }
 
-  return NextResponse.json(jobs);
+  try {
+    const jobs = await prisma.job.findMany({
+      where: {
+        ...(status ? { status: status as JobStatus } : {}),
+        ...(customerId ? { customerId } : {}),
+      },
+      orderBy: { createdAt: "desc" },
+      include: {
+        customer: { select: { firstName: true, lastName: true, phone: true } },
+        _count: { select: { photos: true } },
+      },
+    });
+
+    return NextResponse.json(jobs);
+  } catch (err) {
+    console.error("[GET jobs]", err);
+    return NextResponse.json({ error: "Failed to fetch jobs." }, { status: 500 });
+  }
 }
 
 export async function POST(request: Request) {
-  const body = await request.json();
+  let body;
+  try { body = await request.json(); } catch { return NextResponse.json({ error: "Invalid JSON" }, { status: 400 }); }
   const parsed = jobSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
 
-  const { scheduledDate, ...rest } = parsed.data;
-  const job = await prisma.job.create({
-    data: {
-      ...rest,
-      scheduledDate: scheduledDate ? new Date(scheduledDate) : undefined,
-    },
-  });
+  try {
+    const { scheduledDate, ...rest } = parsed.data;
+    const job = await prisma.job.create({
+      data: {
+        ...rest,
+        scheduledDate: scheduledDate ? new Date(scheduledDate) : undefined,
+      },
+    });
 
-  return NextResponse.json(job, { status: 201 });
+    return NextResponse.json(job, { status: 201 });
+  } catch (err) {
+    console.error("[POST job]", err);
+    return NextResponse.json({ error: "Failed to create job." }, { status: 500 });
+  }
 }

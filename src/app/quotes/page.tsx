@@ -3,18 +3,10 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus } from "lucide-react";
-import { QUOTE_STATUS_LABELS } from "@/types";
+import { QUOTE_STATUS_LABELS, STATUS_COLORS } from "@/types";
 import { format } from "date-fns";
 
 export const dynamic = "force-dynamic";
-
-const STATUS_COLORS: Record<string, string> = {
-  DRAFT: "bg-slate-100 text-slate-700",
-  SENT: "bg-blue-100 text-blue-700",
-  ACCEPTED: "bg-green-100 text-green-700",
-  DECLINED: "bg-red-100 text-red-700",
-  EXPIRED: "bg-orange-100 text-orange-700",
-};
 
 export default async function QuotesPage() {
   const quotes = await prisma.quote.findMany({
@@ -26,7 +18,7 @@ export default async function QuotesPage() {
   });
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
+    <div className="p-4 sm:p-6 max-w-5xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Quotes</h1>

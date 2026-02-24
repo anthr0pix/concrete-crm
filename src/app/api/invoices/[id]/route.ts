@@ -12,34 +12,50 @@ const updateSchema = z.object({
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const invoice = await prisma.invoice.findUnique({
-    where: { id },
-    include: { customer: true, job: true, quote: true, lineItems: true },
-  });
-  if (!invoice) return NextResponse.json({ error: "Not found" }, { status: 404 });
-  return NextResponse.json(invoice);
+  try {
+    const invoice = await prisma.invoice.findUnique({
+      where: { id },
+      include: { customer: true, job: true, quote: true, lineItems: true },
+    });
+    if (!invoice) return NextResponse.json({ error: "Not found" }, { status: 404 });
+    return NextResponse.json(invoice);
+  } catch (err) {
+    console.error("[GET invoice]", err);
+    return NextResponse.json({ error: "Failed to fetch invoice." }, { status: 500 });
+  }
 }
 
 export async function PATCH(request: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  const body = await request.json();
+  let body;
+  try { body = await request.json(); } catch { return NextResponse.json({ error: "Invalid JSON" }, { status: 400 }); }
   const parsed = updateSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
 
-  const { dueDate, paidDate, ...rest } = parsed.data;
-  const invoice = await prisma.invoice.update({
-    where: { id },
-    data: {
-      ...rest,
-      ...(dueDate !== undefined ? { dueDate: dueDate ? new Date(dueDate) : null } : {}),
-      ...(paidDate !== undefined ? { paidDate: paidDate ? new Date(paidDate) : null } : {}),
-    },
-  });
-  return NextResponse.json(invoice);
+  try {
+    const { dueDate, paidDate, ...rest } = parsed.data;
+    const invoice = await prisma.invoice.update({
+      where: { id },
+      data: {
+        ...rest,
+        ...(dueDate !== undefined ? { dueDate: dueDate ? new Date(dueDate) : null } : {}),
+        ...(paidDate !== undefined ? { paidDate: paidDate ? new Date(paidDate) : null } : {}),
+      },
+    });
+    return NextResponse.json(invoice);
+  } catch (err) {
+    console.error("[PATCH invoice]", err);
+    return NextResponse.json({ error: "Failed to update invoice." }, { status: 500 });
+  }
 }
 
 export async function DELETE(_req: Request, { params }: { params: Promise<{ id: string }> }) {
   const { id } = await params;
-  await prisma.invoice.delete({ where: { id } });
-  return NextResponse.json({ success: true });
+  try {
+    await prisma.invoice.delete({ where: { id } });
+    return NextResponse.json({ success: true });
+  } catch (err) {
+    console.error("[DELETE invoice]", err);
+    return NextResponse.json({ error: "Failed to delete invoice." }, { status: 500 });
+  }
 }

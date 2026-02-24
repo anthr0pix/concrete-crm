@@ -2,18 +2,10 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Plus } from "lucide-react";
-import { INVOICE_STATUS_LABELS } from "@/types";
+import { INVOICE_STATUS_LABELS, STATUS_COLORS } from "@/types";
 import { format } from "date-fns";
 
 export const dynamic = "force-dynamic";
-
-const STATUS_COLORS: Record<string, string> = {
-  DRAFT: "bg-slate-100 text-slate-700",
-  SENT: "bg-blue-100 text-blue-700",
-  PAID: "bg-green-100 text-green-700",
-  OVERDUE: "bg-red-100 text-red-700",
-  VOID: "bg-slate-200 text-slate-500",
-};
 
 export default async function InvoicesPage() {
   const invoices = await prisma.invoice.findMany({
@@ -25,7 +17,7 @@ export default async function InvoicesPage() {
   const totalOutstanding = invoices.filter((i) => ["SENT", "OVERDUE"].includes(i.status)).reduce((s, i) => s + i.total, 0);
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
+    <div className="p-4 sm:p-6 max-w-5xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Invoices</h1>

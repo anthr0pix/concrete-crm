@@ -41,6 +41,31 @@ enum ServiceType {
   OTHER
 }
 
+enum DepositType {
+  FIXED
+  PERCENTAGE
+}
+
+enum PipelineStage {
+  NEW
+  CONTACTED
+  QUOTE_SENT
+  FOLLOW_UP
+  WON
+  LOST
+}
+
+enum ExpenseCategory {
+  MATERIALS
+  FUEL
+  EQUIPMENT
+  LABOR
+  INSURANCE
+  MARKETING
+  OFFICE
+  OTHER
+}
+
 model Customer {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
@@ -89,9 +114,22 @@ model Job {
   squareFootage Float?
   notes         String?
 
+  // Phase 2: Review & Reseal
+  reviewRequestSentAt  DateTime?
+  resealDueDate        DateTime?
+  resealReminderSentAt DateTime?
+
+  // Phase 3: Job Costing & Pipeline
+  laborHours     Float?
+  laborRate      Float?
+  materialCost   Float?
+  crewAssignment String?
+  pipelineStage  PipelineStage?
+
   photos   JobPhoto[]
   quotes   Quote[]
   invoices Invoice[]
+  expenses Expense[]
 
   @@index([customerId])
   @@index([status])
@@ -135,7 +173,17 @@ model Quote {
 
   notes String?
 
-  invoices Invoice[]
+  // Phase 1: Follow-up & Deposits
+  followUpCount          Int          @default(0)
+  lastFollowUpAt         DateTime?
+  depositAmount          Float?
+  depositType            DepositType?
+  depositPaid            Boolean      @default(false)
+  depositPaidAt          DateTime?
+  squareDepositPaymentId String?
+
+  paymentEvents PaymentEvent[]
+  invoices      Invoice[]
 
   @@index([customerId])
   @@index([status])
@@ -180,6 +228,12 @@ model Invoice {
 
   notes String?
 
+  // Phase 1: Square payments
+  squarePaymentId String?
+  squareOrderId   String?
+
+  paymentEvents PaymentEvent[]
+
   @@index([customerId])
   @@index([status])
   @@index([dueDate])
@@ -196,4 +250,59 @@ model InvoiceLineItem {
   total       Float
 
   @@index([invoiceId])
+}
+
+// Phase 1: Payment Events
+model PaymentEvent {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+
+  invoiceId String?
+  invoice   Invoice? @relation(fields: [invoiceId], references: [id])
+  quoteId   String?
+  quote     Quote?   @relation(fields: [quoteId], references: [id])
+
+  squarePaymentId String?
+  squareOrderId   String?
+  eventType       String
+  amount          Float
+  currency        String @default("USD")
+  status          String
+  metadata        Json?
+
+  @@index([invoiceId])
+  @@index([quoteId])
+  @@index([squarePaymentId])
+}
+
+// Phase 2: App Settings
+model AppSettings {
+  id                   String   @id @default("singleton")
+  updatedAt            DateTime @updatedAt
+  reviewDelayDays      Int      @default(1)
+  reviewRequestEnabled Boolean  @default(true)
+  googleReviewUrl      String?
+  resealReminderMonths Int      @default(24)
+  resealReminderEnabled Boolean @default(true)
+}
+
+// Phase 4: Expenses
+model Expense {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  date        DateTime
+  category    ExpenseCategory
+  description String
+  amount      Float
+  vendor      String?
+  receiptUrl  String?
+  jobId       String?
+  job         Job?    @relation(fields: [jobId], references: [id])
+  notes       String?
+
+  @@index([date])
+  @@index([category])
+  @@index([jobId])
 }

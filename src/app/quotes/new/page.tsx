@@ -3,6 +3,8 @@ import Link from "next/link";
 import { ChevronLeft } from "lucide-react";
 import QuoteBuilder from "@/components/quotes/QuoteBuilder";
 
+export const dynamic = "force-dynamic";
+
 export default async function NewQuotePage({
   searchParams,
 }: {

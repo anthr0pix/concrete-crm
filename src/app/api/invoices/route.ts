@@ -28,71 +28,87 @@ async function getNextInvoiceNumber(): Promise<string> {
 }
 
 export async function GET() {
-  const invoices = await prisma.invoice.findMany({
-    orderBy: { createdAt: "desc" },
-    include: {
-      customer: { select: { firstName: true, lastName: true } },
-    },
-  });
-  return NextResponse.json(invoices);
+  try {
+    const invoices = await prisma.invoice.findMany({
+      orderBy: { createdAt: "desc" },
+      include: {
+        customer: { select: { firstName: true, lastName: true } },
+      },
+    });
+    return NextResponse.json(invoices);
+  } catch (err) {
+    console.error("[GET invoices]", err);
+    return NextResponse.json({ error: "Failed to fetch invoices." }, { status: 500 });
+  }
 }
 
 export async function POST(request: Request) {
-  const body = await request.json();
+  let body;
+  try { body = await request.json(); } catch { return NextResponse.json({ error: "Invalid JSON" }, { status: 400 }); }
 
   // Check if converting from quote
   const fromQuoteParsed = fromQuoteSchema.safeParse(body);
   if (fromQuoteParsed.success) {
-    const quote = await prisma.quote.findUnique({
-      where: { id: fromQuoteParsed.data.fromQuoteId },
-      include: { lineItems: true },
-    });
-    if (!quote) return NextResponse.json({ error: "Quote not found" }, { status: 404 });
+    try {
+      const quote = await prisma.quote.findUnique({
+        where: { id: fromQuoteParsed.data.fromQuoteId },
+        include: { lineItems: true },
+      });
+      if (!quote) return NextResponse.json({ error: "Quote not found" }, { status: 404 });
 
-    const invoiceNumber = await getNextInvoiceNumber();
-    const invoice = await prisma.invoice.create({
-      data: {
-        invoiceNumber,
-        customerId: quote.customerId,
-        jobId: quote.jobId ?? undefined,
-        quoteId: quote.id,
-        subtotal: quote.subtotal,
-        taxRate: quote.taxRate,
-        taxAmount: quote.taxAmount,
-        total: quote.total,
-        notes: quote.notes ?? undefined,
-        lineItems: {
-          create: quote.lineItems.map(({ description, quantity, unitPrice, total }) => ({
-            description, quantity, unitPrice, total,
-          })),
+      const invoiceNumber = await getNextInvoiceNumber();
+      const invoice = await prisma.invoice.create({
+        data: {
+          invoiceNumber,
+          customerId: quote.customerId,
+          jobId: quote.jobId ?? undefined,
+          quoteId: quote.id,
+          subtotal: quote.subtotal,
+          taxRate: quote.taxRate,
+          taxAmount: quote.taxAmount,
+          total: quote.total,
+          notes: quote.notes ?? undefined,
+          lineItems: {
+            create: quote.lineItems.map(({ description, quantity, unitPrice, total }) => ({
+              description, quantity, unitPrice, total,
+            })),
+          },
         },
-      },
-    });
-    return NextResponse.json(invoice, { status: 201 });
+      });
+      return NextResponse.json(invoice, { status: 201 });
+    } catch (err) {
+      console.error("[POST invoice from quote]", err);
+      return NextResponse.json({ error: "Failed to create invoice from quote." }, { status: 500 });
+    }
   }
 
   // Manual invoice creation
   const parsed = invoiceSchema.safeParse(body);
   if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
 
-  const { lineItems, taxRate, dueDate, ...rest } = parsed.data;
-  const subtotal = lineItems.reduce((s, i) => s + i.quantity * i.unitPrice, 0);
-  const taxAmount = subtotal * (taxRate / 100);
-  const total = subtotal + taxAmount;
-  const invoiceNumber = await getNextInvoiceNumber();
+  try {
+    const { lineItems, taxRate, dueDate, ...rest } = parsed.data;
+    const subtotal = lineItems.reduce((s, i) => s + i.quantity * i.unitPrice, 0);
+    const taxAmount = subtotal * (taxRate / 100);
+    const total = subtotal + taxAmount;
+    const invoiceNumber = await getNextInvoiceNumber();
 
-  const invoice = await prisma.invoice.create({
-    data: {
-      ...rest,
-      invoiceNumber,
-      taxRate,
-      subtotal,
-      taxAmount,
-      total,
-      dueDate: dueDate ? new Date(dueDate) : undefined,
-      lineItems: { create: lineItems.map((item) => ({ ...item, total: item.quantity * item.unitPrice })) },
-    },
-  });
+    const invoice = await prisma.invoice.create({
+      data: {
+        ...rest,
+        invoiceNumber,
+        taxRate,
+        subtotal,
+        taxAmount,
+        total,
+        dueDate: dueDate ? new Date(dueDate) : undefined,
+        lineItems: { create: lineItems.map((item) => ({ ...item, total: item.quantity * item.unitPrice })) },
+      },
+    });
 
-  return NextResponse.json(invoice, { status: 201 });
+    return NextResponse.json(invoice, { status: 201 });
+  } catch (err) {
+    console.error("[POST invoice]", err);
+    return NextResponse.json({ error: "Failed to create invoice." }, { status: 500 });
+  }
 }

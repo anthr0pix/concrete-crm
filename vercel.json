@@ -1,0 +1,16 @@
+{
+  "crons": [
+    {
+      "path": "/api/cron/quote-followup",
+      "schedule": "0 14 * * *"
+    },
+    {
+      "path": "/api/cron/review-requests",
+      "schedule": "0 15 * * *"
+    },
+    {
+      "path": "/api/cron/reseal-reminders",
+      "schedule": "0 14 * * 1"
+    }
+  ]
+}

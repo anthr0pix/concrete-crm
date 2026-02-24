@@ -4,19 +4,11 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, Pencil, Phone, Mail, MapPin, Plus } from "lucide-react";
-import { JOB_STATUS_LABELS, SERVICE_TYPE_LABELS } from "@/types";
+import { JOB_STATUS_LABELS, SERVICE_TYPE_LABELS, STATUS_COLORS } from "@/types";
 import { format } from "date-fns";
+import DeleteCustomerButton from "@/components/customers/DeleteCustomerButton";
 
 export const dynamic = "force-dynamic";
-
-const STATUS_COLORS: Record<string, string> = {
-  LEAD: "bg-slate-100 text-slate-700",
-  QUOTED: "bg-blue-100 text-blue-700",
-  SCHEDULED: "bg-yellow-100 text-yellow-700",
-  IN_PROGRESS: "bg-orange-100 text-orange-700",
-  COMPLETED: "bg-green-100 text-green-700",
-  CANCELLED: "bg-red-100 text-red-700",
-};
 
 export default async function CustomerDetailPage({
   params,
@@ -59,11 +51,17 @@ export default async function CustomerDetailPage({
             <p className="text-sm text-slate-400 mt-1">Referred via: {customer.referralSource}</p>
           )}
         </div>
-        <Link href={`/customers/${customer.id}/edit`}>
-          <Button variant="outline" size="sm">
-            <Pencil className="w-3.5 h-3.5 mr-1" /> Edit
-          </Button>
-        </Link>
+        <div className="flex items-center gap-2">
+          <DeleteCustomerButton
+            customerId={customer.id}
+            customerName={`${customer.firstName} ${customer.lastName}`}
+          />
+          <Link href={`/customers/${customer.id}/edit`}>
+            <Button variant="outline" size="sm">
+              <Pencil className="w-3.5 h-3.5 mr-1" /> Edit
+            </Button>
+          </Link>
+        </div>
       </div>
 
       {/* Notes */}

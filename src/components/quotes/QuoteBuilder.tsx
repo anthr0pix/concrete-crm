@@ -8,6 +8,7 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Trash2 } from "lucide-react";
+import DepositSettings from "@/components/quotes/DepositSettings";
 
 interface LineItem {
   description: string;
@@ -32,6 +33,8 @@ export default function QuoteBuilder({ customers, jobs = [], defaultCustomerId, 
   const [taxRate, setTaxRate] = useState(0);
   const [notes, setNotes] = useState("");
   const [validUntil, setValidUntil] = useState("");
+  const [depositAmount, setDepositAmount] = useState<number | null>(null);
+  const [depositType, setDepositType] = useState<"FIXED" | "PERCENTAGE" | null>(null);
   const [submitting, setSubmitting] = useState(false);
   const [lineItems, setLineItems] = useState<LineItem[]>([
     { description: "", quantity: 1, unitPrice: 0 },
@@ -55,7 +58,7 @@ export default function QuoteBuilder({ customers, jobs = [], defaultCustomerId, 
     const res = await fetch("/api/quotes", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ customerId, jobId: jobId || undefined, taxRate, notes, validUntil: validUntil || undefined, lineItems }),
+      body: JSON.stringify({ customerId, jobId: jobId || undefined, taxRate, notes, validUntil: validUntil || undefined, lineItems, depositAmount, depositType }),
     });
     setSubmitting(false);
 
@@ -174,6 +177,16 @@ export default function QuoteBuilder({ customers, jobs = [], defaultCustomerId, 
           <Input type="date" value={validUntil} onChange={(e) => setValidUntil(e.target.value)} />
         </div>
       </div>
+
+      <DepositSettings
+        depositAmount={depositAmount}
+        depositType={depositType}
+        quoteTotal={total}
+        onChange={(amount, type) => {
+          setDepositAmount(amount);
+          setDepositType(type);
+        }}
+      />
 
       <div className="space-y-1">
         <Label>Notes</Label>

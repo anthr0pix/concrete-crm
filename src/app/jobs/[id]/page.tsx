@@ -3,21 +3,14 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { ChevronLeft, Pencil, User, MapPin, Calendar, Ruler } from "lucide-react";
-import { JOB_STATUS_LABELS, SERVICE_TYPE_LABELS } from "@/types";
+import { JOB_STATUS_LABELS, SERVICE_TYPE_LABELS, STATUS_COLORS } from "@/types";
 import { format } from "date-fns";
 import PhotoUpload from "@/components/jobs/PhotoUpload";
 import JobStatusSelect from "@/components/jobs/JobStatusSelect";
+import DeleteJobButton from "@/components/jobs/DeleteJobButton";
+import JobCostingSection from "@/components/jobs/JobCostingSection";
 
 export const dynamic = "force-dynamic";
-
-const STATUS_COLORS: Record<string, string> = {
-  LEAD: "bg-slate-100 text-slate-700",
-  QUOTED: "bg-blue-100 text-blue-700",
-  SCHEDULED: "bg-yellow-100 text-yellow-700",
-  IN_PROGRESS: "bg-orange-100 text-orange-700",
-  COMPLETED: "bg-green-100 text-green-700",
-  CANCELLED: "bg-red-100 text-red-700",
-};
 
 export default async function JobDetailPage({
   params,
@@ -32,6 +25,7 @@ export default async function JobDetailPage({
       photos: { orderBy: { createdAt: "asc" } },
       quotes: { orderBy: { createdAt: "desc" } },
       invoices: { orderBy: { createdAt: "desc" } },
+      expenses: { orderBy: { date: "desc" } },
     },
   });
 
@@ -60,6 +54,7 @@ export default async function JobDetailPage({
               <Pencil className="w-3.5 h-3.5 mr-1" /> Edit
             </Button>
           </Link>
+          <DeleteJobButton jobId={job.id} />
         </div>
       </div>
 
@@ -79,12 +74,35 @@ export default async function JobDetailPage({
         </div>
         <div className="bg-white border rounded-lg p-4">
           <div className="flex items-center gap-1.5 text-slate-400 text-xs mb-1"><MapPin className="w-3.5 h-3.5" /> Location</div>
-          <p className="font-medium text-sm text-xs leading-tight">{jobAddress}</p>
+          <p className="font-medium text-xs leading-tight">{jobAddress}</p>
         </div>
         <div className="bg-white border rounded-lg p-4">
           <div className="flex items-center gap-1.5 text-slate-400 text-xs mb-1"><Ruler className="w-3.5 h-3.5" /> Sq Ft</div>
-          <p className="font-medium text-sm">{job.squareFootage ? `${job.squareFootage.toLocaleString()} sq ft` : "—"}</p>
+          <p className="font-medium text-sm">{job.squareFootage ? `${job.squareFootage.toLocaleString()} sq ft` : "\u2014"}</p>
         </div>
+        {job.resealDueDate && (
+          <div className="bg-white border rounded-lg p-4">
+            <div className="flex items-center gap-1.5 text-slate-400 text-xs mb-1">
+              <Calendar className="w-3.5 h-3.5" /> Reseal Due
+            </div>
+            <p className={`font-medium text-sm ${new Date(job.resealDueDate) < new Date() ? "text-red-600" : ""}`}>
+              {format(new Date(job.resealDueDate), "MMM d, yyyy")}
+            </p>
+          </div>
+        )}
+        {job.reviewRequestSentAt && (
+          <div className="bg-white border rounded-lg p-4">
+            <div className="flex items-center gap-1.5 text-slate-400 text-xs mb-1">Review Request</div>
+            <p className="font-medium text-sm text-green-600">
+              Sent {format(new Date(job.reviewRequestSentAt), "MMM d, yyyy")}
+            </p>
+          </div>
+        )}
+      </div>
+
+      {/* Job Costing */}
+      <div className="mb-6">
+        <JobCostingSection job={job} />
       </div>
 
       {/* Notes */}
@@ -100,8 +118,31 @@ export default async function JobDetailPage({
         <PhotoUpload jobId={job.id} photos={job.photos} />
       </div>
 
+      {/* Expenses */}
+      {job.expenses.length > 0 && (
+        <div className="bg-white border rounded-lg p-4 mb-6">
+          <div className="flex items-center justify-between mb-3">
+            <h2 className="font-semibold">Expenses</h2>
+            <Link href={`/expenses/new?jobId=${job.id}`}>
+              <Button size="sm" variant="outline">+ Add Expense</Button>
+            </Link>
+          </div>
+          <div className="space-y-1">
+            {job.expenses.map((exp) => (
+              <div key={exp.id} className="flex justify-between text-sm py-1.5 border-b last:border-0">
+                <div>
+                  <span className="font-medium">{exp.description}</span>
+                  <span className="text-slate-400 ml-2">{format(new Date(exp.date), "MMM d")}</span>
+                </div>
+                <span className="font-medium">${exp.amount.toFixed(2)}</span>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* Quotes & Invoices */}
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="bg-white border rounded-lg p-4">
           <div className="flex items-center justify-between mb-3">
             <h2 className="font-semibold">Quotes</h2>
