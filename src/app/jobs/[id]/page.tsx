@@ -9,6 +9,7 @@ import PhotoUpload from "@/components/jobs/PhotoUpload";
 import JobStatusSelect from "@/components/jobs/JobStatusSelect";
 import DeleteJobButton from "@/components/jobs/DeleteJobButton";
 import JobCostingSection from "@/components/jobs/JobCostingSection";
+import JobProgressBar from "@/components/jobs/JobProgressBar";
 
 export const dynamic = "force-dynamic";
 
@@ -58,20 +59,15 @@ export default async function JobDetailPage({
         </div>
       </div>
 
-      {/* Workflow hint */}
-      {job.status === "LEAD" && job.quotes.length === 0 && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 mb-6 text-sm text-blue-800 flex items-center justify-between">
-          <span>Next step: Create a quote for this job so you can send the customer a price.</span>
-          <Link href={`/quotes/new?jobId=${job.id}&customerId=${job.customer.id}`}>
-            <Button size="sm" variant="outline" className="ml-3 shrink-0 border-blue-300 text-blue-700 hover:bg-blue-100">New Quote</Button>
-          </Link>
-        </div>
-      )}
-      {job.status === "QUOTED" && job.invoices.length === 0 && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 mb-6 text-sm text-blue-800">
-          Waiting for the customer to accept your quote. Once accepted, you can create an invoice.
-        </div>
-      )}
+      {/* Workflow progress */}
+      <JobProgressBar
+        jobStatus={job.status}
+        scheduledDate={job.scheduledDate}
+        quotes={job.quotes.map((q) => ({ id: q.id, status: q.status }))}
+        invoices={job.invoices.map((inv) => ({ id: inv.id, status: inv.status }))}
+        jobId={job.id}
+        customerId={job.customer.id}
+      />
 
       {/* Info grid */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
