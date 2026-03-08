@@ -93,12 +93,19 @@ export default function QuoteBuilder({ customers, jobs = [], defaultCustomerId, 
       {/* Line Items */}
       <div>
         <Label className="mb-2 block">Line Items</Label>
+        {/* Column headers */}
+        <div className="grid grid-cols-12 gap-2 mb-1">
+          <div className="col-span-6"><span className="text-xs font-medium text-slate-500">Description</span></div>
+          <div className="col-span-2"><span className="text-xs font-medium text-slate-500">Sq Ft</span></div>
+          <div className="col-span-3"><span className="text-xs font-medium text-slate-500">Price per Sq Ft</span></div>
+          <div className="col-span-1"><span className="text-xs font-medium text-slate-500">Total</span></div>
+        </div>
         <div className="space-y-2">
           {lineItems.map((item, i) => (
             <div key={i} className="grid grid-cols-12 gap-2 items-center">
               <div className="col-span-6">
                 <Input
-                  placeholder="Description"
+                  placeholder="e.g. Driveway sealing"
                   value={item.description}
                   onChange={(e) => updateLine(i, "description", e.target.value)}
                 />
@@ -106,7 +113,7 @@ export default function QuoteBuilder({ customers, jobs = [], defaultCustomerId, 
               <div className="col-span-2">
                 <Input
                   type="number"
-                  placeholder="Qty"
+                  placeholder="0"
                   min="0.01"
                   step="0.01"
                   value={item.quantity}
@@ -116,7 +123,7 @@ export default function QuoteBuilder({ customers, jobs = [], defaultCustomerId, 
               <div className="col-span-3">
                 <Input
                   type="number"
-                  placeholder="Unit Price"
+                  placeholder="0.00"
                   min="0"
                   step="0.01"
                   value={item.unitPrice}

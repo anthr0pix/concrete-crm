@@ -90,8 +90,8 @@ export default async function InvoiceDetailPage({
           <thead className="bg-slate-50 border-b">
             <tr>
               <th className="text-left px-4 py-3 font-medium text-slate-600">Description</th>
-              <th className="text-right px-4 py-3 font-medium text-slate-600">Qty</th>
-              <th className="text-right px-4 py-3 font-medium text-slate-600">Unit Price</th>
+              <th className="text-right px-4 py-3 font-medium text-slate-600">Sq Ft</th>
+              <th className="text-right px-4 py-3 font-medium text-slate-600">Price / Sq Ft</th>
               <th className="text-right px-4 py-3 font-medium text-slate-600">Total</th>
             </tr>
           </thead>

@@ -103,8 +103,8 @@ export default async function PortalPage({
               <thead style={{ backgroundColor: "#1a1a2e" }}>
                 <tr>
                   <th className="text-left px-5 py-3 text-white/80 font-medium text-xs uppercase tracking-wide">Description</th>
-                  <th className="text-right px-5 py-3 text-white/80 font-medium text-xs uppercase tracking-wide">Qty</th>
-                  <th className="text-right px-5 py-3 text-white/80 font-medium text-xs uppercase tracking-wide">Unit Price</th>
+                  <th className="text-right px-5 py-3 text-white/80 font-medium text-xs uppercase tracking-wide">Sq Ft</th>
+                  <th className="text-right px-5 py-3 text-white/80 font-medium text-xs uppercase tracking-wide">Price / Sq Ft</th>
                   <th className="text-right px-5 py-3 text-white/80 font-medium text-xs uppercase tracking-wide">Total</th>
                 </tr>
               </thead>
@@ -253,8 +253,8 @@ export default async function PortalPage({
             <thead style={{ backgroundColor: "#1a1a2e" }}>
               <tr>
                 <th className="text-left px-5 py-3 text-white/80 font-medium text-xs uppercase tracking-wide">Description</th>
-                <th className="text-right px-5 py-3 text-white/80 font-medium text-xs uppercase tracking-wide">Qty</th>
-                <th className="text-right px-5 py-3 text-white/80 font-medium text-xs uppercase tracking-wide">Unit Price</th>
+                <th className="text-right px-5 py-3 text-white/80 font-medium text-xs uppercase tracking-wide">Sq Ft</th>
+                <th className="text-right px-5 py-3 text-white/80 font-medium text-xs uppercase tracking-wide">Price / Sq Ft</th>
                 <th className="text-right px-5 py-3 text-white/80 font-medium text-xs uppercase tracking-wide">Total</th>
               </tr>
             </thead>

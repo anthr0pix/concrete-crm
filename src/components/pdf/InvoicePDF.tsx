@@ -369,8 +369,8 @@ export function InvoicePDF({ invoice }: InvoicePDFProps) {
         <View style={styles.table}>
           <View style={styles.tableHeader}>
             <Text style={[styles.tableHeaderText, styles.colDescription]}>Description</Text>
-            <Text style={[styles.tableHeaderText, styles.colQty]}>Qty</Text>
-            <Text style={[styles.tableHeaderText, styles.colUnit]}>Unit Price</Text>
+            <Text style={[styles.tableHeaderText, styles.colQty]}>Sq Ft</Text>
+            <Text style={[styles.tableHeaderText, styles.colUnit]}>Price / Sq Ft</Text>
             <Text style={[styles.tableHeaderText, styles.colTotal]}>Total</Text>
           </View>
           {invoice.lineItems.map((item, i) => (
