@@ -2,9 +2,8 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { ChevronLeft, Pencil, Phone, Mail, MapPin, Plus } from "lucide-react";
-import { JOB_STATUS_LABELS, SERVICE_TYPE_LABELS, STATUS_COLORS } from "@/types";
+import { JOB_STATUS_LABELS, SERVICE_TYPE_LABELS, STATUS_COLORS, QUOTE_STATUS_LABELS, INVOICE_STATUS_LABELS } from "@/types";
 import { format } from "date-fns";
 import DeleteCustomerButton from "@/components/customers/DeleteCustomerButton";
 
@@ -82,7 +81,7 @@ export default async function CustomerDetailPage({
           </Link>
         </div>
         {customer.jobs.length === 0 ? (
-          <p className="text-sm text-slate-400">No jobs yet.</p>
+          <p className="text-sm text-slate-400">No jobs yet. Click &quot;New Job&quot; above to create one for this customer.</p>
         ) : (
           <div className="space-y-2">
             {customer.jobs.map((job) => (
@@ -119,7 +118,7 @@ export default async function CustomerDetailPage({
                   </div>
                   <div className="text-right">
                     <p className="font-semibold text-sm">${q.total.toFixed(2)}</p>
-                    <Badge variant="secondary" className="text-xs">{q.status}</Badge>
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_COLORS[q.status]}`}>{QUOTE_STATUS_LABELS[q.status] ?? q.status}</span>
                   </div>
                 </div>
               </Link>
@@ -142,7 +141,7 @@ export default async function CustomerDetailPage({
                   </div>
                   <div className="text-right">
                     <p className="font-semibold text-sm">${inv.total.toFixed(2)}</p>
-                    <Badge variant="secondary" className="text-xs">{inv.status}</Badge>
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_COLORS[inv.status]}`}>{INVOICE_STATUS_LABELS[inv.status] ?? inv.status}</span>
                   </div>
                 </div>
               </Link>

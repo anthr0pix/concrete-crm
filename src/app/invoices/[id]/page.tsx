@@ -72,6 +72,18 @@ export default async function InvoiceDetailPage({
         </div>
       </div>
 
+      {/* Workflow hint */}
+      {invoice.status === "DRAFT" && (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 mb-6 text-sm text-amber-800">
+          This invoice is still a draft. Use the <strong>Send Invoice</strong> button above to email it to the customer.
+        </div>
+      )}
+      {invoice.status === "SENT" && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 mb-6 text-sm text-blue-800">
+          This invoice has been sent. Use <strong>&quot;Copy Payment Link&quot;</strong> to share a payment link, or <strong>&quot;Mark as Paid&quot;</strong> if the customer paid by cash or check.
+        </div>
+      )}
+
       {/* Line Items */}
       <div className="bg-white border rounded-lg overflow-hidden mb-4">
         <table className="w-full text-sm">
@@ -125,7 +137,7 @@ export default async function InvoiceDetailPage({
             {invoice.paymentEvents.map((event: { id: string; eventType: string; createdAt: Date; amount: number; status: string }) => (
               <div key={event.id} className="flex justify-between items-center text-sm border-b last:border-0 pb-2">
                 <div>
-                  <span className="font-medium">{event.eventType}</span>
+                  <span className="font-medium">{event.eventType.split(".").map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")}</span>
                   <span className="text-slate-400 ml-2">{format(new Date(event.createdAt), "MMM d, yyyy h:mm a")}</span>
                 </div>
                 <div className="flex items-center gap-2">
@@ -134,7 +146,7 @@ export default async function InvoiceDetailPage({
                     event.status === "COMPLETED" ? "bg-green-100 text-green-700" :
                     event.status === "FAILED" ? "bg-red-100 text-red-700" :
                     "bg-yellow-100 text-yellow-700"
-                  }`}>{event.status}</span>
+                  }`}>{event.status.charAt(0) + event.status.slice(1).toLowerCase()}</span>
                 </div>
               </div>
             ))}

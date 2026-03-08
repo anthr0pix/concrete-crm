@@ -49,7 +49,7 @@ export default function PayNowButton({ invoiceId }: Props) {
       ) : state === "copied" ? (
         <><Check className="w-3.5 h-3.5 mr-1" /> Copied!</>
       ) : (
-        <><CreditCard className="w-3.5 h-3.5 mr-1" /> Payment Link</>
+        <><CreditCard className="w-3.5 h-3.5 mr-1" /> Copy Payment Link</>
       )}
     </Button>
   );

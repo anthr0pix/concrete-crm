@@ -127,7 +127,7 @@ export default function PhotoUpload({ jobId, photos }: Props) {
           className="hidden"
           onChange={(e) => { const f = e.target.files?.[0]; if (f) upload(f); }}
         />
-        <span className="text-xs text-slate-400">JPEG, PNG, WebP, HEIC</span>
+        <span className="text-xs text-slate-400">Select &quot;Before&quot; or &quot;After&quot;, then upload a photo.</span>
       </div>
 
       {/* Before / After grid */}

@@ -1,6 +1,7 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { Users, Briefcase, FileText, Receipt, TrendingUp, Clock } from "lucide-react";
+import { Users, Briefcase, FileText, Receipt, TrendingUp, Clock, ArrowRight } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import { JOB_STATUS_LABELS, SERVICE_TYPE_LABELS } from "@/types";
 import { format, startOfMonth, endOfMonth } from "date-fns";
 
@@ -64,9 +65,9 @@ export default async function DashboardPage() {
 
   const stats = [
     { label: "Total Customers", value: totalCustomers, icon: Users, href: "/customers", color: "text-blue-600" },
-    { label: "Active Jobs", value: activeJobs, icon: Briefcase, href: "/jobs", color: "text-orange-600" },
+    { label: "Active Jobs", subtitle: "Lead, Quoted, Scheduled & In Progress", value: activeJobs, icon: Briefcase, href: "/jobs", color: "text-orange-600" },
     { label: "Revenue Collected", value: `$${(revenue._sum.total ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, icon: TrendingUp, href: "/invoices", color: "text-green-600" },
-    { label: "Outstanding", value: `$${(openInvoices._sum.total ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, icon: Receipt, href: "/invoices", color: "text-red-600" },
+    { label: "Unpaid Invoices", value: `$${(openInvoices._sum.total ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, icon: Receipt, href: "/invoices", color: "text-red-600" },
   ];
 
   const monthlyRevenue = monthlyPaidInvoices.reduce((sum, inv) => sum + inv.total, 0);
@@ -82,18 +83,56 @@ export default async function DashboardPage() {
 
   const fmt = (n: number) => n.toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 });
 
+  const totalJobs = jobCounts.reduce((sum, j) => sum + j._count, 0);
+  const isNewUser = totalCustomers === 0 && totalJobs === 0;
+
+  const gettingStartedSteps = [
+    { done: totalCustomers > 0, label: "Add your first customer", description: "Add their name, phone, and address.", href: "/customers/new", cta: "Add Customer" },
+    { done: totalJobs > 0, label: "Create a job", description: "Track work for a customer — sealing, coating, etc.", href: "/jobs/new", cta: "Create Job" },
+    { done: (revenue._sum.total ?? 0) > 0, label: "Send a quote & get paid", description: "Create a quote, send it, then convert to an invoice.", href: "/quotes/new", cta: "New Quote" },
+  ];
+
   return (
     <div className="p-6 max-w-5xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
 
+      {/* Getting Started — only shown for new users */}
+      {isNewUser && (
+        <div className="bg-white border-2 border-dashed border-blue-200 rounded-lg p-6 mb-8">
+          <h2 className="font-semibold text-lg mb-1">Welcome to Mountain West Surface CRM</h2>
+          <p className="text-sm text-slate-500 mb-4">Here&apos;s how to get started. Follow these steps in order:</p>
+          <div className="space-y-3">
+            {gettingStartedSteps.map((step, i) => (
+              <div key={i} className="flex items-center gap-4 bg-slate-50 rounded-lg px-4 py-3">
+                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold shrink-0 ${step.done ? "bg-green-100 text-green-700" : "bg-blue-100 text-blue-700"}`}>
+                  {step.done ? "\u2713" : i + 1}
+                </div>
+                <div className="flex-1">
+                  <p className="text-sm font-medium">{step.label}</p>
+                  <p className="text-xs text-slate-400">{step.description}</p>
+                </div>
+                {!step.done && (
+                  <Link href={step.href}>
+                    <Button size="sm" variant="outline" className="shrink-0">
+                      {step.cta} <ArrowRight className="w-3.5 h-3.5 ml-1" />
+                    </Button>
+                  </Link>
+                )}
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
+
       {/* KPI Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
-        {stats.map(({ label, value, icon: Icon, href, color }) => (
-          <Link key={label} href={href}>
+        {stats.map((stat) => (
+          <Link key={stat.label} href={stat.href}>
             <div className="bg-white border rounded-lg p-5 hover:shadow-sm transition-shadow">
-              <div className={`${color} mb-3`}><Icon className="w-5 h-5" /></div>
-              <p className="text-2xl font-bold">{value}</p>
-              <p className="text-sm text-slate-500 mt-0.5">{label}</p>
+              <div className={`${stat.color} mb-3`}><stat.icon className="w-5 h-5" /></div>
+              <p className="text-2xl font-bold">{stat.value}</p>
+              <p className="text-sm text-slate-500 mt-0.5">{stat.label}</p>
+              {"subtitle" in stat && <p className="text-xs text-slate-400 mt-0.5">{stat.subtitle}</p>}
             </div>
           </Link>
         ))}
@@ -101,7 +140,8 @@ export default async function DashboardPage() {
 
       {/* Monthly Profitability */}
       <div className="bg-white border rounded-lg p-5 mb-6">
-        <h2 className="font-semibold mb-3">Monthly Profitability</h2>
+        <h2 className="font-semibold mb-1">This Month</h2>
+        <p className="text-xs text-slate-400 mb-3">{format(now, "MMMM yyyy")} — based on paid invoices and completed job costs.</p>
         <div className="grid grid-cols-4 gap-4">
           <div>
             <p className="text-xs text-slate-400">Revenue</p>
@@ -171,7 +211,7 @@ export default async function DashboardPage() {
         <div className="bg-white border rounded-lg p-5">
           <div className="flex items-center gap-2 mb-4">
             <FileText className="w-4 h-4 text-slate-400" />
-            <h2 className="font-semibold">Recent Activity</h2>
+            <h2 className="font-semibold">Recent Jobs</h2>
           </div>
           {recentJobs.length === 0 ? (
             <p className="text-sm text-slate-400">No jobs yet</p>

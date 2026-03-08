@@ -175,6 +175,7 @@ export default function QuoteBuilder({ customers, jobs = [], defaultCustomerId, 
         <div className="space-y-1">
           <Label>Valid Until</Label>
           <Input type="date" value={validUntil} onChange={(e) => setValidUntil(e.target.value)} />
+          <p className="text-xs text-slate-400">How long the customer has to accept this quote.</p>
         </div>
       </div>
 
@@ -191,6 +192,7 @@ export default function QuoteBuilder({ customers, jobs = [], defaultCustomerId, 
       <div className="space-y-1">
         <Label>Notes</Label>
         <Textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Terms, conditions, additional info..." />
+        <p className="text-xs text-slate-400">Shown to the customer on the quote PDF and portal page.</p>
       </div>
 
       <div className="flex gap-3">

@@ -27,7 +27,7 @@ export default function ConvertToInvoiceButton({ quoteId }: { quoteId: string })
   return (
     <Button size="sm" onClick={convert} disabled={loading}>
       <Receipt className="w-3.5 h-3.5 mr-1" />
-      {loading ? "Creating..." : "Convert to Invoice"}
+      {loading ? "Creating..." : "Create Invoice from Quote"}
     </Button>
   );
 }

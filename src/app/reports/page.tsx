@@ -151,7 +151,8 @@ export default async function ReportsPage({ searchParams }: PageProps) {
 
   return (
     <div className="p-4 sm:p-6 max-w-5xl mx-auto">
-      <h1 className="text-2xl font-bold mb-6">Financial Reports</h1>
+      <h1 className="text-2xl font-bold mb-1">Reports</h1>
+      <p className="text-sm text-slate-500 mb-6">Revenue, expenses, and profit at a glance. Select a year to filter.</p>
 
       {/* Year selector */}
       <div className="flex gap-2 mb-6">
@@ -183,7 +184,7 @@ export default async function ReportsPage({ searchParams }: PageProps) {
           <RevenueByCategoryChart data={revenueData} />
         </div>
         <div className="bg-white border rounded-lg p-5">
-          <h2 className="font-semibold text-lg mb-4">Accounts Receivable Aging</h2>
+          <h2 className="font-semibold text-lg mb-4">Unpaid Invoice Aging</h2>
           <ARAgingTable
             buckets={arBuckets}
             totalOutstanding={totalOutstanding}

@@ -2,51 +2,43 @@
 
 import { useDroppable } from "@dnd-kit/core";
 import PipelineCard from "./PipelineCard";
-
-interface PipelineJob {
-  id: string;
-  title: string;
-  serviceType: string;
-  customer: { firstName: string; lastName: string };
-  total?: number;
-  createdAt: string;
-}
+import type { PipelineJob } from "./PipelineBoard";
 
 const COLUMN_COLORS: Record<
   string,
   { border: string; bg: string; badge: string; dropBg: string }
 > = {
-  NEW: {
+  LEAD: {
     border: "border-t-slate-400",
     bg: "bg-slate-50",
     badge: "bg-slate-100 text-slate-700",
     dropBg: "bg-slate-100",
   },
-  CONTACTED: {
+  QUOTED: {
     border: "border-t-blue-400",
     bg: "bg-blue-50",
     badge: "bg-blue-100 text-blue-700",
     dropBg: "bg-blue-100",
   },
-  QUOTE_SENT: {
-    border: "border-t-purple-400",
-    bg: "bg-purple-50",
-    badge: "bg-purple-100 text-purple-700",
-    dropBg: "bg-purple-100",
+  SCHEDULED: {
+    border: "border-t-yellow-400",
+    bg: "bg-yellow-50",
+    badge: "bg-yellow-100 text-yellow-700",
+    dropBg: "bg-yellow-100",
   },
-  FOLLOW_UP: {
-    border: "border-t-amber-400",
-    bg: "bg-amber-50",
-    badge: "bg-amber-100 text-amber-700",
-    dropBg: "bg-amber-100",
+  IN_PROGRESS: {
+    border: "border-t-orange-400",
+    bg: "bg-orange-50",
+    badge: "bg-orange-100 text-orange-700",
+    dropBg: "bg-orange-100",
   },
-  WON: {
+  COMPLETED: {
     border: "border-t-green-400",
     bg: "bg-green-50",
     badge: "bg-green-100 text-green-700",
     dropBg: "bg-green-100",
   },
-  LOST: {
+  CANCELLED: {
     border: "border-t-red-400",
     bg: "bg-red-50",
     badge: "bg-red-100 text-red-700",
@@ -55,18 +47,17 @@ const COLUMN_COLORS: Record<
 };
 
 export default function PipelineColumn({
-  stage,
+  status,
   label,
   jobs,
 }: {
-  stage: string;
+  status: string;
   label: string;
   jobs: PipelineJob[];
-  color?: string;
 }) {
-  const { isOver, setNodeRef } = useDroppable({ id: stage });
+  const { isOver, setNodeRef } = useDroppable({ id: status });
 
-  const colors = COLUMN_COLORS[stage] || COLUMN_COLORS.NEW;
+  const colors = COLUMN_COLORS[status] || COLUMN_COLORS.LEAD;
 
   return (
     <div
@@ -89,7 +80,7 @@ export default function PipelineColumn({
       <div className="flex-1 overflow-y-auto p-2 space-y-2 max-h-[calc(100vh-220px)]">
         {jobs.length === 0 ? (
           <div className="text-center py-8 text-xs text-slate-400">
-            No leads
+            Drag jobs here
           </div>
         ) : (
           jobs.map((job) => <PipelineCard key={job.id} job={job} />)

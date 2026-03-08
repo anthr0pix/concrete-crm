@@ -38,7 +38,14 @@ export default async function ExpensesPage() {
         </Link>
       </div>
 
-      <ExpenseTable expenses={serialized} />
+      {expenses.length === 0 ? (
+        <div className="text-center py-16 text-slate-400">
+          <p className="text-lg font-medium">No expenses yet</p>
+          <p className="text-sm mt-1">Track fuel, materials, and other costs. Link them to jobs to see per-job profitability.</p>
+        </div>
+      ) : (
+        <ExpenseTable expenses={serialized} />
+      )}
     </div>
   );
 }

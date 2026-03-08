@@ -25,7 +25,7 @@ export default function MarkPaidButton({ invoiceId }: { invoiceId: string }) {
   return (
     <Button size="sm" onClick={markPaid} disabled={loading} className="bg-green-600 hover:bg-green-700">
       <CheckCircle className="w-3.5 h-3.5 mr-1" />
-      {loading ? "Updating..." : "Mark Paid"}
+      {loading ? "Updating..." : "Mark as Paid"}
     </Button>
   );
 }

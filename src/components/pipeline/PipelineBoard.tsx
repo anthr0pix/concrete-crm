@@ -14,22 +14,26 @@ import { toast } from "sonner";
 import PipelineColumn from "./PipelineColumn";
 import PipelineCard from "./PipelineCard";
 
-interface PipelineJob {
+export interface PipelineJob {
   id: string;
   title: string;
   serviceType: string;
   customer: { firstName: string; lastName: string };
-  total?: number;
   createdAt: string;
+  scheduledDate: string | null;
+  quoteTotal: number | null;
 }
 
-const PIPELINE_STAGES = [
-  { key: "NEW", label: "New" },
-  { key: "CONTACTED", label: "Contacted" },
-  { key: "QUOTE_SENT", label: "Quote Sent" },
-  { key: "FOLLOW_UP", label: "Follow Up" },
-  { key: "WON", label: "Won" },
-  { key: "LOST", label: "Lost" },
+const ACTIVE_STATUSES = [
+  { key: "LEAD", label: "Lead" },
+  { key: "QUOTED", label: "Quoted" },
+  { key: "SCHEDULED", label: "Scheduled" },
+  { key: "IN_PROGRESS", label: "In Progress" },
+];
+
+const CLOSED_STATUSES = [
+  { key: "COMPLETED", label: "Completed" },
+  { key: "CANCELLED", label: "Cancelled" },
 ];
 
 export default function PipelineBoard({
@@ -37,23 +41,20 @@ export default function PipelineBoard({
 }: {
   initialJobs: Record<string, PipelineJob[]>;
 }) {
-  const [jobsByStage, setJobsByStage] =
+  const [jobsByStatus, setJobsByStatus] =
     useState<Record<string, PipelineJob[]>>(initialJobs);
   const [activeJob, setActiveJob] = useState<PipelineJob | null>(null);
+  const [showClosed, setShowClosed] = useState(false);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
-      activationConstraint: {
-        distance: 8,
-      },
+      activationConstraint: { distance: 8 },
     })
   );
 
   const handleDragStart = useCallback((event: DragStartEvent) => {
     const job = event.active.data.current?.job as PipelineJob | undefined;
-    if (job) {
-      setActiveJob(job);
-    }
+    if (job) setActiveJob(job);
   }, []);
 
   const handleDragEnd = useCallback(
@@ -64,50 +65,50 @@ export default function PipelineBoard({
       if (!over) return;
 
       const jobId = active.id as string;
-      const newStage = over.id as string;
+      const newStatus = over.id as string;
 
-      // Find current stage for this job
-      let oldStage: string | null = null;
-      for (const [stage, jobs] of Object.entries(jobsByStage)) {
+      // Find current status for this job
+      let oldStatus: string | null = null;
+      for (const [status, jobs] of Object.entries(jobsByStatus)) {
         if (jobs.some((j) => j.id === jobId)) {
-          oldStage = stage;
+          oldStatus = status;
           break;
         }
       }
 
-      if (!oldStage || oldStage === newStage) return;
+      if (!oldStatus || oldStatus === newStatus) return;
 
       // Optimistic update
-      const job = jobsByStage[oldStage].find((j) => j.id === jobId);
+      const job = jobsByStatus[oldStatus].find((j) => j.id === jobId);
       if (!job) return;
 
-      const prevState = { ...jobsByStage };
-      setJobsByStage((prev) => ({
+      const prevState = { ...jobsByStatus };
+      setJobsByStatus((prev) => ({
         ...prev,
-        [oldStage!]: prev[oldStage!].filter((j) => j.id !== jobId),
-        [newStage]: [job, ...prev[newStage]],
+        [oldStatus!]: prev[oldStatus!].filter((j) => j.id !== jobId),
+        [newStatus]: [job, ...prev[newStatus]],
       }));
 
       try {
-        const res = await fetch(`/api/jobs/${jobId}/pipeline`, {
+        const res = await fetch(`/api/jobs/${jobId}`, {
           method: "PATCH",
           headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({ pipelineStage: newStage }),
+          body: JSON.stringify({ status: newStatus }),
         });
 
-        if (!res.ok) {
-          throw new Error("Failed to update pipeline stage");
-        }
-
-        toast.success("Pipeline stage updated");
+        if (!res.ok) throw new Error("Failed to update status");
+        toast.success("Status updated");
       } catch {
-        // Revert on error
-        setJobsByStage(prevState);
-        toast.error("Failed to move lead. Please try again.");
+        setJobsByStatus(prevState);
+        toast.error("Failed to move job. Please try again.");
       }
     },
-    [jobsByStage]
+    [jobsByStatus]
   );
+
+  const columns = showClosed
+    ? [...ACTIVE_STATUSES, ...CLOSED_STATUSES]
+    : ACTIVE_STATUSES;
 
   return (
     <DndContext
@@ -115,14 +116,22 @@ export default function PipelineBoard({
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
+      <div className="mb-4">
+        <button
+          onClick={() => setShowClosed((v) => !v)}
+          className="text-sm text-slate-500 hover:text-slate-700 transition-colors"
+        >
+          {showClosed ? "Hide Closed Jobs" : "Show Closed Jobs"}
+        </button>
+      </div>
+
       <div className="flex gap-4 overflow-x-auto pb-4">
-        {PIPELINE_STAGES.map(({ key, label }) => (
+        {columns.map(({ key, label }) => (
           <PipelineColumn
             key={key}
-            stage={key}
+            status={key}
             label={label}
-            jobs={jobsByStage[key] || []}
-            color={key}
+            jobs={jobsByStatus[key] || []}
           />
         ))}
       </div>

@@ -58,6 +58,21 @@ export default async function JobDetailPage({
         </div>
       </div>
 
+      {/* Workflow hint */}
+      {job.status === "LEAD" && job.quotes.length === 0 && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 mb-6 text-sm text-blue-800 flex items-center justify-between">
+          <span>Next step: Create a quote for this job so you can send the customer a price.</span>
+          <Link href={`/quotes/new?jobId=${job.id}&customerId=${job.customer.id}`}>
+            <Button size="sm" variant="outline" className="ml-3 shrink-0 border-blue-300 text-blue-700 hover:bg-blue-100">New Quote</Button>
+          </Link>
+        </div>
+      )}
+      {job.status === "QUOTED" && job.invoices.length === 0 && (
+        <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 mb-6 text-sm text-blue-800">
+          Waiting for the customer to accept your quote. Once accepted, you can create an invoice.
+        </div>
+      )}
+
       {/* Info grid */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
         <div className="bg-white border rounded-lg p-4">
@@ -77,7 +92,7 @@ export default async function JobDetailPage({
           <p className="font-medium text-xs leading-tight">{jobAddress}</p>
         </div>
         <div className="bg-white border rounded-lg p-4">
-          <div className="flex items-center gap-1.5 text-slate-400 text-xs mb-1"><Ruler className="w-3.5 h-3.5" /> Sq Ft</div>
+          <div className="flex items-center gap-1.5 text-slate-400 text-xs mb-1"><Ruler className="w-3.5 h-3.5" /> Square Feet</div>
           <p className="font-medium text-sm">{job.squareFootage ? `${job.squareFootage.toLocaleString()} sq ft` : "\u2014"}</p>
         </div>
         {job.resealDueDate && (

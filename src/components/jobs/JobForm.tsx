@@ -123,6 +123,7 @@ export default function JobForm({ customers, defaultValues, jobId }: Props) {
       <div className="space-y-1">
         <Label>Square Footage</Label>
         <Input {...register("squareFootage")} type="number" placeholder="0" />
+        <p className="text-xs text-slate-400">Total area to be sealed. Used for estimating materials.</p>
       </div>
 
       <div className="space-y-1">
@@ -146,7 +147,7 @@ export default function JobForm({ customers, defaultValues, jobId }: Props) {
       </div>
 
       <div className="border-t pt-4 mt-2">
-        <Label className="text-base font-semibold mb-3 block">Job Costing</Label>
+        <Label className="text-base font-semibold mb-3 block">Cost Breakdown</Label>
         <div className="grid grid-cols-3 gap-4">
           <div className="space-y-1">
             <Label>Labor Hours</Label>
@@ -170,11 +171,13 @@ export default function JobForm({ customers, defaultValues, jobId }: Props) {
       <div className="space-y-1">
         <Label>Description</Label>
         <Textarea {...register("description")} rows={2} placeholder="Brief description of the work..." />
+        <p className="text-xs text-slate-400">Visible on quotes and invoices sent to the customer.</p>
       </div>
 
       <div className="space-y-1">
         <Label>Notes</Label>
         <Textarea {...register("notes")} rows={3} placeholder="Internal notes, gate codes, special instructions..." />
+        <p className="text-xs text-slate-400">Internal only — not shown to the customer.</p>
       </div>
 
       <div className="flex gap-3">

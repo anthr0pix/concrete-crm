@@ -27,7 +27,7 @@ import { Button } from "@/components/ui/button";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import CalendarJobCard from "./CalendarJobCard";
 import Link from "next/link";
-import { SERVICE_TYPE_LABELS } from "@/types";
+import { SERVICE_TYPE_LABELS, JOB_STATUS_LABELS } from "@/types";
 
 const SERVICE_TYPE_COLORS: Record<string, string> = {
   CONCRETE_SEALING: "bg-blue-100 text-blue-800",
@@ -344,7 +344,7 @@ export default function EnhancedCalendar({
                           ? format(parseISO(job.scheduledDate), "MMM d")
                           : ""}
                       </p>
-                      <p className="text-xs text-slate-500">{job.status}</p>
+                      <p className="text-xs text-slate-500">{JOB_STATUS_LABELS[job.status] ?? job.status}</p>
                     </div>
                   </div>
                 </Link>

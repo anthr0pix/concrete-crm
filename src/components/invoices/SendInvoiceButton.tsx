@@ -16,12 +16,14 @@ export default function SendInvoiceButton({ invoiceId, customerEmail }: Props) {
 
   if (!customerEmail) {
     return (
-      <span
-        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-slate-200 text-sm font-medium text-slate-400 cursor-not-allowed"
-        title="Add an email address to this customer before sending"
-      >
-        <Mail className="w-3.5 h-3.5" />
-        Send Invoice
+      <span className="inline-flex items-center gap-1.5 text-sm">
+        <span
+          className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md border border-slate-200 font-medium text-slate-400 cursor-not-allowed"
+        >
+          <Mail className="w-3.5 h-3.5" />
+          Send Invoice
+        </span>
+        <span className="text-xs text-amber-600">No email on file</span>
       </span>
     );
   }

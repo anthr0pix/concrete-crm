@@ -51,6 +51,18 @@ export default async function QuoteDetailPage({
         </div>
       </div>
 
+      {/* Workflow hint */}
+      {quote.status === "DRAFT" && (
+        <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 mb-6 text-sm text-amber-800">
+          This quote is still a draft. When you&apos;re ready, use the <strong>Send</strong> button above to email it to the customer.
+        </div>
+      )}
+      {quote.status === "ACCEPTED" && (
+        <div className="bg-green-50 border border-green-200 rounded-lg px-4 py-3 mb-6 text-sm text-green-800">
+          The customer accepted this quote. Click <strong>&quot;Create Invoice from Quote&quot;</strong> above to bill them.
+        </div>
+      )}
+
       {/* Line Items */}
       <div className="bg-white border rounded-lg overflow-hidden mb-4">
         <table className="w-full text-sm">

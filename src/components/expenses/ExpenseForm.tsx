@@ -144,27 +144,29 @@ export default function ExpenseForm({ jobs, defaultValues, expenseId }: Props) {
       </div>
 
       <div className="space-y-1">
-        <Label>Link to Job</Label>
+        <Label>Link to Job (optional)</Label>
         <select
           {...register("jobId")}
           className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
         >
-          <option value="">No job</option>
+          <option value="">None — general business expense</option>
           {jobs.map((job) => (
             <option key={job.id} value={job.id}>
               {job.title}
             </option>
           ))}
         </select>
+        <p className="text-xs text-slate-400">Link this expense to a specific job to track job-level costs.</p>
       </div>
 
       <div className="space-y-1">
-        <Label>Receipt URL</Label>
+        <Label>Receipt Link (optional)</Label>
         <Input
           {...register("receiptUrl")}
           type="url"
           placeholder="https://..."
         />
+        <p className="text-xs text-slate-400">Paste a link to a photo or scan of the receipt, if you have one.</p>
         {errors.receiptUrl && (
           <p className="text-xs text-red-500">{errors.receiptUrl.message}</p>
         )}

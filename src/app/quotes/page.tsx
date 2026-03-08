@@ -32,6 +32,7 @@ export default async function QuotesPage() {
       {quotes.length === 0 ? (
         <div className="text-center py-16 text-slate-400">
           <p className="text-lg font-medium">No quotes yet</p>
+          <p className="text-sm mt-1">Create a quote to send a price estimate to a customer.</p>
         </div>
       ) : (
         <div className="space-y-2">

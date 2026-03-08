@@ -35,7 +35,7 @@ export default async function InvoicesPage() {
           <p className="text-2xl font-bold text-green-800">${totalPaid.toLocaleString("en-US", { minimumFractionDigits: 2 })}</p>
         </div>
         <div className="bg-orange-50 border border-orange-100 rounded-lg p-4">
-          <p className="text-sm text-orange-700 font-medium">Outstanding</p>
+          <p className="text-sm text-orange-700 font-medium">Unpaid Invoices</p>
           <p className="text-2xl font-bold text-orange-800">${totalOutstanding.toLocaleString("en-US", { minimumFractionDigits: 2 })}</p>
         </div>
       </div>
@@ -43,6 +43,7 @@ export default async function InvoicesPage() {
       {invoices.length === 0 ? (
         <div className="text-center py-16 text-slate-400">
           <p className="text-lg font-medium">No invoices yet</p>
+          <p className="text-sm mt-1">Invoices are created from accepted quotes, or you can create one manually.</p>
         </div>
       ) : (
         <div className="space-y-2">

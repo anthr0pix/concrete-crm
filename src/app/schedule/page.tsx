@@ -24,7 +24,7 @@ export default async function SchedulePage({
 
   const jobs = await prisma.job.findMany({
     where: {
-      status: { in: ["SCHEDULED", "IN_PROGRESS"] },
+      status: { in: ["LEAD", "QUOTED", "SCHEDULED", "IN_PROGRESS"] },
       scheduledDate: { gte: calStart, lte: calEnd },
     },
     include: { customer: { select: { firstName: true, lastName: true } } },
@@ -43,7 +43,10 @@ export default async function SchedulePage({
   return (
     <div className="p-4 sm:p-6 max-w-5xl mx-auto">
       <div className="flex items-center justify-between mb-6">
-        <h1 className="text-2xl font-bold">Schedule</h1>
+        <div>
+          <h1 className="text-2xl font-bold">Schedule</h1>
+          <p className="text-sm text-slate-500 mt-0.5 hidden md:block">Drag jobs to a different day to reschedule them.</p>
+        </div>
         <Link href="/jobs/new">
           <Button><Plus className="w-4 h-4 mr-2" /> New Job</Button>
         </Link>

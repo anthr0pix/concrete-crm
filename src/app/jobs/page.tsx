@@ -60,7 +60,7 @@ export default async function JobsPage({
       {/* Job list */}
       {jobs.length === 0 ? (
         <div className="text-center py-16 text-slate-400">
-          <p className="text-lg font-medium">No jobs found</p>
+          <p className="text-lg font-medium">No jobs found. Click &apos;New Job&apos; to create one.</p>
         </div>
       ) : (
         <div className="space-y-2">
