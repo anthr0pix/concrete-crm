@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RequiredLabel } from "@/components/ui/required-label";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Trash2 } from "lucide-react";
 import DepositSettings from "@/components/quotes/DepositSettings";
@@ -71,9 +72,10 @@ export default function QuoteBuilder({ customers, jobs = [], defaultCustomerId, 
 
   return (
     <form onSubmit={onSubmit} className="space-y-6">
+      <p className="text-xs text-slate-400"><span className="text-red-500">*</span> Required</p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1">
-          <Label>Customer</Label>
+          <RequiredLabel>Customer</RequiredLabel>
           <select value={customerId} onChange={(e) => setCustomerId(e.target.value)} className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900">
             <option value="">Select customer...</option>
             {customers.map((c) => <option key={c.id} value={c.id}>{c.lastName}, {c.firstName}</option>)}
@@ -92,7 +94,8 @@ export default function QuoteBuilder({ customers, jobs = [], defaultCustomerId, 
 
       {/* Line Items */}
       <div>
-        <Label className="mb-2 block">Line Items</Label>
+        <RequiredLabel className="mb-2 block">Line Items</RequiredLabel>
+        <p className="text-xs text-slate-400 mb-2">Add at least one line item with a description.</p>
 
         {/* Desktop layout */}
         <div className="hidden sm:block">

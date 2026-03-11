@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RequiredLabel } from "@/components/ui/required-label";
 import { Textarea } from "@/components/ui/textarea";
 import { ServiceType, JobStatus } from "@prisma/client";
 import { SERVICE_TYPE_LABELS, JOB_STATUS_LABELS } from "@/types";
@@ -71,9 +72,10 @@ export default function JobForm({ customers, defaultValues, jobId }: Props) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <p className="text-xs text-slate-400"><span className="text-red-500">*</span> Required</p>
       {!isEdit && (
         <div className="space-y-1">
-          <Label>Customer</Label>
+          <RequiredLabel>Customer</RequiredLabel>
           <select {...register("customerId")} className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900">
             <option value="">Select a customer...</option>
             {customers.map((c) => (
@@ -85,14 +87,14 @@ export default function JobForm({ customers, defaultValues, jobId }: Props) {
       )}
 
       <div className="space-y-1">
-        <Label>Job Title</Label>
+        <RequiredLabel>Job Title</RequiredLabel>
         <Input {...register("title")} placeholder="e.g. Driveway Sealing - Johnson Residence" />
         {errors.title && <p className="text-xs text-red-500">{errors.title.message}</p>}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1">
-          <Label>Service Type</Label>
+          <RequiredLabel>Service Type</RequiredLabel>
           <select {...register("serviceType")} className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900">
             {Object.entries(SERVICE_TYPE_LABELS).map(([val, label]) => (
               <option key={val} value={val}>{label}</option>
@@ -100,7 +102,7 @@ export default function JobForm({ customers, defaultValues, jobId }: Props) {
           </select>
         </div>
         <div className="space-y-1">
-          <Label>Status</Label>
+          <RequiredLabel>Status</RequiredLabel>
           <select {...register("status")} className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900">
             {Object.entries(JOB_STATUS_LABELS).map(([val, label]) => (
               <option key={val} value={val}>{label}</option>

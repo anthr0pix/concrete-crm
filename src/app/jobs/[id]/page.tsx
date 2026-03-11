@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { User, MapPin, Calendar, Ruler, Phone, Navigation } from "lucide-react";
+import { User, MapPin, Calendar, Ruler, Phone, Navigation, FileText, Receipt } from "lucide-react";
 import Breadcrumbs from "@/components/layout/Breadcrumbs";
 import { SERVICE_TYPE_LABELS } from "@/types";
 import { format } from "date-fns";
@@ -70,6 +70,34 @@ export default async function JobDetailPage({
               <Navigation className="w-4 h-4 mr-1.5" /> Directions
             </Button>
           </a>
+        </div>
+      )}
+
+      {/* Next-step prompts */}
+      {job.status === "LEAD" && job.quotes.length === 0 && (
+        <div className="border-2 border-dashed border-purple-300 bg-purple-50 rounded-lg px-4 py-3 mb-6 flex items-center justify-between">
+          <div className="flex items-center gap-2 text-sm text-purple-800">
+            <FileText className="w-4 h-4" />
+            <span>New lead — ready to send a quote?</span>
+          </div>
+          <Link href={`/quotes/new?customerId=${job.customer.id}&jobId=${job.id}`}>
+            <Button size="sm" className="bg-purple-600 hover:bg-purple-700 text-white">
+              Create Quote
+            </Button>
+          </Link>
+        </div>
+      )}
+      {job.status === "COMPLETED" && job.invoices.length === 0 && (
+        <div className="border-2 border-dashed border-green-300 bg-green-50 rounded-lg px-4 py-3 mb-6 flex items-center justify-between">
+          <div className="flex items-center gap-2 text-sm text-green-800">
+            <Receipt className="w-4 h-4" />
+            <span>Job complete — time to get paid!</span>
+          </div>
+          <Link href={`/invoices/new?customerId=${job.customer.id}&jobId=${job.id}`}>
+            <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white">
+              Create Invoice
+            </Button>
+          </Link>
         </div>
       )}
 
@@ -144,14 +172,16 @@ export default async function JobDetailPage({
       </div>
 
       {/* Expenses */}
-      {job.expenses.length > 0 && (
-        <div className="bg-white border rounded-lg p-4 mb-6">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="font-semibold">Expenses</h2>
-            <Link href={`/expenses/new?jobId=${job.id}`}>
-              <Button size="sm" variant="outline">+ Add Expense</Button>
-            </Link>
-          </div>
+      <div className="bg-white border rounded-lg p-4 mb-6">
+        <div className="flex items-center justify-between mb-3">
+          <h2 className="font-semibold">Expenses</h2>
+          <Link href={`/expenses/new?jobId=${job.id}`}>
+            <Button size="sm" variant="outline">+ Add Expense</Button>
+          </Link>
+        </div>
+        {job.expenses.length === 0 ? (
+          <p className="text-sm text-slate-400">No expenses recorded yet.</p>
+        ) : (
           <div className="space-y-1">
             {job.expenses.map((exp) => (
               <div key={exp.id} className="flex justify-between text-sm py-1.5 border-b last:border-0">
@@ -163,8 +193,8 @@ export default async function JobDetailPage({
               </div>
             ))}
           </div>
-        </div>
-      )}
+        )}
+      </div>
 
       {/* Quotes & Invoices */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">

@@ -49,14 +49,14 @@ export const EXPENSE_CATEGORY_LABELS: Record<string, string> = {
 
 export const STATUS_COLORS: Record<string, string> = {
   // Job statuses
-  LEAD: "bg-slate-100 text-slate-700",
+  LEAD: "bg-purple-100 text-purple-700",
   QUOTED: "bg-blue-100 text-blue-700",
   SCHEDULED: "bg-yellow-100 text-yellow-700",
   IN_PROGRESS: "bg-orange-100 text-orange-700",
   COMPLETED: "bg-green-100 text-green-700",
   CANCELLED: "bg-red-100 text-red-700",
   // Quote statuses
-  DRAFT: "bg-slate-100 text-slate-700",
+  DRAFT: "bg-amber-100 text-amber-700",
   SENT: "bg-blue-100 text-blue-700",
   ACCEPTED: "bg-green-100 text-green-700",
   DECLINED: "bg-red-100 text-red-700",
@@ -64,5 +64,5 @@ export const STATUS_COLORS: Record<string, string> = {
   // Invoice statuses
   PAID: "bg-green-100 text-green-700",
   OVERDUE: "bg-red-100 text-red-700",
-  VOID: "bg-slate-200 text-slate-500",
+  VOID: "bg-slate-200 text-slate-600",
 };

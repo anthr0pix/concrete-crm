@@ -123,6 +123,11 @@ export default async function CustomerDetailPage({
               </Link>
             ))}
           </div>
+          {customer.quotes.length >= 5 && (
+            <Link href={`/quotes?search=${encodeURIComponent(customer.firstName + " " + customer.lastName)}`} className="text-sm text-slate-500 hover:text-slate-700 mt-2 inline-block">
+              View all quotes &rarr;
+            </Link>
+          )}
         </div>
       )}
 
@@ -146,6 +151,11 @@ export default async function CustomerDetailPage({
               </Link>
             ))}
           </div>
+          {customer.invoices.length >= 5 && (
+            <Link href={`/invoices?search=${encodeURIComponent(customer.firstName + " " + customer.lastName)}`} className="text-sm text-slate-500 hover:text-slate-700 mt-2 inline-block">
+              View all invoices &rarr;
+            </Link>
+          )}
         </div>
       )}
     </div>

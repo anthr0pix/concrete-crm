@@ -53,6 +53,7 @@ export default async function QuoteDetailPage({
               <Download className="w-4 h-4 mr-1.5" /> PDF
             </Button>
           </a>
+          <div className="hidden sm:block w-px h-6 bg-slate-200" />
           <DuplicateQuoteButton quoteId={quote.id} />
           {quote.status === "ACCEPTED" && (
             <ConvertToInvoiceButton quoteId={quote.id} />

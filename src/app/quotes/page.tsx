@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Plus } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import { QUOTE_STATUS_LABELS, STATUS_COLORS } from "@/types";
 import { QuoteStatus } from "@prisma/client";
 import { format, subDays } from "date-fns";
@@ -82,12 +82,15 @@ export default async function QuotesPage({
         <form className="flex-1">
           {activeStatus && <input type="hidden" name="status" value={activeStatus} />}
           {sort && <input type="hidden" name="sort" value={sort} />}
-          <input
-            name="search"
-            defaultValue={search}
-            placeholder="Search by quote number or customer name..."
-            className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
-          />
+          <div className="relative">
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <input
+              name="search"
+              defaultValue={search}
+              placeholder="Search by quote number or customer name..."
+              className="w-full border rounded-md pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
+            />
+          </div>
         </form>
         <Suspense fallback={<div className="border rounded-md px-2 py-1.5 text-sm w-28 bg-white" />}>
           <SortSelect options={SORT_OPTIONS} basePath="/quotes" />

@@ -8,6 +8,7 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { RequiredLabel } from "@/components/ui/required-label";
 import { Textarea } from "@/components/ui/textarea";
 
 const schema = z.object({
@@ -62,14 +63,15 @@ export default function CustomerForm({ defaultValues, customerId }: Props) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <p className="text-xs text-slate-400"><span className="text-red-500">*</span> Required</p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1">
-          <Label>First Name</Label>
+          <RequiredLabel>First Name</RequiredLabel>
           <Input {...register("firstName")} />
           {errors.firstName && <p className="text-xs text-red-500">{errors.firstName.message}</p>}
         </div>
         <div className="space-y-1">
-          <Label>Last Name</Label>
+          <RequiredLabel>Last Name</RequiredLabel>
           <Input {...register("lastName")} />
           {errors.lastName && <p className="text-xs text-red-500">{errors.lastName.message}</p>}
         </div>
@@ -77,7 +79,7 @@ export default function CustomerForm({ defaultValues, customerId }: Props) {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1">
-          <Label>Phone</Label>
+          <RequiredLabel>Phone</RequiredLabel>
           <Input {...register("phone")} type="tel" />
           {errors.phone && <p className="text-xs text-red-500">{errors.phone.message}</p>}
         </div>
@@ -89,24 +91,24 @@ export default function CustomerForm({ defaultValues, customerId }: Props) {
       </div>
 
       <div className="space-y-1">
-        <Label>Street Address</Label>
+        <RequiredLabel>Street Address</RequiredLabel>
         <Input {...register("address")} />
         {errors.address && <p className="text-xs text-red-500">{errors.address.message}</p>}
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="space-y-1 col-span-1">
-          <Label>City</Label>
+          <RequiredLabel>City</RequiredLabel>
           <Input {...register("city")} />
           {errors.city && <p className="text-xs text-red-500">{errors.city.message}</p>}
         </div>
         <div className="space-y-1">
-          <Label>State</Label>
+          <RequiredLabel>State</RequiredLabel>
           <Input {...register("state")} maxLength={2} placeholder="UT" />
           {errors.state && <p className="text-xs text-red-500">{errors.state.message}</p>}
         </div>
         <div className="space-y-1">
-          <Label>Zip</Label>
+          <RequiredLabel>Zip</RequiredLabel>
           <Input {...register("zip")} />
           {errors.zip && <p className="text-xs text-red-500">{errors.zip.message}</p>}
         </div>

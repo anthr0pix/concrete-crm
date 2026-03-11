@@ -71,6 +71,7 @@ export default async function InvoiceDetailPage({
               <Download className="w-4 h-4 mr-1.5" /> PDF
             </Button>
           </a>
+          <div className="hidden sm:block w-px h-6 bg-slate-200" />
           <DuplicateInvoiceButton invoiceId={invoice.id} />
           {invoice.status !== "PAID" && invoice.status !== "VOID" && (
             <>

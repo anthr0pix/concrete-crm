@@ -21,7 +21,7 @@ import { cn } from "@/lib/utils";
 
 const nav = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/pipeline", label: "Job Board", icon: Kanban },
+  { href: "/pipeline", label: "Pipeline", icon: Kanban },
   { href: "/customers", label: "Customers", icon: Users },
   { href: "/jobs", label: "Jobs", icon: Briefcase },
   { href: "/quotes", label: "Quotes", icon: FileText },
@@ -67,7 +67,7 @@ export default function Sidebar({ open = false, onClose }: SidebarProps) {
         {/* Close button — mobile only */}
         <button
           onClick={onClose}
-          className="md:hidden p-1 rounded text-white/60 hover:text-white transition-colors"
+          className="md:hidden p-1 rounded text-white/80 hover:text-white transition-colors"
           aria-label="Close menu"
         >
           <X className="w-4 h-4" />
@@ -86,7 +86,7 @@ export default function Sidebar({ open = false, onClose }: SidebarProps) {
                 "flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-all",
                 isActive
                   ? "text-white"
-                  : "text-white/60 hover:text-white hover:bg-white/5"
+                  : "text-white/80 hover:text-white hover:bg-white/5"
               )}
               style={isActive ? { backgroundColor: "#e94560" } : {}}
             >
@@ -102,7 +102,7 @@ export default function Sidebar({ open = false, onClose }: SidebarProps) {
         <form action="/api/auth/logout" method="POST">
           <button
             type="submit"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-white/50 hover:text-white hover:bg-white/5 transition-all w-full"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-white/70 hover:text-white hover:bg-white/5 transition-all w-full"
           >
             <LogOut className="w-4 h-4" />
             Sign Out
