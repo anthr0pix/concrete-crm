@@ -3,17 +3,8 @@
 import { useState } from "react";
 import { toast } from "sonner";
 import { useRouter } from "next/navigation";
-import { JOB_STATUS_LABELS } from "@/types";
+import { JOB_STATUS_LABELS, STATUS_COLORS } from "@/types";
 import { JobStatus } from "@prisma/client";
-
-const STATUS_COLORS: Record<string, string> = {
-  LEAD: "bg-slate-100 text-slate-700",
-  QUOTED: "bg-blue-100 text-blue-700",
-  SCHEDULED: "bg-yellow-100 text-yellow-700",
-  IN_PROGRESS: "bg-orange-100 text-orange-700",
-  COMPLETED: "bg-green-100 text-green-700",
-  CANCELLED: "bg-red-100 text-red-700",
-};
 
 interface Props {
   jobId: string;

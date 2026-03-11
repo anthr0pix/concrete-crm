@@ -62,7 +62,7 @@ export default function CustomerForm({ defaultValues, customerId }: Props) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1">
           <Label>First Name</Label>
           <Input {...register("firstName")} />
@@ -75,7 +75,7 @@ export default function CustomerForm({ defaultValues, customerId }: Props) {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1">
           <Label>Phone</Label>
           <Input {...register("phone")} type="tel" />
@@ -94,7 +94,7 @@ export default function CustomerForm({ defaultValues, customerId }: Props) {
         {errors.address && <p className="text-xs text-red-500">{errors.address.message}</p>}
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="space-y-1 col-span-1">
           <Label>City</Label>
           <Input {...register("city")} />

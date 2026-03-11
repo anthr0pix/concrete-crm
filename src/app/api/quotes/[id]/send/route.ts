@@ -90,6 +90,14 @@ export async function POST(
       data: { status: "SENT" },
     });
 
+    // Auto-transition: sending a quote for a LEAD job → QUOTED
+    if (quote.jobId) {
+      await prisma.job.updateMany({
+        where: { id: quote.jobId, status: "LEAD" },
+        data: { status: "QUOTED" },
+      });
+    }
+
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("[send/quote] unexpected error:", err);

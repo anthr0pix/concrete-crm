@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
-import { ServiceType, JobStatus, PipelineStage } from "@prisma/client";
+import { ServiceType, JobStatus } from "@prisma/client";
 
 const updateSchema = z.object({
   title: z.string().min(1).optional(),
@@ -21,7 +21,6 @@ const updateSchema = z.object({
   laborRate: z.number().nullable().optional(),
   materialCost: z.number().nullable().optional(),
   crewAssignment: z.string().nullable().optional(),
-  pipelineStage: z.nativeEnum(PipelineStage).nullable().optional(),
 });
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -54,10 +53,21 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
 
   try {
     const { scheduledDate, completedDate, resealDueDate, ...rest } = parsed.data;
+
+    // Auto-transition: setting a scheduledDate on a LEAD or QUOTED job → SCHEDULED
+    let autoStatus: JobStatus | undefined;
+    if (scheduledDate && !rest.status) {
+      const current = await prisma.job.findUnique({ where: { id }, select: { status: true } });
+      if (current && (current.status === "LEAD" || current.status === "QUOTED")) {
+        autoStatus = "SCHEDULED";
+      }
+    }
+
     const job = await prisma.job.update({
       where: { id },
       data: {
         ...rest,
+        ...(autoStatus ? { status: autoStatus } : {}),
         ...(scheduledDate !== undefined ? { scheduledDate: scheduledDate ? new Date(scheduledDate) : null } : {}),
         ...(completedDate !== undefined ? { completedDate: completedDate ? new Date(completedDate) : null } : {}),
         ...(resealDueDate !== undefined ? { resealDueDate: resealDueDate ? new Date(resealDueDate) : null } : {}),

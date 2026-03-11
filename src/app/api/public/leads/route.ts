@@ -1,7 +1,15 @@
 import { NextRequest, NextResponse } from "next/server";
+import { render } from "@react-email/components";
 import { prisma } from "@/lib/prisma";
+import { getResend } from "@/lib/email";
 import { ServiceType } from "@prisma/client";
 import { z } from "zod";
+import React from "react";
+import NewLeadNotificationEmail from "@/components/emails/NewLeadNotificationEmail";
+
+const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.mountainwestsurface.com";
+const FROM_EMAIL = process.env.FROM_EMAIL ?? "Mountain West Surface <notifications@mountainwestsurface.com>";
+const NOTIFICATION_EMAIL = process.env.NOTIFICATION_EMAIL ?? "mwsurfaceco@gmail.com";
 
 const ALLOWED_ORIGINS = new Set([
   process.env.WEBSITE_ORIGIN ?? "https://mountainwestsurface.com",
@@ -55,6 +63,14 @@ const LeadSchema = z.object({
   message: z.string().max(2000).optional(),
   // Honeypot — must be empty
   "bot-field": z.string().max(0).optional(),
+  // UTM / attribution data
+  source: z.object({
+    utm_source: z.string().max(200).optional(),
+    utm_medium: z.string().max(200).optional(),
+    utm_campaign: z.string().max(200).optional(),
+    referrer: z.string().max(500).optional(),
+    landing_page: z.string().max(500).optional(),
+  }).optional(),
 });
 
 function corsHeaders(origin?: string | null) {
@@ -65,6 +81,71 @@ function corsHeaders(origin?: string | null) {
     "Access-Control-Allow-Headers": "Content-Type",
     "Vary": "Origin",
   };
+}
+
+/**
+ * Build a structured referralSource string from UTM data.
+ */
+function buildReferralSource(source?: z.infer<typeof LeadSchema>["source"]): string {
+  if (!source) return "Website";
+
+  if (source.utm_source) {
+    const parts = ["Website", `${source.utm_source} / ${source.utm_medium ?? "direct"}`];
+    if (source.landing_page) parts.push(source.landing_page);
+    return parts.join(" | ");
+  }
+
+  if (source.landing_page) {
+    return `Website | ${source.landing_page}`;
+  }
+
+  return "Website";
+}
+
+/**
+ * Fire-and-forget notification email. Silently catches all errors —
+ * notification failure should never break lead creation.
+ */
+async function sendNotificationEmail(
+  customer: { id: string; firstName: string; lastName: string },
+  lead: z.infer<typeof LeadSchema>,
+  referralSource: string,
+  toEmail: string
+): Promise<void> {
+  const resend = getResend();
+
+  const serviceName = lead.service ? lead.service.replace(/-/g, " ") : undefined;
+  const timestamp = new Date().toLocaleString("en-US", {
+    timeZone: "America/Denver",
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+
+  const html = await render(
+    React.createElement(NewLeadNotificationEmail, {
+      customerName: lead.name,
+      phone: lead.phone,
+      email: lead.email,
+      service: serviceName,
+      sqFootage: lead.sqFootage ? String(lead.sqFootage) : undefined,
+      location: lead.location,
+      message: lead.message,
+      source: referralSource !== "Website" ? referralSource : undefined,
+      crmUrl: `${APP_URL}/customers/${customer.id}`,
+      timestamp,
+    })
+  );
+
+  const subject = serviceName
+    ? `New Website Lead: ${lead.name} — ${serviceName}`
+    : `New Website Lead: ${lead.name}`;
+
+  await resend.emails.send({
+    from: FROM_EMAIL,
+    to: toEmail,
+    subject,
+    html,
+  });
 }
 
 // Handle preflight
@@ -129,11 +210,19 @@ export async function POST(req: NextRequest) {
   // Parse sq footage
   const squareFootage = data.sqFootage ? parseFloat(String(data.sqFootage)) : null;
 
+  // Build referral source from UTM data
+  const referralSource = buildReferralSource(data.source);
+
   // Build notes from available info
   const notesParts: string[] = ["Website contact form submission."];
   if (data.location) notesParts.push(`Area: ${data.location}`);
   if (squareFootage) notesParts.push(`Approx sq footage: ${squareFootage}`);
   if (data.message) notesParts.push(data.message);
+
+  // Append UTM campaign and referrer to notes if present
+  if (data.source?.utm_campaign) notesParts.push(`Campaign: ${data.source.utm_campaign}`);
+  if (data.source?.referrer) notesParts.push(`Referrer: ${data.source.referrer}`);
+
   const notes = notesParts.join(" | ");
 
   try {
@@ -147,7 +236,7 @@ export async function POST(req: NextRequest) {
         city: data.location ?? "—",
         state: "UT",
         zip: "—",
-        referralSource: "Website",
+        referralSource,
         notes,
         jobs: {
           create: {
@@ -160,6 +249,9 @@ export async function POST(req: NextRequest) {
         },
       },
     });
+
+    // Fire and forget — don't await, don't block the response
+    sendNotificationEmail(customer, data, referralSource, NOTIFICATION_EMAIL).catch(() => {});
 
     return NextResponse.json(
       { success: true },

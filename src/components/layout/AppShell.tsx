@@ -4,6 +4,7 @@ import { useState, useEffect } from "react";
 import { usePathname } from "next/navigation";
 import { Menu } from "lucide-react";
 import Sidebar from "./Sidebar";
+import MobileBottomNav from "./MobileBottomNav";
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -44,10 +45,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           </span>
         </div>
 
-        <main className="flex-1 overflow-auto">
+        <main className="flex-1 overflow-auto pb-16 md:pb-0">
           {children}
         </main>
       </div>
+
+      <MobileBottomNav onMoreTap={() => setSidebarOpen(true)} />
     </div>
   );
 }

@@ -90,7 +90,7 @@ export default function JobForm({ customers, defaultValues, jobId }: Props) {
         {errors.title && <p className="text-xs text-red-500">{errors.title.message}</p>}
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1">
           <Label>Service Type</Label>
           <select {...register("serviceType")} className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900">
@@ -109,7 +109,7 @@ export default function JobForm({ customers, defaultValues, jobId }: Props) {
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1">
           <Label>Scheduled Date</Label>
           <Input {...register("scheduledDate")} type="date" />
@@ -131,7 +131,7 @@ export default function JobForm({ customers, defaultValues, jobId }: Props) {
         <Input {...register("address")} placeholder="Street address" />
       </div>
 
-      <div className="grid grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         <div className="space-y-1 col-span-1">
           <Label>City</Label>
           <Input {...register("city")} />
@@ -148,7 +148,7 @@ export default function JobForm({ customers, defaultValues, jobId }: Props) {
 
       <div className="border-t pt-4 mt-2">
         <Label className="text-base font-semibold mb-3 block">Cost Breakdown</Label>
-        <div className="grid grid-cols-3 gap-4">
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
           <div className="space-y-1">
             <Label>Labor Hours</Label>
             <Input {...register("laborHours")} type="number" step="0.5" placeholder="0" />

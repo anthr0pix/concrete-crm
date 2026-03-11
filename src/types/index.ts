@@ -1,5 +1,5 @@
 export type { Customer, Job, JobPhoto, Quote, QuoteLineItem, Invoice, InvoiceLineItem, PaymentEvent, AppSettings, Expense } from "@prisma/client";
-export { JobStatus, QuoteStatus, InvoiceStatus, ServiceType, DepositType, PipelineStage, ExpenseCategory } from "@prisma/client";
+export { JobStatus, QuoteStatus, InvoiceStatus, ServiceType, DepositType, ExpenseCategory } from "@prisma/client";
 
 export const JOB_STATUS_LABELS: Record<string, string> = {
   LEAD: "Lead",
@@ -36,15 +36,6 @@ export const INVOICE_STATUS_LABELS: Record<string, string> = {
   VOID: "Void",
 };
 
-export const PIPELINE_STAGE_LABELS: Record<string, string> = {
-  NEW: "New",
-  CONTACTED: "Contacted",
-  QUOTE_SENT: "Quote Sent",
-  FOLLOW_UP: "Follow Up",
-  WON: "Won",
-  LOST: "Lost",
-};
-
 export const EXPENSE_CATEGORY_LABELS: Record<string, string> = {
   MATERIALS: "Materials",
   FUEL: "Fuel",
@@ -74,11 +65,4 @@ export const STATUS_COLORS: Record<string, string> = {
   PAID: "bg-green-100 text-green-700",
   OVERDUE: "bg-red-100 text-red-700",
   VOID: "bg-slate-200 text-slate-500",
-  // Pipeline stages
-  NEW: "bg-slate-100 text-slate-700",
-  CONTACTED: "bg-blue-100 text-blue-700",
-  QUOTE_SENT: "bg-purple-100 text-purple-700",
-  FOLLOW_UP: "bg-yellow-100 text-yellow-700",
-  WON: "bg-green-100 text-green-700",
-  LOST: "bg-red-100 text-red-700",
 };

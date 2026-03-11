@@ -71,7 +71,7 @@ export default function QuoteBuilder({ customers, jobs = [], defaultCustomerId, 
 
   return (
     <form onSubmit={onSubmit} className="space-y-6">
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1">
           <Label>Customer</Label>
           <select value={customerId} onChange={(e) => setCustomerId(e.target.value)} className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900">
@@ -93,56 +93,110 @@ export default function QuoteBuilder({ customers, jobs = [], defaultCustomerId, 
       {/* Line Items */}
       <div>
         <Label className="mb-2 block">Line Items</Label>
-        {/* Column headers */}
-        <div className="grid grid-cols-12 gap-2 mb-1">
-          <div className="col-span-6"><span className="text-xs font-medium text-slate-500">Description</span></div>
-          <div className="col-span-2"><span className="text-xs font-medium text-slate-500">Sq Ft</span></div>
-          <div className="col-span-3"><span className="text-xs font-medium text-slate-500">Price per Sq Ft</span></div>
-          <div className="col-span-1"><span className="text-xs font-medium text-slate-500">Total</span></div>
+
+        {/* Desktop layout */}
+        <div className="hidden sm:block">
+          <div className="grid grid-cols-12 gap-2 mb-1">
+            <div className="col-span-6"><span className="text-xs font-medium text-slate-500">Description</span></div>
+            <div className="col-span-2"><span className="text-xs font-medium text-slate-500">Sq Ft</span></div>
+            <div className="col-span-3"><span className="text-xs font-medium text-slate-500">Price per Sq Ft</span></div>
+            <div className="col-span-1"><span className="text-xs font-medium text-slate-500">Total</span></div>
+          </div>
+          <div className="space-y-2">
+            {lineItems.map((item, i) => (
+              <div key={i} className="grid grid-cols-12 gap-2 items-center">
+                <div className="col-span-6">
+                  <Input
+                    placeholder="e.g. Driveway sealing"
+                    value={item.description}
+                    onChange={(e) => updateLine(i, "description", e.target.value)}
+                  />
+                </div>
+                <div className="col-span-2">
+                  <Input
+                    type="number"
+                    placeholder="0"
+                    min="0.01"
+                    step="0.01"
+                    value={item.quantity}
+                    onChange={(e) => updateLine(i, "quantity", parseFloat(e.target.value) || 0)}
+                  />
+                </div>
+                <div className="col-span-3">
+                  <Input
+                    type="number"
+                    placeholder="0.00"
+                    min="0"
+                    step="0.01"
+                    value={item.unitPrice}
+                    onChange={(e) => updateLine(i, "unitPrice", parseFloat(e.target.value) || 0)}
+                  />
+                </div>
+                <div className="col-span-1 flex items-center justify-between">
+                  <span className="text-sm text-slate-500 whitespace-nowrap">
+                    ${(item.quantity * item.unitPrice).toFixed(2)}
+                  </span>
+                  {lineItems.length > 1 && (
+                    <button type="button" onClick={() => removeLine(i)} className="p-1 rounded text-red-400 hover:text-red-600 hover:bg-red-50">
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
         </div>
-        <div className="space-y-2">
+
+        {/* Mobile layout */}
+        <div className="sm:hidden space-y-3">
           {lineItems.map((item, i) => (
-            <div key={i} className="grid grid-cols-12 gap-2 items-center">
-              <div className="col-span-6">
-                <Input
-                  placeholder="e.g. Driveway sealing"
-                  value={item.description}
-                  onChange={(e) => updateLine(i, "description", e.target.value)}
-                />
-              </div>
-              <div className="col-span-2">
-                <Input
-                  type="number"
-                  placeholder="0"
-                  min="0.01"
-                  step="0.01"
-                  value={item.quantity}
-                  onChange={(e) => updateLine(i, "quantity", parseFloat(e.target.value) || 0)}
-                />
-              </div>
-              <div className="col-span-3">
-                <Input
-                  type="number"
-                  placeholder="0.00"
-                  min="0"
-                  step="0.01"
-                  value={item.unitPrice}
-                  onChange={(e) => updateLine(i, "unitPrice", parseFloat(e.target.value) || 0)}
-                />
-              </div>
-              <div className="col-span-1 flex items-center justify-between">
-                <span className="text-sm text-slate-500 whitespace-nowrap">
-                  ${(item.quantity * item.unitPrice).toFixed(2)}
-                </span>
+            <div key={i} className="border rounded-lg p-3 space-y-3">
+              <div className="flex items-start justify-between gap-2">
+                <div className="flex-1 space-y-1">
+                  <span className="text-xs font-medium text-slate-500">Description</span>
+                  <Input
+                    placeholder="e.g. Driveway sealing"
+                    value={item.description}
+                    onChange={(e) => updateLine(i, "description", e.target.value)}
+                  />
+                </div>
                 {lineItems.length > 1 && (
-                  <button type="button" onClick={() => removeLine(i)} className="text-red-400 hover:text-red-600 ml-1">
+                  <button type="button" onClick={() => removeLine(i)} className="p-2 rounded text-red-400 hover:text-red-600 hover:bg-red-50 mt-5">
                     <Trash2 className="w-4 h-4" />
                   </button>
                 )}
               </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="space-y-1">
+                  <span className="text-xs font-medium text-slate-500">Sq Ft</span>
+                  <Input
+                    type="number"
+                    placeholder="0"
+                    min="0.01"
+                    step="0.01"
+                    value={item.quantity}
+                    onChange={(e) => updateLine(i, "quantity", parseFloat(e.target.value) || 0)}
+                  />
+                </div>
+                <div className="space-y-1">
+                  <span className="text-xs font-medium text-slate-500">Price / Sq Ft</span>
+                  <Input
+                    type="number"
+                    placeholder="0.00"
+                    min="0"
+                    step="0.01"
+                    value={item.unitPrice}
+                    onChange={(e) => updateLine(i, "unitPrice", parseFloat(e.target.value) || 0)}
+                  />
+                </div>
+              </div>
+              <div className="text-right text-sm font-medium text-slate-700">
+                Total: ${(item.quantity * item.unitPrice).toFixed(2)}
+              </div>
             </div>
           ))}
         </div>
+
         <Button type="button" variant="outline" size="sm" className="mt-2" onClick={addLine}>
           <Plus className="w-3.5 h-3.5 mr-1" /> Add Line
         </Button>
@@ -178,7 +232,7 @@ export default function QuoteBuilder({ customers, jobs = [], defaultCustomerId, 
         </div>
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="max-w-xs">
         <div className="space-y-1">
           <Label>Valid Until</Label>
           <Input type="date" value={validUntil} onChange={(e) => setValidUntil(e.target.value)} />

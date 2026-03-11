@@ -104,9 +104,15 @@ export default function JobProgressBar({
   // Find the current step index for the active marker
   const currentIdx = steps.findIndex((s) => s.status === "current");
 
+  const doneCount = steps.filter((s) => s.status === "done").length;
+  const currentStep = steps.find((s) => s.status === "current");
+  const currentStepIdx = steps.findIndex((s) => s.status === "current");
+  const allDone = doneCount === steps.length;
+
   return (
     <div className="bg-white border rounded-lg px-5 py-4 mb-6">
-      <div className="flex items-center justify-between">
+      {/* Desktop: horizontal steps */}
+      <div className="hidden md:flex items-center justify-between">
         {steps.map((step, i) => (
           <div key={step.key} className="flex items-center flex-1 last:flex-none">
             {/* Step circle + label */}
@@ -161,6 +167,39 @@ export default function JobProgressBar({
             )}
           </div>
         ))}
+      </div>
+
+      {/* Mobile: compact layout */}
+      <div className="md:hidden">
+        <div className="flex items-center gap-3 mb-2">
+          <span className="text-sm font-medium text-slate-600">
+            Step {allDone ? steps.length : Math.max(currentStepIdx + 1, doneCount + 1)} of {steps.length}
+          </span>
+          <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+            <div
+              className={`h-full rounded-full transition-all ${allDone ? "bg-green-500" : "bg-blue-500"}`}
+              style={{ width: `${(doneCount / steps.length) * 100}%` }}
+            />
+          </div>
+        </div>
+        {allDone ? (
+          <div className="bg-green-50 border border-green-200 rounded-lg px-3 py-2 text-sm font-medium text-green-700">
+            All steps complete
+          </div>
+        ) : currentStep ? (
+          <div className="bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
+            <p className="text-sm font-medium text-blue-800">{currentStep.label}</p>
+            {currentStep.hint && (
+              currentStep.href ? (
+                <Link href={currentStep.href} className="text-xs text-blue-600 hover:underline">
+                  {currentStep.hint} →
+                </Link>
+              ) : (
+                <p className="text-xs text-blue-500">{currentStep.hint}</p>
+              )
+            )}
+          </div>
+        ) : null}
       </div>
     </div>
   );

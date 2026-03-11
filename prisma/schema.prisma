@@ -46,15 +46,6 @@ enum DepositType {
   PERCENTAGE
 }
 
-enum PipelineStage {
-  NEW
-  CONTACTED
-  QUOTE_SENT
-  FOLLOW_UP
-  WON
-  LOST
-}
-
 enum ExpenseCategory {
   MATERIALS
   FUEL
@@ -119,12 +110,11 @@ model Job {
   resealDueDate        DateTime?
   resealReminderSentAt DateTime?
 
-  // Phase 3: Job Costing & Pipeline
+  // Phase 3: Job Costing
   laborHours     Float?
   laborRate      Float?
   materialCost   Float?
   crewAssignment String?
-  pipelineStage  PipelineStage?
 
   photos   JobPhoto[]
   quotes   Quote[]

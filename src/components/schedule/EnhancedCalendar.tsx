@@ -229,6 +229,16 @@ export default function EnhancedCalendar({
     ? SERVICE_TYPE_COLORS[activeJob.serviceType] || SERVICE_TYPE_COLORS.OTHER
     : "";
 
+  const isCurrentMonth = currentYear === now.getFullYear() && currentMonth === now.getMonth();
+
+  const goToToday = useCallback(() => {
+    const todayMonth = now.getMonth();
+    const todayYear = now.getFullYear();
+    setCurrentMonth(todayMonth);
+    setCurrentYear(todayYear);
+    router.push(`/schedule?month=${todayMonth}&year=${todayYear}`);
+  }, [now, router]);
+
   return (
     <div>
       {/* Month navigation */}
@@ -244,6 +254,11 @@ export default function EnhancedCalendar({
           <ChevronRight className="w-4 h-4" />
           <span className="sr-only">Next month</span>
         </Button>
+        {!isCurrentMonth && (
+          <Button variant="ghost" size="sm" onClick={goToToday} className="text-blue-600 hover:text-blue-700">
+            Today
+          </Button>
+        )}
       </div>
 
       {/* Desktop: Calendar grid with DnD */}

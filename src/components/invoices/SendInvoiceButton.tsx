@@ -39,33 +39,35 @@ export default function SendInvoiceButton({ invoiceId, customerEmail }: Props) {
 
   if (state === "confirming") {
     return (
-      <span className="inline-flex items-center gap-1 text-sm">
-        <span className="text-slate-600 mr-1">Send to {customerEmail}?</span>
-        <button
-          onClick={async () => {
-            setState("sending");
-            try {
-              const res = await fetch(`/api/invoices/${invoiceId}/send`, { method: "POST" });
-              const data = await res.json();
-              if (!res.ok) throw new Error(data.error ?? "Failed to send");
-              setState("sent");
-              toast.success(`Invoice sent to ${customerEmail}`);
-            } catch (err) {
-              setState("idle");
-              toast.error(err instanceof Error ? err.message : "Failed to send invoice");
-            }
-          }}
-          className="px-2 py-1 rounded text-xs font-semibold text-white"
-          style={{ backgroundColor: "#e94560" }}
-        >
-          Yes, Send
-        </button>
-        <button
-          onClick={() => setState("idle")}
-          className="px-2 py-1 rounded text-xs font-medium text-slate-500 hover:bg-slate-100"
-        >
-          Cancel
-        </button>
+      <span className="inline-flex flex-wrap items-center gap-1.5 text-sm">
+        <span className="text-slate-600">Send to {customerEmail}?</span>
+        <span className="inline-flex items-center gap-1.5">
+          <button
+            onClick={async () => {
+              setState("sending");
+              try {
+                const res = await fetch(`/api/invoices/${invoiceId}/send`, { method: "POST" });
+                const data = await res.json();
+                if (!res.ok) throw new Error(data.error ?? "Failed to send");
+                setState("sent");
+                toast.success(`Invoice sent to ${customerEmail}`);
+              } catch (err) {
+                setState("idle");
+                toast.error(err instanceof Error ? err.message : "Failed to send invoice");
+              }
+            }}
+            className="px-3 py-1.5 rounded text-xs font-semibold text-white"
+            style={{ backgroundColor: "#e94560" }}
+          >
+            Yes, Send
+          </button>
+          <button
+            onClick={() => setState("idle")}
+            className="px-3 py-1.5 rounded text-xs font-medium text-slate-500 hover:bg-slate-100"
+          >
+            Cancel
+          </button>
+        </span>
       </span>
     );
   }

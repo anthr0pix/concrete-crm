@@ -1,25 +1,19 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { Users, Briefcase, FileText, Receipt, TrendingUp, Clock, ArrowRight } from "lucide-react";
+import { Users, Briefcase, FileText, Receipt, TrendingUp, Clock, ArrowRight, Phone, MapPin, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
-import { JOB_STATUS_LABELS, SERVICE_TYPE_LABELS } from "@/types";
-import { format, startOfMonth, endOfMonth } from "date-fns";
+import { JOB_STATUS_LABELS, SERVICE_TYPE_LABELS, STATUS_COLORS } from "@/types";
+import { format, startOfMonth, endOfMonth, startOfDay, endOfDay } from "date-fns";
 
 export const dynamic = "force-dynamic";
-
-const STATUS_COLORS: Record<string, string> = {
-  LEAD: "bg-slate-100 text-slate-700",
-  QUOTED: "bg-blue-100 text-blue-700",
-  SCHEDULED: "bg-yellow-100 text-yellow-700",
-  IN_PROGRESS: "bg-orange-100 text-orange-700",
-  COMPLETED: "bg-green-100 text-green-700",
-  CANCELLED: "bg-red-100 text-red-700",
-};
 
 export default async function DashboardPage() {
   const now = new Date();
   const monthStart = startOfMonth(now);
   const monthEnd = endOfMonth(now);
+
+  const todayStart = startOfDay(now);
+  const todayEnd = endOfDay(now);
 
   const [
     totalCustomers,
@@ -30,6 +24,8 @@ export default async function DashboardPage() {
     openInvoices,
     monthlyPaidInvoices,
     monthlyCompletedJobs,
+    todaysJobs,
+    overdueInvoiceCount,
   ] = await Promise.all([
     prisma.customer.count(),
     prisma.job.groupBy({ by: ["status"], _count: true }),
@@ -57,6 +53,19 @@ export default async function DashboardPage() {
       },
       select: { laborHours: true, laborRate: true, materialCost: true },
     }),
+    prisma.job.findMany({
+      where: {
+        status: { in: ["SCHEDULED", "IN_PROGRESS"] },
+        scheduledDate: { gte: todayStart, lte: todayEnd },
+      },
+      orderBy: { scheduledDate: "asc" },
+      include: {
+        customer: {
+          select: { firstName: true, lastName: true, phone: true },
+        },
+      },
+    }),
+    prisma.invoice.count({ where: { status: "OVERDUE" } }),
   ]);
 
   const statusMap = Object.fromEntries(jobCounts.map((j) => [j.status, j._count]));
@@ -67,7 +76,7 @@ export default async function DashboardPage() {
     { label: "Total Customers", value: totalCustomers, icon: Users, href: "/customers", color: "text-blue-600" },
     { label: "Active Jobs", subtitle: "Lead, Quoted, Scheduled & In Progress", value: activeJobs, icon: Briefcase, href: "/jobs", color: "text-orange-600" },
     { label: "Revenue Collected", value: `$${(revenue._sum.total ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, icon: TrendingUp, href: "/invoices", color: "text-green-600" },
-    { label: "Unpaid Invoices", value: `$${(openInvoices._sum.total ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, icon: Receipt, href: "/invoices", color: "text-red-600" },
+    { label: "Unpaid Invoices", subtitle: overdueInvoiceCount > 0 ? `${overdueInvoiceCount} overdue` : undefined, value: `$${(openInvoices._sum.total ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, icon: Receipt, href: "/invoices", color: "text-red-600" },
   ];
 
   const monthlyRevenue = monthlyPaidInvoices.reduce((sum, inv) => sum + inv.total, 0);
@@ -93,7 +102,7 @@ export default async function DashboardPage() {
   ];
 
   return (
-    <div className="p-6 max-w-5xl mx-auto">
+    <div className="p-4 sm:p-6 max-w-5xl mx-auto">
       <h1 className="text-2xl font-bold mb-6">Dashboard</h1>
 
       {/* Getting Started — only shown for new users */}
@@ -138,11 +147,71 @@ export default async function DashboardPage() {
         ))}
       </div>
 
+      {/* Today's Jobs */}
+      <div className="bg-white border-2 border-green-200 rounded-lg p-5 mb-6">
+        <div className="flex items-center gap-2 mb-3">
+          <Briefcase className="w-4 h-4 text-green-600" />
+          <h2 className="font-semibold">Today&apos;s Jobs</h2>
+          <span className="text-xs text-slate-400">{format(now, "EEEE, MMM d")}</span>
+        </div>
+        {todaysJobs.length === 0 ? (
+          <p className="text-sm text-slate-400">No jobs scheduled for today.</p>
+        ) : (
+          <div className="space-y-3">
+            {todaysJobs.map((job) => {
+              const addr = job.address
+                ? `${job.address}, ${job.city}, ${job.state} ${job.zip}`
+                : null;
+              return (
+                <div key={job.id} className="flex flex-col sm:flex-row sm:items-start sm:justify-between bg-green-50/50 rounded-lg px-4 py-3 gap-2">
+                  <div className="min-w-0 flex-1">
+                    <Link href={`/jobs/${job.id}`} className="font-medium text-sm hover:underline">
+                      {job.title}
+                    </Link>
+                    <p className="text-xs text-slate-500 mt-0.5">
+                      {job.customer.firstName} {job.customer.lastName}
+                    </p>
+                    {addr && (
+                      <p className="text-xs text-slate-400 mt-0.5 truncate">{addr}</p>
+                    )}
+                  </div>
+                  <div className="flex items-center gap-2 shrink-0 sm:ml-3">
+                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_COLORS[job.status]}`}>
+                      {JOB_STATUS_LABELS[job.status]}
+                    </span>
+                    {job.customer.phone && (
+                      <a
+                        href={`tel:${job.customer.phone}`}
+                        className="p-1.5 rounded-md hover:bg-green-100 text-green-700"
+                        title="Call customer"
+                      >
+                        <Phone className="w-4 h-4" />
+                      </a>
+                    )}
+                    {addr && (
+                      <a
+                        href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(addr)}`}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="p-1.5 rounded-md hover:bg-green-100 text-green-700"
+                        title="Get directions"
+                      >
+                        <MapPin className="w-4 h-4" />
+                      </a>
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        )}
+      </div>
+
       {/* Monthly Profitability */}
       <div className="bg-white border rounded-lg p-5 mb-6">
         <h2 className="font-semibold mb-1">This Month</h2>
         <p className="text-xs text-slate-400 mb-3">{format(now, "MMMM yyyy")} — based on paid invoices and completed job costs.</p>
-        <div className="grid grid-cols-4 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div>
             <p className="text-xs text-slate-400">Revenue</p>
             <p className="text-lg font-bold text-green-600">${fmt(monthlyRevenue)}</p>

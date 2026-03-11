@@ -136,3 +136,8 @@
     font-weight: 700;
   }
 }
+
+/* Safe area padding for iPhone home indicator */
+.safe-area-pb {
+  padding-bottom: env(safe-area-inset-bottom, 0px);
+}
