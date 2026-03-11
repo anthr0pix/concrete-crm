@@ -1,3 +1,4 @@
+import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
@@ -5,61 +6,93 @@ import { Plus } from "lucide-react";
 import { QUOTE_STATUS_LABELS, STATUS_COLORS } from "@/types";
 import { QuoteStatus } from "@prisma/client";
 import { format, subDays } from "date-fns";
+import SortSelect from "@/components/ui/sort-select";
+import Pagination from "@/components/ui/pagination";
 
 export const dynamic = "force-dynamic";
 
+const PAGE_SIZE = 20;
 const STATUS_TABS = ["ALL", ...Object.keys(QUOTE_STATUS_LABELS)] as const;
+
+const SORT_OPTIONS = [
+  { value: "newest", label: "Newest" },
+  { value: "oldest", label: "Oldest" },
+  { value: "amount_high", label: "Amount High\u2192Low" },
+  { value: "amount_low", label: "Amount Low\u2192High" },
+];
+
+const SORT_MAP: Record<string, object> = {
+  newest: { createdAt: "desc" },
+  oldest: { createdAt: "asc" },
+  amount_high: { total: "desc" },
+  amount_low: { total: "asc" },
+};
 
 export default async function QuotesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ search?: string; status?: string }>;
+  searchParams: Promise<{ search?: string; status?: string; sort?: string; page?: string }>;
 }) {
-  const { search, status } = await searchParams;
+  const { search, status, sort, page } = await searchParams;
   const activeStatus = status && status !== "ALL" ? (status as QuoteStatus) : undefined;
+  const currentPage = Math.max(1, parseInt(page || "1", 10) || 1);
+  const orderBy = SORT_MAP[sort || "newest"] || SORT_MAP.newest;
 
-  const quotes = await prisma.quote.findMany({
-    where: {
-      ...(activeStatus ? { status: activeStatus } : {}),
-      ...(search
-        ? {
-            OR: [
-              { quoteNumber: { contains: search, mode: "insensitive" as const } },
-              { customer: { firstName: { contains: search, mode: "insensitive" as const } } },
-              { customer: { lastName: { contains: search, mode: "insensitive" as const } } },
-            ],
-          }
-        : {}),
-    },
-    orderBy: { createdAt: "desc" },
-    include: {
-      customer: { select: { firstName: true, lastName: true } },
-      lineItems: true,
-    },
-  });
+  const where = {
+    ...(activeStatus ? { status: activeStatus } : {}),
+    ...(search
+      ? {
+          OR: [
+            { quoteNumber: { contains: search, mode: "insensitive" as const } },
+            { customer: { firstName: { contains: search, mode: "insensitive" as const } } },
+            { customer: { lastName: { contains: search, mode: "insensitive" as const } } },
+          ],
+        }
+      : {}),
+  };
+
+  const [quotes, totalCount] = await Promise.all([
+    prisma.quote.findMany({
+      where,
+      orderBy,
+      take: PAGE_SIZE,
+      skip: (currentPage - 1) * PAGE_SIZE,
+      include: {
+        customer: { select: { firstName: true, lastName: true } },
+        lineItems: true,
+      },
+    }),
+    prisma.quote.count({ where }),
+  ]);
 
   return (
     <div className="p-4 sm:p-6 max-w-5xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Quotes</h1>
-          <p className="text-slate-500 text-sm mt-1">{quotes.length} total</p>
+          <p className="text-slate-500 text-sm mt-1">{totalCount} total</p>
         </div>
         <Link href="/quotes/new">
           <Button><Plus className="w-4 h-4 mr-2" /> New Quote</Button>
         </Link>
       </div>
 
-      {/* Search */}
-      <form className="mb-4">
-        {activeStatus && <input type="hidden" name="status" value={activeStatus} />}
-        <input
-          name="search"
-          defaultValue={search}
-          placeholder="Search by quote number or customer name..."
-          className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
-        />
-      </form>
+      {/* Search + Sort */}
+      <div className="flex gap-3 mb-4">
+        <form className="flex-1">
+          {activeStatus && <input type="hidden" name="status" value={activeStatus} />}
+          {sort && <input type="hidden" name="sort" value={sort} />}
+          <input
+            name="search"
+            defaultValue={search}
+            placeholder="Search by quote number or customer name..."
+            className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
+          />
+        </form>
+        <Suspense fallback={<div className="border rounded-md px-2 py-1.5 text-sm w-28 bg-white" />}>
+          <SortSelect options={SORT_OPTIONS} basePath="/quotes" />
+        </Suspense>
+      </div>
 
       {/* Status filter tabs */}
       <div className="flex gap-1 mb-6 overflow-x-auto pb-1">
@@ -67,6 +100,7 @@ export default async function QuotesPage({
           const params = new URLSearchParams();
           if (s !== "ALL") params.set("status", s);
           if (search) params.set("search", search);
+          if (sort) params.set("sort", sort);
           const href = params.toString() ? `/quotes?${params}` : "/quotes";
           return (
             <Link key={s} href={href}>
@@ -128,6 +162,14 @@ export default async function QuotesPage({
           })}
         </div>
       )}
+
+      <Pagination
+        currentPage={currentPage}
+        totalCount={totalCount}
+        pageSize={PAGE_SIZE}
+        baseUrl="/quotes"
+        searchParams={{ search, status, sort }}
+      />
     </div>
   );
 }

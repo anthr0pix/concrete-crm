@@ -2,12 +2,15 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Breadcrumbs from "@/components/layout/Breadcrumbs";
-import { INVOICE_STATUS_LABELS } from "@/types";
 import { format } from "date-fns";
 import InvoiceStatusSelect from "@/components/invoices/InvoiceStatusSelect";
+import SendInvoiceButton from "@/components/invoices/SendInvoiceButton";
 import MarkPaidButton from "@/components/invoices/MarkPaidButton";
 import PayNowButton from "@/components/invoices/PayNowButton";
 import DuplicateInvoiceButton from "@/components/invoices/DuplicateInvoiceButton";
+import DeleteInvoiceButton from "@/components/invoices/DeleteInvoiceButton";
+import { Download } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
@@ -62,6 +65,12 @@ export default async function InvoiceDetailPage({
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <InvoiceStatusSelect invoiceId={invoice.id} currentStatus={invoice.status} />
+          <SendInvoiceButton invoiceId={invoice.id} customerEmail={invoice.customer.email} />
+          <a href={`/api/invoices/${invoice.id}/pdf`} download>
+            <Button variant="outline" size="sm">
+              <Download className="w-4 h-4 mr-1.5" /> PDF
+            </Button>
+          </a>
           <DuplicateInvoiceButton invoiceId={invoice.id} />
           {invoice.status !== "PAID" && invoice.status !== "VOID" && (
             <>
@@ -69,6 +78,7 @@ export default async function InvoiceDetailPage({
               <PayNowButton invoiceId={invoice.id} />
             </>
           )}
+          <DeleteInvoiceButton invoiceId={invoice.id} />
         </div>
       </div>
 

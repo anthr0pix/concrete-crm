@@ -2,11 +2,14 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import Breadcrumbs from "@/components/layout/Breadcrumbs";
-import { QUOTE_STATUS_LABELS } from "@/types";
 import { format } from "date-fns";
 import QuoteStatusSelect from "@/components/quotes/QuoteStatusSelect";
+import SendQuoteButton from "@/components/quotes/SendQuoteButton";
 import ConvertToInvoiceButton from "@/components/quotes/ConvertToInvoiceButton";
 import DuplicateQuoteButton from "@/components/quotes/DuplicateQuoteButton";
+import DeleteQuoteButton from "@/components/quotes/DeleteQuoteButton";
+import { Download } from "lucide-react";
+import { Button } from "@/components/ui/button";
 
 export const dynamic = "force-dynamic";
 
@@ -44,10 +47,17 @@ export default async function QuoteDetailPage({
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <QuoteStatusSelect quoteId={quote.id} currentStatus={quote.status} />
+          <SendQuoteButton quoteId={quote.id} customerEmail={quote.customer.email} />
+          <a href={`/api/quotes/${quote.id}/pdf`} download>
+            <Button variant="outline" size="sm">
+              <Download className="w-4 h-4 mr-1.5" /> PDF
+            </Button>
+          </a>
           <DuplicateQuoteButton quoteId={quote.id} />
           {quote.status === "ACCEPTED" && (
             <ConvertToInvoiceButton quoteId={quote.id} />
           )}
+          <DeleteQuoteButton quoteId={quote.id} />
         </div>
       </div>
 

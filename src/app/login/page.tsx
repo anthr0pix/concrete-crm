@@ -2,6 +2,7 @@
 
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -39,7 +40,8 @@ export default function LoginPage() {
     <div className="min-h-screen flex items-center justify-center bg-slate-50">
       <div className="bg-white border rounded-xl shadow-sm p-8 w-full max-w-sm">
         <div className="mb-8 text-center">
-          <h1 className="text-2xl font-bold">Concrete CRM</h1>
+          <Image src="/logo.png" alt="Mountain West Surface" width={180} height={60} className="mx-auto mb-3" priority />
+          <h1 className="text-2xl font-bold">Mountain West Surface</h1>
           <p className="text-slate-500 text-sm mt-1">Sign in to your account</p>
         </div>
 

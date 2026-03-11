@@ -1,39 +1,67 @@
+import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Phone, MapPin } from "lucide-react";
+import SortSelect from "@/components/ui/sort-select";
+import Pagination from "@/components/ui/pagination";
 
 export const dynamic = "force-dynamic";
+
+const PAGE_SIZE = 20;
+
+const SORT_OPTIONS = [
+  { value: "last_name_asc", label: "Last Name A\u2013Z" },
+  { value: "last_name_desc", label: "Last Name Z\u2013A" },
+  { value: "most_jobs", label: "Most Jobs" },
+  { value: "newest", label: "Newest" },
+];
+
+const SORT_MAP: Record<string, object> = {
+  last_name_asc: { lastName: "asc" },
+  last_name_desc: { lastName: "desc" },
+  most_jobs: { jobs: { _count: "desc" } },
+  newest: { createdAt: "desc" },
+};
 
 export default async function CustomersPage({
   searchParams,
 }: {
-  searchParams: Promise<{ search?: string }>;
+  searchParams: Promise<{ search?: string; sort?: string; page?: string }>;
 }) {
-  const { search } = await searchParams;
+  const { search, sort, page } = await searchParams;
+  const currentPage = Math.max(1, parseInt(page || "1", 10) || 1);
+  const orderBy = SORT_MAP[sort || "last_name_asc"] || SORT_MAP.last_name_asc;
 
-  const customers = await prisma.customer.findMany({
-    where: search
-      ? {
-          OR: [
-            { firstName: { contains: search, mode: "insensitive" } },
-            { lastName: { contains: search, mode: "insensitive" } },
-            { phone: { contains: search } },
-            { email: { contains: search, mode: "insensitive" } },
-          ],
-        }
-      : undefined,
-    orderBy: { lastName: "asc" },
-    include: { _count: { select: { jobs: true } } },
-  });
+  const where = search
+    ? {
+        OR: [
+          { firstName: { contains: search, mode: "insensitive" as const } },
+          { lastName: { contains: search, mode: "insensitive" as const } },
+          { phone: { contains: search } },
+          { email: { contains: search, mode: "insensitive" as const } },
+        ],
+      }
+    : undefined;
+
+  const [customers, totalCount] = await Promise.all([
+    prisma.customer.findMany({
+      where,
+      orderBy,
+      take: PAGE_SIZE,
+      skip: (currentPage - 1) * PAGE_SIZE,
+      include: { _count: { select: { jobs: true } } },
+    }),
+    prisma.customer.count({ where }),
+  ]);
 
   return (
     <div className="p-4 sm:p-6 max-w-5xl mx-auto">
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Customers</h1>
-          <p className="text-slate-500 text-sm mt-1">{customers.length} total</p>
+          <p className="text-slate-500 text-sm mt-1">{totalCount} total</p>
         </div>
         <Link href="/customers/new">
           <Button>
@@ -43,21 +71,29 @@ export default async function CustomersPage({
         </Link>
       </div>
 
-      {/* Search */}
-      <form className="mb-6">
-        <input
-          name="search"
-          defaultValue={search}
-          placeholder="Search by name, phone, or email..."
-          className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
-        />
-      </form>
+      {/* Search + Sort */}
+      <div className="flex gap-3 mb-6">
+        <form className="flex-1">
+          {sort && <input type="hidden" name="sort" value={sort} />}
+          <input
+            name="search"
+            defaultValue={search}
+            placeholder="Search by name, phone, or email..."
+            className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
+          />
+        </form>
+        <Suspense fallback={<div className="border rounded-md px-2 py-1.5 text-sm w-28 bg-white" />}>
+          <SortSelect options={SORT_OPTIONS} basePath="/customers" />
+        </Suspense>
+      </div>
 
       {/* List */}
       {customers.length === 0 ? (
         <div className="text-center py-16 text-slate-400">
-          <p className="text-lg font-medium">No customers yet</p>
-          <p className="text-sm mt-1">Add your first customer to get started</p>
+          <p className="text-lg font-medium">No customers found</p>
+          <p className="text-sm mt-1">
+            {search ? "Try adjusting your search." : "Add your first customer to get started"}
+          </p>
         </div>
       ) : (
         <div className="space-y-2">
@@ -90,6 +126,14 @@ export default async function CustomersPage({
           ))}
         </div>
       )}
+
+      <Pagination
+        currentPage={currentPage}
+        totalCount={totalCount}
+        pageSize={PAGE_SIZE}
+        baseUrl="/customers"
+        searchParams={{ search, sort }}
+      />
     </div>
   );
 }
