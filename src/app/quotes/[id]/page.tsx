@@ -1,11 +1,12 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
+import Breadcrumbs from "@/components/layout/Breadcrumbs";
 import { QUOTE_STATUS_LABELS } from "@/types";
 import { format } from "date-fns";
 import QuoteStatusSelect from "@/components/quotes/QuoteStatusSelect";
 import ConvertToInvoiceButton from "@/components/quotes/ConvertToInvoiceButton";
+import DuplicateQuoteButton from "@/components/quotes/DuplicateQuoteButton";
 
 export const dynamic = "force-dynamic";
 
@@ -23,12 +24,10 @@ export default async function QuoteDetailPage({
 
   return (
     <div className="p-6 max-w-3xl mx-auto">
-      <Link href="/quotes" className="flex items-center gap-1 text-sm text-slate-500 hover:text-slate-900 mb-6">
-        <ChevronLeft className="w-4 h-4" /> Back to Quotes
-      </Link>
+      <Breadcrumbs items={[{ label: "Quotes", href: "/quotes" }, { label: quote.quoteNumber }]} />
 
       {/* Header */}
-      <div className="flex items-start justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-6">
         <div>
           <h1 className="text-2xl font-bold">{quote.quoteNumber}</h1>
           <p className="text-slate-500 text-sm mt-1">
@@ -43,8 +42,9 @@ export default async function QuoteDetailPage({
             </p>
           )}
         </div>
-        <div className="flex items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2">
           <QuoteStatusSelect quoteId={quote.id} currentStatus={quote.status} />
+          <DuplicateQuoteButton quoteId={quote.id} />
           {quote.status === "ACCEPTED" && (
             <ConvertToInvoiceButton quoteId={quote.id} />
           )}
@@ -63,8 +63,8 @@ export default async function QuoteDetailPage({
         </div>
       )}
 
-      {/* Line Items */}
-      <div className="bg-white border rounded-lg overflow-hidden mb-4">
+      {/* Line Items — Desktop Table */}
+      <div className="hidden sm:block bg-white border rounded-lg overflow-hidden mb-4">
         <table className="w-full text-sm">
           <thead className="bg-slate-50 border-b">
             <tr>
@@ -85,6 +85,20 @@ export default async function QuoteDetailPage({
             ))}
           </tbody>
         </table>
+      </div>
+
+      {/* Line Items — Mobile Cards */}
+      <div className="sm:hidden space-y-3 mb-4">
+        {quote.lineItems.map((item) => (
+          <div key={item.id} className="bg-white border rounded-lg p-4">
+            <p className="font-medium text-sm mb-2">{item.description}</p>
+            <div className="flex justify-between text-sm text-slate-500">
+              <span>{item.quantity} sq ft</span>
+              <span>${item.unitPrice.toFixed(2)} / sq ft</span>
+              <span className="font-medium text-slate-900">${item.total.toFixed(2)}</span>
+            </div>
+          </div>
+        ))}
       </div>
 
       {/* Totals */}

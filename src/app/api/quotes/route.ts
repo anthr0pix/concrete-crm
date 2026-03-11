@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getNextQuoteNumber } from "@/lib/numbering";
 import { z } from "zod";
 
 const lineItemSchema = z.object({
@@ -16,12 +17,6 @@ const quoteSchema = z.object({
   notes: z.string().optional(),
   lineItems: z.array(lineItemSchema).min(1, "At least one line item required"),
 });
-
-async function getNextQuoteNumber(): Promise<string> {
-  const last = await prisma.quote.findFirst({ orderBy: { quoteNumber: "desc" } });
-  const num = last ? parseInt(last.quoteNumber.replace("Q-", ""), 10) + 1 : 1;
-  return `Q-${String(num).padStart(4, "0")}`;
-}
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -69,6 +64,14 @@ export async function POST(request: Request) {
       },
       include: { lineItems: true },
     });
+
+    // Auto-transition: creating a quote for a LEAD job → QUOTED
+    if (rest.jobId) {
+      await prisma.job.updateMany({
+        where: { id: rest.jobId, status: "LEAD" },
+        data: { status: "QUOTED" },
+      });
+    }
 
     return NextResponse.json(quote, { status: 201 });
   } catch (err) {

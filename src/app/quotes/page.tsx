@@ -1,15 +1,36 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Badge } from "@/components/ui/badge";
 import { Plus } from "lucide-react";
 import { QUOTE_STATUS_LABELS, STATUS_COLORS } from "@/types";
-import { format } from "date-fns";
+import { QuoteStatus } from "@prisma/client";
+import { format, subDays } from "date-fns";
 
 export const dynamic = "force-dynamic";
 
-export default async function QuotesPage() {
+const STATUS_TABS = ["ALL", ...Object.keys(QUOTE_STATUS_LABELS)] as const;
+
+export default async function QuotesPage({
+  searchParams,
+}: {
+  searchParams: Promise<{ search?: string; status?: string }>;
+}) {
+  const { search, status } = await searchParams;
+  const activeStatus = status && status !== "ALL" ? (status as QuoteStatus) : undefined;
+
   const quotes = await prisma.quote.findMany({
+    where: {
+      ...(activeStatus ? { status: activeStatus } : {}),
+      ...(search
+        ? {
+            OR: [
+              { quoteNumber: { contains: search, mode: "insensitive" as const } },
+              { customer: { firstName: { contains: search, mode: "insensitive" as const } } },
+              { customer: { lastName: { contains: search, mode: "insensitive" as const } } },
+            ],
+          }
+        : {}),
+    },
     orderBy: { createdAt: "desc" },
     include: {
       customer: { select: { firstName: true, lastName: true } },
@@ -29,14 +50,54 @@ export default async function QuotesPage() {
         </Link>
       </div>
 
+      {/* Search */}
+      <form className="mb-4">
+        {activeStatus && <input type="hidden" name="status" value={activeStatus} />}
+        <input
+          name="search"
+          defaultValue={search}
+          placeholder="Search by quote number or customer name..."
+          className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
+        />
+      </form>
+
+      {/* Status filter tabs */}
+      <div className="flex gap-1 mb-6 overflow-x-auto pb-1">
+        {STATUS_TABS.map((s) => {
+          const params = new URLSearchParams();
+          if (s !== "ALL") params.set("status", s);
+          if (search) params.set("search", search);
+          const href = params.toString() ? `/quotes?${params}` : "/quotes";
+          return (
+            <Link key={s} href={href}>
+              <button
+                className={`px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition-colors ${
+                  (s === "ALL" && !activeStatus) || s === activeStatus
+                    ? "bg-slate-900 text-white"
+                    : "bg-white border text-slate-600 hover:bg-slate-50"
+                }`}
+              >
+                {s === "ALL" ? "All" : QUOTE_STATUS_LABELS[s]}
+              </button>
+            </Link>
+          );
+        })}
+      </div>
+
       {quotes.length === 0 ? (
         <div className="text-center py-16 text-slate-400">
-          <p className="text-lg font-medium">No quotes yet</p>
-          <p className="text-sm mt-1">Create a quote to send a price estimate to a customer.</p>
+          <p className="text-lg font-medium">No quotes found</p>
+          <p className="text-sm mt-1">
+            {search || activeStatus
+              ? "Try adjusting your search or filter."
+              : "Create a quote to send a price estimate to a customer."}
+          </p>
         </div>
       ) : (
         <div className="space-y-2">
-          {quotes.map((q) => (
+          {quotes.map((q) => {
+            const isStale = q.status === "SENT" && new Date(q.updatedAt) < subDays(new Date(), 7);
+            return (
             <Link key={q.id} href={`/quotes/${q.id}`}>
               <div className="flex items-center justify-between bg-white border rounded-lg px-5 py-4 hover:shadow-sm transition-shadow cursor-pointer">
                 <div>
@@ -45,6 +106,11 @@ export default async function QuotesPage() {
                     <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_COLORS[q.status]}`}>
                       {QUOTE_STATUS_LABELS[q.status]}
                     </span>
+                    {isStale && (
+                      <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">
+                        Stale
+                      </span>
+                    )}
                   </div>
                   <p className="text-sm text-slate-500 mt-0.5">
                     {q.customer.firstName} {q.customer.lastName} · {format(new Date(q.createdAt), "MMM d, yyyy")}
@@ -58,7 +124,8 @@ export default async function QuotesPage() {
                 </div>
               </div>
             </Link>
-          ))}
+            );
+          })}
         </div>
       )}
     </div>

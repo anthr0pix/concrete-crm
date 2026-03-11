@@ -1,5 +1,6 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
+import { getNextInvoiceNumber } from "@/lib/numbering";
 import { z } from "zod";
 
 const lineItemSchema = z.object({
@@ -20,12 +21,6 @@ const invoiceSchema = z.object({
 const fromQuoteSchema = z.object({
   fromQuoteId: z.string(),
 });
-
-async function getNextInvoiceNumber(): Promise<string> {
-  const last = await prisma.invoice.findFirst({ orderBy: { invoiceNumber: "desc" } });
-  const num = last ? parseInt(last.invoiceNumber.replace("INV-", ""), 10) + 1 : 1;
-  return `INV-${String(num).padStart(4, "0")}`;
-}
 
 export async function GET() {
   try {

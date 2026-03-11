@@ -5,6 +5,7 @@ import { format } from "date-fns";
 import { STATUS_COLORS } from "@/types";
 import ApproveQuoteButton from "./ApproveQuoteButton";
 import DeclineQuoteButton from "./DeclineQuoteButton";
+import RequestChangesButton from "./RequestChangesButton";
 import PortalPayButton from "@/components/portal/PortalPayButton";
 
 export const dynamic = "force-dynamic";
@@ -160,6 +161,7 @@ export default async function PortalPage({
               ) : (
                 <div className="text-center space-y-4">
                   <ApproveQuoteButton token={token} />
+                  {quote.status === "SENT" && <RequestChangesButton token={token} />}
                   {quote.status === "SENT" && <DeclineQuoteButton token={token} />}
                 </div>
               )}

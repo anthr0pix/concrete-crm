@@ -2,7 +2,8 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Pencil, Phone, Mail, MapPin, Plus } from "lucide-react";
+import { Pencil, Phone, Mail, MapPin, Plus } from "lucide-react";
+import Breadcrumbs from "@/components/layout/Breadcrumbs";
 import { JOB_STATUS_LABELS, SERVICE_TYPE_LABELS, STATUS_COLORS, QUOTE_STATUS_LABELS, INVOICE_STATUS_LABELS } from "@/types";
 import { format } from "date-fns";
 import DeleteCustomerButton from "@/components/customers/DeleteCustomerButton";
@@ -28,9 +29,7 @@ export default async function CustomerDetailPage({
 
   return (
     <div className="p-6 max-w-4xl mx-auto">
-      <Link href="/customers" className="flex items-center gap-1 text-sm text-slate-500 hover:text-slate-900 mb-6">
-        <ChevronLeft className="w-4 h-4" /> Back to Customers
-      </Link>
+      <Breadcrumbs items={[{ label: "Customers", href: "/customers" }, { label: `${customer.firstName} ${customer.lastName}` }]} />
 
       {/* Header */}
       <div className="flex items-start justify-between mb-6">

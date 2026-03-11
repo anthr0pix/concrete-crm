@@ -1,7 +1,6 @@
 import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
-import Link from "next/link";
-import { ChevronLeft } from "lucide-react";
+import Breadcrumbs from "@/components/layout/Breadcrumbs";
 import JobForm from "@/components/jobs/JobForm";
 
 export const dynamic = "force-dynamic";
@@ -21,9 +20,11 @@ export default async function EditJobPage({
 
   return (
     <div className="p-6 max-w-2xl mx-auto">
-      <Link href={`/jobs/${id}`} className="flex items-center gap-1 text-sm text-slate-500 hover:text-slate-900 mb-6">
-        <ChevronLeft className="w-4 h-4" /> Back
-      </Link>
+      <Breadcrumbs items={[
+        { label: "Jobs", href: "/jobs" },
+        { label: job.title, href: `/jobs/${id}` },
+        { label: "Edit" },
+      ]} />
       <h1 className="text-2xl font-bold mb-6">Edit Job</h1>
       <JobForm
         customers={customers}

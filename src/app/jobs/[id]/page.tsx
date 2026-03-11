@@ -2,14 +2,15 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { ChevronLeft, Pencil, User, MapPin, Calendar, Ruler } from "lucide-react";
-import { JOB_STATUS_LABELS, SERVICE_TYPE_LABELS, STATUS_COLORS } from "@/types";
+import { User, MapPin, Calendar, Ruler, Phone, Navigation } from "lucide-react";
+import Breadcrumbs from "@/components/layout/Breadcrumbs";
+import { SERVICE_TYPE_LABELS } from "@/types";
 import { format } from "date-fns";
 import PhotoUpload from "@/components/jobs/PhotoUpload";
-import JobStatusSelect from "@/components/jobs/JobStatusSelect";
-import DeleteJobButton from "@/components/jobs/DeleteJobButton";
+import JobDetailActions from "@/components/jobs/JobDetailActions";
 import JobCostingSection from "@/components/jobs/JobCostingSection";
 import JobProgressBar from "@/components/jobs/JobProgressBar";
+import MarkCompleteButton from "@/components/jobs/MarkCompleteButton";
 
 export const dynamic = "force-dynamic";
 
@@ -37,27 +38,40 @@ export default async function JobDetailPage({
     : `${job.customer.address}, ${job.customer.city}, ${job.customer.state} ${job.customer.zip}`;
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
-      <Link href="/jobs" className="flex items-center gap-1 text-sm text-slate-500 hover:text-slate-900 mb-6">
-        <ChevronLeft className="w-4 h-4" /> Back to Jobs
-      </Link>
+    <div className="p-4 sm:p-6 max-w-4xl mx-auto">
+      <Breadcrumbs items={[{ label: "Jobs", href: "/jobs" }, { label: job.title }]} />
 
       {/* Header */}
-      <div className="flex items-start justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-6">
         <div>
           <h1 className="text-2xl font-bold">{job.title}</h1>
           <p className="text-slate-500 text-sm mt-1">{SERVICE_TYPE_LABELS[job.serviceType]}</p>
         </div>
-        <div className="flex items-center gap-2">
-          <JobStatusSelect jobId={job.id} currentStatus={job.status} />
-          <Link href={`/jobs/${job.id}/edit`}>
-            <Button variant="outline" size="sm">
-              <Pencil className="w-3.5 h-3.5 mr-1" /> Edit
-            </Button>
-          </Link>
-          <DeleteJobButton jobId={job.id} />
-        </div>
+        <JobDetailActions jobId={job.id} currentStatus={job.status} />
       </div>
+
+      {/* Quick actions — SCHEDULED / IN_PROGRESS only */}
+      {(job.status === "SCHEDULED" || job.status === "IN_PROGRESS") && (
+        <div className="flex flex-wrap items-center gap-3 border-2 border-dashed border-slate-200 bg-slate-50 rounded-lg px-4 py-3 mb-6">
+          <MarkCompleteButton jobId={job.id} />
+          {job.customer.phone && (
+            <a href={`tel:${job.customer.phone}`}>
+              <Button size="sm" variant="outline">
+                <Phone className="w-4 h-4 mr-1.5" /> Call Customer
+              </Button>
+            </a>
+          )}
+          <a
+            href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(jobAddress)}`}
+            target="_blank"
+            rel="noopener noreferrer"
+          >
+            <Button size="sm" variant="outline">
+              <Navigation className="w-4 h-4 mr-1.5" /> Directions
+            </Button>
+          </a>
+        </div>
+      )}
 
       {/* Workflow progress */}
       <JobProgressBar

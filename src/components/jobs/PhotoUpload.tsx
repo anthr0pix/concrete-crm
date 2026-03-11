@@ -5,7 +5,7 @@ import imageCompression from "browser-image-compression";
 import { createClient } from "@/lib/supabase/client";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Upload, Trash2 } from "lucide-react";
+import { Upload, Trash2, LayoutGrid, Columns2 } from "lucide-react";
 import { useRouter } from "next/navigation";
 import Image from "next/image";
 import { JobPhoto } from "@prisma/client";
@@ -31,6 +31,7 @@ export default function PhotoUpload({ jobId, photos }: Props) {
   const [uploading, setUploading] = useState(false);
   const [progress, setProgress] = useState<string | null>(null);
   const [isBefore, setIsBefore] = useState(true);
+  const [viewMode, setViewMode] = useState<"grid" | "compare">("grid");
 
   const upload = async (file: File) => {
     // Validate MIME type
@@ -128,34 +129,99 @@ export default function PhotoUpload({ jobId, photos }: Props) {
           onChange={(e) => { const f = e.target.files?.[0]; if (f) upload(f); }}
         />
         <span className="text-xs text-slate-400">Select &quot;Before&quot; or &quot;After&quot;, then upload a photo.</span>
+
+        {/* View mode toggle */}
+        <div className="flex rounded-md border overflow-hidden ml-auto">
+          <button
+            onClick={() => setViewMode("grid")}
+            className={`px-3 py-1.5 text-sm font-medium flex items-center gap-1 ${viewMode === "grid" ? "bg-slate-900 text-white" : "bg-white text-slate-600"}`}
+          >
+            <LayoutGrid className="w-3.5 h-3.5" /> Grid
+          </button>
+          <button
+            onClick={() => setViewMode("compare")}
+            disabled={beforePhotos.length === 0 || afterPhotos.length === 0}
+            className={`px-3 py-1.5 text-sm font-medium flex items-center gap-1 disabled:opacity-40 disabled:cursor-not-allowed ${viewMode === "compare" ? "bg-slate-900 text-white" : "bg-white text-slate-600"}`}
+          >
+            <Columns2 className="w-3.5 h-3.5" /> Compare
+          </button>
+        </div>
       </div>
 
-      {/* Before / After grid */}
-      {[{ label: "Before", list: beforePhotos }, { label: "After", list: afterPhotos }].map(({ label, list }) => (
-        <div key={label}>
-          <h3 className="text-sm font-semibold text-slate-500 mb-2">{label} Photos</h3>
-          {list.length === 0 ? (
-            <p className="text-sm text-slate-300 italic">No {label.toLowerCase()} photos yet</p>
-          ) : (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {list.map((photo) => (
-                <div key={photo.id} className="relative group rounded-lg overflow-hidden border aspect-square bg-slate-100">
-                  <Image src={photo.url} alt={photo.caption ?? label} fill className="object-cover" />
-                  <button
-                    onClick={() => deletePhoto(photo.id)}
-                    className="absolute top-1 right-1 bg-red-500 text-white rounded p-1 opacity-0 group-hover:opacity-100 transition-opacity"
-                  >
-                    <Trash2 className="w-3 h-3" />
-                  </button>
-                  {photo.caption && (
-                    <div className="absolute bottom-0 inset-x-0 bg-black/50 text-white text-xs px-2 py-1">{photo.caption}</div>
-                  )}
+      {viewMode === "grid" ? (
+        <>
+          {/* Before / After grid */}
+          {[{ label: "Before", list: beforePhotos }, { label: "After", list: afterPhotos }].map(({ label, list }) => (
+            <div key={label}>
+              <h3 className="text-sm font-semibold text-slate-500 mb-2">{label} Photos</h3>
+              {list.length === 0 ? (
+                <p className="text-sm text-slate-300 italic">No {label.toLowerCase()} photos yet</p>
+              ) : (
+                <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
+                  {list.map((photo) => (
+                    <div key={photo.id} className="relative group rounded-lg overflow-hidden border aspect-square bg-slate-100">
+                      <Image src={photo.url} alt={photo.caption ?? label} fill className="object-cover" />
+                      <button
+                        onClick={() => deletePhoto(photo.id)}
+                        className="absolute top-1 right-1 bg-red-500 text-white rounded p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      >
+                        <Trash2 className="w-3 h-3" />
+                      </button>
+                      {photo.caption && (
+                        <div className="absolute bottom-0 inset-x-0 bg-black/50 text-white text-xs px-2 py-1">{photo.caption}</div>
+                      )}
+                    </div>
+                  ))}
                 </div>
-              ))}
+              )}
             </div>
-          )}
+          ))}
+        </>
+      ) : (
+        /* Compare view — side-by-side pairing */
+        <div>
+          <div className="grid grid-cols-2 gap-4">
+            <h3 className="text-sm font-semibold text-slate-500 mb-1">Before</h3>
+            <h3 className="text-sm font-semibold text-slate-500 mb-1">After</h3>
+          </div>
+          <div className="space-y-4">
+            {Array.from({ length: Math.max(beforePhotos.length, afterPhotos.length) }).map((_, i) => (
+              <div key={i} className="grid grid-cols-2 gap-4">
+                {beforePhotos[i] ? (
+                  <div className="relative group rounded-lg overflow-hidden border aspect-square bg-slate-100">
+                    <Image src={beforePhotos[i].url} alt={beforePhotos[i].caption ?? "Before"} fill className="object-cover" />
+                    <button
+                      onClick={() => deletePhoto(beforePhotos[i].id)}
+                      className="absolute top-1 right-1 bg-red-500 text-white rounded p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="rounded-lg border-2 border-dashed border-slate-200 aspect-square bg-slate-50 flex items-center justify-center">
+                    <span className="text-sm text-slate-300">No photo</span>
+                  </div>
+                )}
+                {afterPhotos[i] ? (
+                  <div className="relative group rounded-lg overflow-hidden border aspect-square bg-slate-100">
+                    <Image src={afterPhotos[i].url} alt={afterPhotos[i].caption ?? "After"} fill className="object-cover" />
+                    <button
+                      onClick={() => deletePhoto(afterPhotos[i].id)}
+                      className="absolute top-1 right-1 bg-red-500 text-white rounded p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                    >
+                      <Trash2 className="w-3 h-3" />
+                    </button>
+                  </div>
+                ) : (
+                  <div className="rounded-lg border-2 border-dashed border-slate-200 aspect-square bg-slate-50 flex items-center justify-center">
+                    <span className="text-sm text-slate-300">No photo</span>
+                  </div>
+                )}
+              </div>
+            ))}
+          </div>
         </div>
-      ))}
+      )}
     </div>
   );
 }
