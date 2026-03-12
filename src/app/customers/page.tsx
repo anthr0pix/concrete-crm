@@ -3,7 +3,7 @@ import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Plus, Phone, MapPin, Search } from "lucide-react";
+import { Plus, Phone, MapPin, Search, Users } from "lucide-react";
 import SortSelect from "@/components/ui/sort-select";
 import Pagination from "@/components/ui/pagination";
 
@@ -93,6 +93,7 @@ export default async function CustomersPage({
       {/* List */}
       {customers.length === 0 ? (
         <div className="text-center py-16 text-slate-400">
+          <Users className="w-8 h-8 text-slate-300 mx-auto mb-2" />
           <p className="text-lg font-medium">No customers found</p>
           <p className="text-sm mt-1">
             {search ? "Try adjusting your search." : "Add your first customer to get started"}
@@ -102,7 +103,7 @@ export default async function CustomersPage({
         <div className="space-y-2">
           {customers.map((c) => (
             <Link key={c.id} href={`/customers/${c.id}`}>
-              <div className="flex items-center justify-between bg-white border rounded-lg px-5 py-4 hover:shadow-sm transition-shadow cursor-pointer">
+              <div className="flex items-center justify-between bg-white rounded-xl shadow-sm px-5 py-4 hover:shadow-md hover:-translate-y-px transition-all duration-150 cursor-pointer">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3">
                     <span className="font-semibold text-slate-900">

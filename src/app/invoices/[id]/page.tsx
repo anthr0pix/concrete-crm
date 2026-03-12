@@ -32,7 +32,7 @@ export default async function InvoiceDetailPage({
 
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-6">
         <div>
-          <h1 className="text-2xl font-bold">{invoice.invoiceNumber}</h1>
+          <h1 className="text-3xl font-bold">{invoice.invoiceNumber}</h1>
           <p className="text-slate-500 text-sm mt-1">
             <Link href={`/customers/${invoice.customer.id}`} className="hover:underline">
               {invoice.customer.firstName} {invoice.customer.lastName}
@@ -63,7 +63,7 @@ export default async function InvoiceDetailPage({
             </p>
           )}
         </div>
-        <div className="flex flex-wrap items-center gap-2">
+        <div className="flex flex-wrap items-center gap-2 bg-white rounded-xl shadow-sm px-3 py-2">
           <InvoiceStatusSelect invoiceId={invoice.id} currentStatus={invoice.status} />
           <SendInvoiceButton invoiceId={invoice.id} customerEmail={invoice.customer.email} />
           <a href={`/api/invoices/${invoice.id}/pdf`} download>
@@ -85,20 +85,20 @@ export default async function InvoiceDetailPage({
 
       {/* Workflow hint */}
       {invoice.status === "DRAFT" && (
-        <div className="bg-amber-50 border border-amber-200 rounded-lg px-4 py-3 mb-6 text-sm text-amber-800">
+        <div className="border-l-4 border-l-amber-400 bg-amber-50 rounded-r-lg px-4 py-3 mb-6 text-sm text-amber-800">
           This invoice is still a draft. Use the <strong>Send Invoice</strong> button above to email it to the customer.
         </div>
       )}
       {invoice.status === "SENT" && (
-        <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 mb-6 text-sm text-blue-800">
+        <div className="border-l-4 border-l-blue-400 bg-blue-50 rounded-r-lg px-4 py-3 mb-6 text-sm text-blue-800">
           This invoice has been sent. Use <strong>&quot;Copy Payment Link&quot;</strong> to share a payment link, or <strong>&quot;Mark as Paid&quot;</strong> if the customer paid by cash or check.
         </div>
       )}
 
       {/* Line Items — Desktop Table */}
-      <div className="hidden sm:block bg-white border rounded-lg overflow-hidden mb-4">
+      <div className="hidden sm:block bg-white rounded-xl shadow-sm overflow-hidden mb-4">
         <table className="w-full text-sm">
-          <thead className="bg-slate-50 border-b">
+          <thead className="bg-slate-100 border-b">
             <tr>
               <th className="text-left px-4 py-3 font-medium text-slate-600">Description</th>
               <th className="text-right px-4 py-3 font-medium text-slate-600">Sq Ft</th>
@@ -107,8 +107,8 @@ export default async function InvoiceDetailPage({
             </tr>
           </thead>
           <tbody>
-            {invoice.lineItems.map((item) => (
-              <tr key={item.id} className="border-b last:border-0">
+            {invoice.lineItems.map((item, i) => (
+              <tr key={item.id} className={`border-b last:border-0 hover:bg-slate-50/60 transition-colors ${i % 2 === 1 ? "bg-slate-50/40" : ""}`}>
                 <td className="px-4 py-3">{item.description}</td>
                 <td className="px-4 py-3 text-right">{item.quantity}</td>
                 <td className="px-4 py-3 text-right">${item.unitPrice.toFixed(2)}</td>
@@ -122,7 +122,7 @@ export default async function InvoiceDetailPage({
       {/* Line Items — Mobile Cards */}
       <div className="sm:hidden space-y-3 mb-4">
         {invoice.lineItems.map((item) => (
-          <div key={item.id} className="bg-white border rounded-lg p-4">
+          <div key={item.id} className="bg-white rounded-xl shadow-sm p-4">
             <p className="font-medium text-sm mb-2">{item.description}</p>
             <div className="flex justify-between text-sm text-slate-500">
               <span>{item.quantity} sq ft</span>
@@ -134,7 +134,7 @@ export default async function InvoiceDetailPage({
       </div>
 
       {/* Totals */}
-      <div className="max-w-xs ml-auto space-y-2 mb-6">
+      <div className="max-w-xs ml-auto bg-white rounded-xl shadow-sm p-4 space-y-2 mb-6">
         <div className="flex justify-between text-sm">
           <span className="text-slate-500">Subtotal</span>
           <span>${invoice.subtotal.toFixed(2)}</span>
@@ -152,15 +152,18 @@ export default async function InvoiceDetailPage({
       </div>
 
       {invoice.notes && (
-        <p className="text-sm text-slate-600 bg-slate-50 rounded p-3">{invoice.notes}</p>
+        <p className="text-sm text-slate-600 bg-white rounded-xl shadow-sm p-3">{invoice.notes}</p>
       )}
 
       {invoice.paymentEvents.length > 0 && (
-        <div className="bg-white border rounded-lg p-4 mt-4">
-          <h2 className="font-semibold mb-3">Payment History</h2>
+        <div className="bg-white rounded-xl shadow-sm p-4 mt-4">
+          <div className="flex items-center gap-2 mb-3 border-b pb-2">
+            <h2 className="font-semibold text-base">Payment History</h2>
+            <span className="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">{invoice.paymentEvents.length}</span>
+          </div>
           <div className="space-y-2">
             {invoice.paymentEvents.map((event: { id: string; eventType: string; createdAt: Date; amount: number; status: string }) => (
-              <div key={event.id} className="flex justify-between items-center text-sm border-b last:border-0 pb-2">
+              <div key={event.id} className="flex justify-between items-center text-sm border-b last:border-0 pb-2 hover:bg-slate-50 transition-colors rounded px-1">
                 <div>
                   <span className="font-medium">{event.eventType.split(".").map((w: string) => w.charAt(0).toUpperCase() + w.slice(1)).join(" ")}</span>
                   <span className="text-slate-400 ml-2">{format(new Date(event.createdAt), "MMM d, yyyy h:mm a")}</span>

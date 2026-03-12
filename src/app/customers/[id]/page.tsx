@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Pencil, Phone, Mail, MapPin, Plus } from "lucide-react";
+import { Pencil, Phone, Mail, MapPin, Plus, Briefcase, FileText, Receipt } from "lucide-react";
 import Breadcrumbs from "@/components/layout/Breadcrumbs";
 import { JOB_STATUS_LABELS, SERVICE_TYPE_LABELS, STATUS_COLORS, QUOTE_STATUS_LABELS, INVOICE_STATUS_LABELS } from "@/types";
 import { format } from "date-fns";
@@ -34,7 +34,7 @@ export default async function CustomerDetailPage({
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h1 className="text-2xl font-bold">
+          <h1 className="text-3xl font-bold">
             {customer.firstName} {customer.lastName}
           </h1>
           <div className="flex flex-wrap items-center gap-4 mt-2 text-sm text-slate-500">
@@ -64,15 +64,18 @@ export default async function CustomerDetailPage({
 
       {/* Notes */}
       {customer.notes && (
-        <div className="bg-amber-50 border border-amber-100 rounded-lg px-4 py-3 mb-6 text-sm text-amber-900">
+        <div className="bg-amber-50 border-l-4 border-l-amber-400 rounded-r-lg px-4 py-3 mb-6 text-sm text-amber-900">
           <span className="font-medium">Notes: </span>{customer.notes}
         </div>
       )}
 
       {/* Jobs */}
       <div className="mb-8">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="font-semibold text-lg">Jobs ({customer.jobs.length})</h2>
+        <div className="flex items-center justify-between mb-3 border-b pb-2">
+          <div className="flex items-center gap-2">
+            <h2 className="font-semibold text-base">Jobs</h2>
+            <span className="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">{customer.jobs.length}</span>
+          </div>
           <Link href={`/jobs/new?customerId=${customer.id}`}>
             <Button size="sm" variant="outline">
               <Plus className="w-3.5 h-3.5 mr-1" /> New Job
@@ -80,12 +83,15 @@ export default async function CustomerDetailPage({
           </Link>
         </div>
         {customer.jobs.length === 0 ? (
-          <p className="text-sm text-slate-400">No jobs yet. Click &quot;New Job&quot; above to create one for this customer.</p>
+          <div className="text-center py-8">
+            <Briefcase className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+            <p className="text-sm text-slate-400">No jobs yet. Click &quot;New Job&quot; above to create one for this customer.</p>
+          </div>
         ) : (
           <div className="space-y-2">
             {customer.jobs.map((job) => (
               <Link key={job.id} href={`/jobs/${job.id}`}>
-                <div className="flex items-center justify-between bg-white border rounded-lg px-4 py-3 hover:shadow-sm transition-shadow">
+                <div className="flex items-center justify-between bg-white rounded-xl shadow-sm px-4 py-3 hover:shadow-md hover:-translate-y-px transition-all duration-150">
                   <div>
                     <p className="font-medium text-sm">{job.title}</p>
                     <p className="text-xs text-slate-400 mt-0.5">
@@ -104,60 +110,84 @@ export default async function CustomerDetailPage({
       </div>
 
       {/* Quotes */}
-      {customer.quotes.length > 0 && (
-        <div className="mb-8">
-          <h2 className="font-semibold text-lg mb-3">Recent Quotes</h2>
-          <div className="space-y-2">
-            {customer.quotes.map((q) => (
-              <Link key={q.id} href={`/quotes/${q.id}`}>
-                <div className="flex items-center justify-between bg-white border rounded-lg px-4 py-3 hover:shadow-sm transition-shadow">
-                  <div>
-                    <p className="font-medium text-sm">{q.quoteNumber}</p>
-                    <p className="text-xs text-slate-400">{format(new Date(q.createdAt), "MMM d, yyyy")}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-semibold text-sm">${q.total.toFixed(2)}</p>
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_COLORS[q.status]}`}>{QUOTE_STATUS_LABELS[q.status] ?? q.status}</span>
-                  </div>
-                </div>
-              </Link>
-            ))}
+      <div className="mb-8">
+        <div className="flex items-center justify-between mb-3 border-b pb-2">
+          <div className="flex items-center gap-2">
+            <h2 className="font-semibold text-base">Recent Quotes</h2>
+            <span className="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">{customer.quotes.length}</span>
           </div>
-          {customer.quotes.length >= 5 && (
-            <Link href={`/quotes?search=${encodeURIComponent(customer.firstName + " " + customer.lastName)}`} className="text-sm text-slate-500 hover:text-slate-700 mt-2 inline-block">
-              View all quotes &rarr;
-            </Link>
-          )}
         </div>
-      )}
+        {customer.quotes.length === 0 ? (
+          <div className="text-center py-8">
+            <FileText className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+            <p className="text-sm text-slate-400">No quotes yet</p>
+          </div>
+        ) : (
+          <>
+            <div className="space-y-2">
+              {customer.quotes.map((q) => (
+                <Link key={q.id} href={`/quotes/${q.id}`}>
+                  <div className="flex items-center justify-between bg-white rounded-xl shadow-sm px-4 py-3 hover:shadow-md hover:-translate-y-px transition-all duration-150">
+                    <div>
+                      <p className="font-medium text-sm">{q.quoteNumber}</p>
+                      <p className="text-xs text-slate-400">{format(new Date(q.createdAt), "MMM d, yyyy")}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold text-sm">${q.total.toFixed(2)}</p>
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_COLORS[q.status]}`}>{QUOTE_STATUS_LABELS[q.status] ?? q.status}</span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+            {customer.quotes.length >= 5 && (
+              <Link href={`/quotes?search=${encodeURIComponent(customer.firstName + " " + customer.lastName)}`} className="text-sm text-slate-500 hover:text-slate-700 mt-2 inline-block">
+                View all quotes &rarr;
+              </Link>
+            )}
+          </>
+        )}
+      </div>
 
       {/* Invoices */}
-      {customer.invoices.length > 0 && (
-        <div>
-          <h2 className="font-semibold text-lg mb-3">Recent Invoices</h2>
-          <div className="space-y-2">
-            {customer.invoices.map((inv) => (
-              <Link key={inv.id} href={`/invoices/${inv.id}`}>
-                <div className="flex items-center justify-between bg-white border rounded-lg px-4 py-3 hover:shadow-sm transition-shadow">
-                  <div>
-                    <p className="font-medium text-sm">{inv.invoiceNumber}</p>
-                    <p className="text-xs text-slate-400">{format(new Date(inv.createdAt), "MMM d, yyyy")}</p>
-                  </div>
-                  <div className="text-right">
-                    <p className="font-semibold text-sm">${inv.total.toFixed(2)}</p>
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_COLORS[inv.status]}`}>{INVOICE_STATUS_LABELS[inv.status] ?? inv.status}</span>
-                  </div>
-                </div>
-              </Link>
-            ))}
+      <div>
+        <div className="flex items-center justify-between mb-3 border-b pb-2">
+          <div className="flex items-center gap-2">
+            <h2 className="font-semibold text-base">Recent Invoices</h2>
+            <span className="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">{customer.invoices.length}</span>
           </div>
-          {customer.invoices.length >= 5 && (
-            <Link href={`/invoices?search=${encodeURIComponent(customer.firstName + " " + customer.lastName)}`} className="text-sm text-slate-500 hover:text-slate-700 mt-2 inline-block">
-              View all invoices &rarr;
-            </Link>
-          )}
         </div>
-      )}
+        {customer.invoices.length === 0 ? (
+          <div className="text-center py-8">
+            <Receipt className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+            <p className="text-sm text-slate-400">No invoices yet</p>
+          </div>
+        ) : (
+          <>
+            <div className="space-y-2">
+              {customer.invoices.map((inv) => (
+                <Link key={inv.id} href={`/invoices/${inv.id}`}>
+                  <div className="flex items-center justify-between bg-white rounded-xl shadow-sm px-4 py-3 hover:shadow-md hover:-translate-y-px transition-all duration-150">
+                    <div>
+                      <p className="font-medium text-sm">{inv.invoiceNumber}</p>
+                      <p className="text-xs text-slate-400">{format(new Date(inv.createdAt), "MMM d, yyyy")}</p>
+                    </div>
+                    <div className="text-right">
+                      <p className="font-semibold text-sm">${inv.total.toFixed(2)}</p>
+                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_COLORS[inv.status]}`}>{INVOICE_STATUS_LABELS[inv.status] ?? inv.status}</span>
+                    </div>
+                  </div>
+                </Link>
+              ))}
+            </div>
+            {customer.invoices.length >= 5 && (
+              <Link href={`/invoices?search=${encodeURIComponent(customer.firstName + " " + customer.lastName)}`} className="text-sm text-slate-500 hover:text-slate-700 mt-2 inline-block">
+                View all invoices &rarr;
+              </Link>
+            )}
+          </>
+        )}
+      </div>
     </div>
   );
 }

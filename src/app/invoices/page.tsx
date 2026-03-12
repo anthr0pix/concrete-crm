@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, Receipt } from "lucide-react";
 import { INVOICE_STATUS_LABELS, STATUS_COLORS } from "@/types";
 import { InvoiceStatus } from "@prisma/client";
 import { format, isPast, startOfDay } from "date-fns";
@@ -88,11 +88,11 @@ export default async function InvoicesPage({
 
       {/* Summary */}
       <div className="grid grid-cols-2 gap-4 mb-6">
-        <div className="bg-green-50 border border-green-100 rounded-lg p-4">
+        <div className="bg-green-50 rounded-xl shadow-sm border-l-4 border-l-green-500 p-4">
           <p className="text-sm text-green-700 font-medium">Total Collected</p>
           <p className="text-2xl font-bold text-green-800">${totalPaid.toLocaleString("en-US", { minimumFractionDigits: 2 })}</p>
         </div>
-        <div className="bg-orange-50 border border-orange-100 rounded-lg p-4">
+        <div className="bg-orange-50 rounded-xl shadow-sm border-l-4 border-l-orange-500 p-4">
           <p className="text-sm text-orange-700 font-medium">Unpaid Invoices</p>
           <p className="text-2xl font-bold text-orange-800">${totalOutstanding.toLocaleString("en-US", { minimumFractionDigits: 2 })}</p>
         </div>
@@ -126,14 +126,17 @@ export default async function InvoicesPage({
           if (search) params.set("search", search);
           if (sort) params.set("sort", sort);
           const href = params.toString() ? `/invoices?${params}` : "/invoices";
+          const isActive = (s === "ALL" && !activeStatus) || s === activeStatus;
           return (
             <Link key={s} href={href}>
               <button
-                className={`px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition-colors ${
-                  (s === "ALL" && !activeStatus) || s === activeStatus
-                    ? "bg-slate-900 text-white"
+                className={cn(
+                  "px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition-all duration-150",
+                  isActive
+                    ? "text-white"
                     : "bg-white border text-slate-600 hover:bg-slate-50"
-                }`}
+                )}
+                style={isActive ? { background: "linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%)" } : {}}
               >
                 {s === "ALL" ? "All" : INVOICE_STATUS_LABELS[s]}
               </button>
@@ -144,6 +147,7 @@ export default async function InvoicesPage({
 
       {invoices.length === 0 ? (
         <div className="text-center py-16 text-slate-400">
+          <Receipt className="w-8 h-8 text-slate-300 mx-auto mb-2" />
           <p className="text-lg font-medium">No invoices found</p>
           <p className="text-sm mt-1">
             {search || activeStatus
@@ -159,7 +163,7 @@ export default async function InvoicesPage({
             return (
               <Link key={inv.id} href={`/invoices/${inv.id}`}>
                 <div className={cn(
-                  "flex items-center justify-between bg-white border rounded-lg px-5 py-4 hover:shadow-sm transition-shadow cursor-pointer",
+                  "flex items-center justify-between bg-white rounded-xl shadow-sm px-5 py-4 hover:shadow-md hover:-translate-y-px transition-all duration-150 cursor-pointer",
                   isOverdue && "border-l-4 border-l-red-500 bg-red-50/50",
                 )}>
                   <div>

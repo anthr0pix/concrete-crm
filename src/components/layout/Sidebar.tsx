@@ -50,11 +50,11 @@ export default function Sidebar({ open = false, onClose }: SidebarProps) {
         // Desktop: always visible in normal flow
         "md:relative md:translate-x-0"
       )}
-      style={{ backgroundColor: "#1a1a2e" }}
+      style={{ background: "linear-gradient(180deg, #1a1a2e 0%, #16213e 100%)" }}
     >
       {/* Logo */}
-      <div className="px-5 py-5 border-b border-white/10 flex items-center justify-between">
-        <Link href="/dashboard" className="flex items-center gap-3">
+      <div className="px-5 py-5 flex items-center justify-between" style={{ borderBottom: "1px solid rgba(255,255,255,0.08)", boxShadow: "0 1px 0 rgba(255,255,255,0.04)" }}>
+        <Link href="/dashboard" className="flex items-center gap-3 hover:opacity-90">
           <Image
             src="/logo-white.png"
             alt="Mountain West Surface"
@@ -75,36 +75,39 @@ export default function Sidebar({ open = false, onClose }: SidebarProps) {
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-4 space-y-0.5">
-        {nav.map(({ href, label, icon: Icon }) => {
-          const isActive = pathname.startsWith(href);
-          return (
-            <Link
-              key={href}
-              href={href}
-              className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium transition-all",
-                isActive
-                  ? "text-white"
-                  : "text-white/80 hover:text-white hover:bg-white/5"
-              )}
-              style={isActive ? { backgroundColor: "#e94560" } : {}}
-            >
-              <Icon className="w-4 h-4 shrink-0" />
-              {label}
-            </Link>
-          );
-        })}
+      <nav className="flex-1 px-3 py-4">
+        <p className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-widest text-white/30">Menu</p>
+        <div className="space-y-0.5">
+          {nav.map(({ href, label, icon: Icon }) => {
+            const isActive = pathname.startsWith(href);
+            return (
+              <Link
+                key={href}
+                href={href}
+                className={cn(
+                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150",
+                  isActive
+                    ? "text-white shadow-[0_0_12px_rgba(233,69,96,0.3)]"
+                    : "text-white/70 hover:text-white hover:bg-white/[0.08]"
+                )}
+                style={isActive ? { background: "linear-gradient(135deg, #e94560 0%, #d63851 100%)" } : {}}
+              >
+                <Icon className="w-[18px] h-[18px] shrink-0" />
+                {label}
+              </Link>
+            );
+          })}
+        </div>
       </nav>
 
       {/* Sign Out */}
-      <div className="px-3 py-4 border-t border-white/10">
+      <div className="px-3 py-4" style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}>
         <form action="/api/auth/logout" method="POST">
           <button
             type="submit"
-            className="flex items-center gap-3 px-3 py-2.5 rounded-md text-sm font-medium text-white/70 hover:text-white hover:bg-white/5 transition-all w-full"
+            className="flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium text-white/50 hover:text-white hover:bg-white/[0.08] transition-all duration-150 w-full"
           >
-            <LogOut className="w-4 h-4" />
+            <LogOut className="w-[18px] h-[18px]" />
             Sign Out
           </button>
         </form>

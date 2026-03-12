@@ -2,7 +2,7 @@ import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, Briefcase } from "lucide-react";
 import { JOB_STATUS_LABELS, SERVICE_TYPE_LABELS, STATUS_COLORS } from "@/types";
 import { JobStatus } from "@prisma/client";
 import { format, isToday } from "date-fns";
@@ -27,6 +27,13 @@ const SORT_MAP: Record<string, object> = {
   oldest: { createdAt: "asc" },
   scheduled: { scheduledDate: "asc" },
   customer: { customer: { lastName: "asc" } },
+};
+
+const SUMMARY_ACCENTS: Record<string, string> = {
+  Leads: "border-l-4 border-l-slate-400",
+  Scheduled: "border-l-4 border-l-yellow-400",
+  "In Progress": "border-l-4 border-l-orange-400",
+  Completed: "border-l-4 border-l-green-500",
 };
 
 export default async function JobsPage({
@@ -68,10 +75,10 @@ export default async function JobsPage({
 
   const countMap = Object.fromEntries(statusCounts.map((s) => [s.status, s._count]));
   const summaryCards = [
-    { label: "Leads", count: countMap["LEAD"] ?? 0, color: "bg-slate-50 border-slate-200 text-slate-700" },
-    { label: "Scheduled", count: countMap["SCHEDULED"] ?? 0, color: "bg-yellow-50 border-yellow-200 text-yellow-700" },
-    { label: "In Progress", count: countMap["IN_PROGRESS"] ?? 0, color: "bg-orange-50 border-orange-200 text-orange-700" },
-    { label: "Completed", count: countMap["COMPLETED"] ?? 0, color: "bg-green-50 border-green-200 text-green-700" },
+    { label: "Leads", count: countMap["LEAD"] ?? 0, color: "bg-slate-50 text-slate-700" },
+    { label: "Scheduled", count: countMap["SCHEDULED"] ?? 0, color: "bg-yellow-50 text-yellow-700" },
+    { label: "In Progress", count: countMap["IN_PROGRESS"] ?? 0, color: "bg-orange-50 text-orange-700" },
+    { label: "Completed", count: countMap["COMPLETED"] ?? 0, color: "bg-green-50 text-green-700" },
   ];
 
   return (
@@ -91,7 +98,7 @@ export default async function JobsPage({
       {/* Summary cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-6">
         {summaryCards.map((card) => (
-          <div key={card.label} className={`border rounded-lg p-3 ${card.color}`}>
+          <div key={card.label} className={`rounded-xl shadow-sm p-3 ${card.color} ${SUMMARY_ACCENTS[card.label]}`}>
             <p className="text-2xl font-bold">{card.count}</p>
             <p className="text-sm font-medium">{card.label}</p>
           </div>
@@ -126,14 +133,17 @@ export default async function JobsPage({
           if (search) params.set("search", search);
           if (sort) params.set("sort", sort);
           const href = params.toString() ? `/jobs?${params}` : "/jobs";
+          const isActive = (s === "ALL" && !activeStatus) || s === activeStatus;
           return (
             <Link key={s} href={href}>
               <button
-                className={`px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition-colors ${
-                  (s === "ALL" && !activeStatus) || s === activeStatus
-                    ? "bg-slate-900 text-white"
+                className={cn(
+                  "px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition-all duration-150",
+                  isActive
+                    ? "text-white"
                     : "bg-white border text-slate-600 hover:bg-slate-50"
-                }`}
+                )}
+                style={isActive ? { background: "linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%)" } : {}}
               >
                 {s === "ALL" ? "All" : JOB_STATUS_LABELS[s]}
               </button>
@@ -145,6 +155,7 @@ export default async function JobsPage({
       {/* Job list */}
       {jobs.length === 0 ? (
         <div className="text-center py-16 text-slate-400">
+          <Briefcase className="w-8 h-8 text-slate-300 mx-auto mb-2" />
           <p className="text-lg font-medium">No jobs found</p>
           <p className="text-sm mt-1">
             {search || activeStatus
@@ -159,7 +170,7 @@ export default async function JobsPage({
             return (
               <Link key={job.id} href={`/jobs/${job.id}`}>
                 <div className={cn(
-                  "flex items-center justify-between bg-white border rounded-lg px-5 py-4 hover:shadow-sm transition-shadow cursor-pointer",
+                  "flex items-center justify-between bg-white rounded-xl shadow-sm px-5 py-4 hover:shadow-md hover:-translate-y-px transition-all duration-150 cursor-pointer",
                   isTodayJob && "border-l-4 border-l-green-500",
                 )}>
                   <div className="flex-1 min-w-0">
@@ -169,7 +180,8 @@ export default async function JobsPage({
                         {JOB_STATUS_LABELS[job.status]}
                       </span>
                       {isTodayJob && (
-                        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-green-100 text-green-700">
+                        <span className="flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full bg-green-100 text-green-700">
+                          <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse-dot" />
                           Today
                         </span>
                       )}

@@ -71,7 +71,7 @@ export default function JobForm({ customers, defaultValues, jobId }: Props) {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+    <form onSubmit={handleSubmit(onSubmit)} className="bg-white rounded-xl shadow-sm p-6 space-y-6">
       <p className="text-xs text-slate-400"><span className="text-red-500">*</span> Required</p>
       {!isEdit && (
         <div className="space-y-1">

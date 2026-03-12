@@ -2,10 +2,11 @@ import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Plus, Search } from "lucide-react";
+import { Plus, Search, FileText } from "lucide-react";
 import { QUOTE_STATUS_LABELS, STATUS_COLORS } from "@/types";
 import { QuoteStatus } from "@prisma/client";
 import { format, subDays } from "date-fns";
+import { cn } from "@/lib/utils";
 import SortSelect from "@/components/ui/sort-select";
 import Pagination from "@/components/ui/pagination";
 
@@ -105,14 +106,17 @@ export default async function QuotesPage({
           if (search) params.set("search", search);
           if (sort) params.set("sort", sort);
           const href = params.toString() ? `/quotes?${params}` : "/quotes";
+          const isActive = (s === "ALL" && !activeStatus) || s === activeStatus;
           return (
             <Link key={s} href={href}>
               <button
-                className={`px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition-colors ${
-                  (s === "ALL" && !activeStatus) || s === activeStatus
-                    ? "bg-slate-900 text-white"
+                className={cn(
+                  "px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition-all duration-150",
+                  isActive
+                    ? "text-white"
                     : "bg-white border text-slate-600 hover:bg-slate-50"
-                }`}
+                )}
+                style={isActive ? { background: "linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%)" } : {}}
               >
                 {s === "ALL" ? "All" : QUOTE_STATUS_LABELS[s]}
               </button>
@@ -123,6 +127,7 @@ export default async function QuotesPage({
 
       {quotes.length === 0 ? (
         <div className="text-center py-16 text-slate-400">
+          <FileText className="w-8 h-8 text-slate-300 mx-auto mb-2" />
           <p className="text-lg font-medium">No quotes found</p>
           <p className="text-sm mt-1">
             {search || activeStatus
@@ -136,7 +141,7 @@ export default async function QuotesPage({
             const isStale = q.status === "SENT" && new Date(q.updatedAt) < subDays(new Date(), 7);
             return (
             <Link key={q.id} href={`/quotes/${q.id}`}>
-              <div className="flex items-center justify-between bg-white border rounded-lg px-5 py-4 hover:shadow-sm transition-shadow cursor-pointer">
+              <div className="flex items-center justify-between bg-white rounded-xl shadow-sm px-5 py-4 hover:shadow-md hover:-translate-y-px transition-all duration-150 cursor-pointer">
                 <div>
                   <div className="flex items-center gap-3">
                     <span className="font-semibold">{q.quoteNumber}</span>

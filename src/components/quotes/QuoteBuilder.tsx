@@ -71,7 +71,7 @@ export default function QuoteBuilder({ customers, jobs = [], defaultCustomerId, 
   };
 
   return (
-    <form onSubmit={onSubmit} className="space-y-6">
+    <form onSubmit={onSubmit} className="bg-white rounded-xl shadow-sm p-6 space-y-6">
       <p className="text-xs text-slate-400"><span className="text-red-500">*</span> Required</p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1">

@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { User, MapPin, Calendar, Ruler, Phone, Navigation, FileText, Receipt } from "lucide-react";
+import { User, MapPin, Calendar, Ruler, Phone, Navigation, FileText, Receipt, Camera, DollarSign } from "lucide-react";
 import Breadcrumbs from "@/components/layout/Breadcrumbs";
 import { SERVICE_TYPE_LABELS } from "@/types";
 import { format } from "date-fns";
@@ -37,6 +37,15 @@ export default async function JobDetailPage({
     ? `${job.address}, ${job.city}, ${job.state} ${job.zip}`
     : `${job.customer.address}, ${job.customer.city}, ${job.customer.state} ${job.customer.zip}`;
 
+  const INFO_CARD_BORDERS: Record<string, string> = {
+    Customer: "border-t-blue-400",
+    Scheduled: "border-t-yellow-400",
+    Location: "border-t-green-400",
+    "Square Feet": "border-t-orange-400",
+    "Reseal Due": "border-t-red-400",
+    "Review Request": "border-t-purple-400",
+  };
+
   return (
     <div className="p-4 sm:p-6 max-w-4xl mx-auto">
       <Breadcrumbs items={[{ label: "Jobs", href: "/jobs" }, { label: job.title }]} />
@@ -44,7 +53,7 @@ export default async function JobDetailPage({
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-6">
         <div>
-          <h1 className="text-2xl font-bold">{job.title}</h1>
+          <h1 className="text-3xl font-bold">{job.title}</h1>
           <p className="text-slate-500 text-sm mt-1">{SERVICE_TYPE_LABELS[job.serviceType]}</p>
         </div>
         <JobDetailActions jobId={job.id} currentStatus={job.status} />
@@ -52,7 +61,7 @@ export default async function JobDetailPage({
 
       {/* Quick actions — SCHEDULED / IN_PROGRESS only */}
       {(job.status === "SCHEDULED" || job.status === "IN_PROGRESS") && (
-        <div className="flex flex-wrap items-center gap-3 border-2 border-dashed border-slate-200 bg-slate-50 rounded-lg px-4 py-3 mb-6">
+        <div className="flex flex-wrap items-center gap-3 bg-white rounded-xl shadow-sm px-4 py-3 mb-6">
           <MarkCompleteButton jobId={job.id} />
           {job.customer.phone && (
             <a href={`tel:${job.customer.phone}`}>
@@ -75,7 +84,7 @@ export default async function JobDetailPage({
 
       {/* Next-step prompts */}
       {job.status === "LEAD" && job.quotes.length === 0 && (
-        <div className="border-2 border-dashed border-purple-300 bg-purple-50 rounded-lg px-4 py-3 mb-6 flex items-center justify-between">
+        <div className="border-l-4 border-l-purple-400 bg-purple-50 rounded-r-lg px-4 py-3 mb-6 flex items-center justify-between">
           <div className="flex items-center gap-2 text-sm text-purple-800">
             <FileText className="w-4 h-4" />
             <span>New lead — ready to send a quote?</span>
@@ -88,7 +97,7 @@ export default async function JobDetailPage({
         </div>
       )}
       {job.status === "COMPLETED" && job.invoices.length === 0 && (
-        <div className="border-2 border-dashed border-green-300 bg-green-50 rounded-lg px-4 py-3 mb-6 flex items-center justify-between">
+        <div className="border-l-4 border-l-green-400 bg-green-50 rounded-r-lg px-4 py-3 mb-6 flex items-center justify-between">
           <div className="flex items-center gap-2 text-sm text-green-800">
             <Receipt className="w-4 h-4" />
             <span>Job complete — time to get paid!</span>
@@ -113,28 +122,28 @@ export default async function JobDetailPage({
 
       {/* Info grid */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white border rounded-lg p-4">
+        <div className={`bg-white rounded-xl shadow-sm border-t-2 ${INFO_CARD_BORDERS["Customer"]} p-4`}>
           <div className="flex items-center gap-1.5 text-slate-400 text-xs mb-1"><User className="w-3.5 h-3.5" /> Customer</div>
           <Link href={`/customers/${job.customer.id}`} className="font-medium text-sm hover:underline">
             {job.customer.firstName} {job.customer.lastName}
           </Link>
         </div>
-        <div className="bg-white border rounded-lg p-4">
+        <div className={`bg-white rounded-xl shadow-sm border-t-2 ${INFO_CARD_BORDERS["Scheduled"]} p-4`}>
           <div className="flex items-center gap-1.5 text-slate-400 text-xs mb-1"><Calendar className="w-3.5 h-3.5" /> Scheduled</div>
           <p className="font-medium text-sm">
             {job.scheduledDate ? format(new Date(job.scheduledDate), "MMM d, yyyy") : "Not set"}
           </p>
         </div>
-        <div className="bg-white border rounded-lg p-4">
+        <div className={`bg-white rounded-xl shadow-sm border-t-2 ${INFO_CARD_BORDERS["Location"]} p-4`}>
           <div className="flex items-center gap-1.5 text-slate-400 text-xs mb-1"><MapPin className="w-3.5 h-3.5" /> Location</div>
           <p className="font-medium text-xs leading-tight">{jobAddress}</p>
         </div>
-        <div className="bg-white border rounded-lg p-4">
+        <div className={`bg-white rounded-xl shadow-sm border-t-2 ${INFO_CARD_BORDERS["Square Feet"]} p-4`}>
           <div className="flex items-center gap-1.5 text-slate-400 text-xs mb-1"><Ruler className="w-3.5 h-3.5" /> Square Feet</div>
           <p className="font-medium text-sm">{job.squareFootage ? `${job.squareFootage.toLocaleString()} sq ft` : "\u2014"}</p>
         </div>
         {job.resealDueDate && (
-          <div className="bg-white border rounded-lg p-4">
+          <div className={`bg-white rounded-xl shadow-sm border-t-2 ${INFO_CARD_BORDERS["Reseal Due"]} p-4`}>
             <div className="flex items-center gap-1.5 text-slate-400 text-xs mb-1">
               <Calendar className="w-3.5 h-3.5" /> Reseal Due
             </div>
@@ -144,7 +153,7 @@ export default async function JobDetailPage({
           </div>
         )}
         {job.reviewRequestSentAt && (
-          <div className="bg-white border rounded-lg p-4">
+          <div className={`bg-white rounded-xl shadow-sm border-t-2 ${INFO_CARD_BORDERS["Review Request"]} p-4`}>
             <div className="flex items-center gap-1.5 text-slate-400 text-xs mb-1">Review Request</div>
             <p className="font-medium text-sm text-green-600">
               Sent {format(new Date(job.reviewRequestSentAt), "MMM d, yyyy")}
@@ -160,31 +169,46 @@ export default async function JobDetailPage({
 
       {/* Notes */}
       {job.notes && (
-        <div className="bg-amber-50 border border-amber-100 rounded-lg px-4 py-3 mb-6 text-sm text-amber-900">
+        <div className="bg-amber-50 border-l-4 border-l-amber-400 rounded-r-lg px-4 py-3 mb-6 text-sm text-amber-900">
           <span className="font-medium">Notes: </span>{job.notes}
         </div>
       )}
 
       {/* Photos */}
-      <div className="bg-white border rounded-lg p-6 mb-6">
-        <h2 className="font-semibold text-lg mb-4">Photos</h2>
+      <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+        <div className="flex items-center gap-2 mb-4 border-b pb-2">
+          <h2 className="font-semibold text-base">Photos</h2>
+          <span className="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">{job.photos.length}</span>
+        </div>
+        {job.photos.length === 0 ? (
+          <div className="text-center py-6">
+            <Camera className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+            <p className="text-sm text-slate-400">No photos yet</p>
+          </div>
+        ) : null}
         <PhotoUpload jobId={job.id} photos={job.photos} />
       </div>
 
       {/* Expenses */}
-      <div className="bg-white border rounded-lg p-4 mb-6">
-        <div className="flex items-center justify-between mb-3">
-          <h2 className="font-semibold">Expenses</h2>
+      <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
+        <div className="flex items-center justify-between mb-3 border-b pb-2">
+          <div className="flex items-center gap-2">
+            <h2 className="font-semibold text-base">Expenses</h2>
+            <span className="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">{job.expenses.length}</span>
+          </div>
           <Link href={`/expenses/new?jobId=${job.id}`}>
             <Button size="sm" variant="outline">+ Add Expense</Button>
           </Link>
         </div>
         {job.expenses.length === 0 ? (
-          <p className="text-sm text-slate-400">No expenses recorded yet.</p>
+          <div className="text-center py-6">
+            <DollarSign className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+            <p className="text-sm text-slate-400">No expenses recorded yet.</p>
+          </div>
         ) : (
           <div className="space-y-1">
             {job.expenses.map((exp) => (
-              <div key={exp.id} className="flex justify-between text-sm py-1.5 border-b last:border-0">
+              <div key={exp.id} className="flex justify-between text-sm py-1.5 border-b last:border-0 hover:bg-slate-50 transition-colors rounded px-1">
                 <div>
                   <span className="font-medium">{exp.description}</span>
                   <span className="text-slate-400 ml-2">{format(new Date(exp.date), "MMM d")}</span>
@@ -198,19 +222,25 @@ export default async function JobDetailPage({
 
       {/* Quotes & Invoices */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="bg-white border rounded-lg p-4">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="font-semibold">Quotes</h2>
+        <div className="bg-white rounded-xl shadow-sm p-4">
+          <div className="flex items-center justify-between mb-3 border-b pb-2">
+            <div className="flex items-center gap-2">
+              <h2 className="font-semibold text-base">Quotes</h2>
+              <span className="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">{job.quotes.length}</span>
+            </div>
             <Link href={`/quotes/new?jobId=${job.id}`}>
               <Button size="sm" variant="outline">+ New Quote</Button>
             </Link>
           </div>
           {job.quotes.length === 0 ? (
-            <p className="text-sm text-slate-400">No quotes yet</p>
+            <div className="text-center py-6">
+              <FileText className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+              <p className="text-sm text-slate-400">No quotes yet</p>
+            </div>
           ) : (
             job.quotes.map((q) => (
               <Link key={q.id} href={`/quotes/${q.id}`}>
-                <div className="flex justify-between text-sm py-1.5 border-b last:border-0 hover:text-slate-600">
+                <div className="flex justify-between text-sm py-1.5 border-b last:border-0 hover:bg-slate-50 transition-colors rounded px-1">
                   <span>{q.quoteNumber}</span>
                   <span className="font-medium">${q.total.toFixed(2)}</span>
                 </div>
@@ -219,19 +249,25 @@ export default async function JobDetailPage({
           )}
         </div>
 
-        <div className="bg-white border rounded-lg p-4">
-          <div className="flex items-center justify-between mb-3">
-            <h2 className="font-semibold">Invoices</h2>
+        <div className="bg-white rounded-xl shadow-sm p-4">
+          <div className="flex items-center justify-between mb-3 border-b pb-2">
+            <div className="flex items-center gap-2">
+              <h2 className="font-semibold text-base">Invoices</h2>
+              <span className="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">{job.invoices.length}</span>
+            </div>
             <Link href={`/invoices/new?jobId=${job.id}`}>
               <Button size="sm" variant="outline">+ New Invoice</Button>
             </Link>
           </div>
           {job.invoices.length === 0 ? (
-            <p className="text-sm text-slate-400">No invoices yet</p>
+            <div className="text-center py-6">
+              <Receipt className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+              <p className="text-sm text-slate-400">No invoices yet</p>
+            </div>
           ) : (
             job.invoices.map((inv) => (
               <Link key={inv.id} href={`/invoices/${inv.id}`}>
-                <div className="flex justify-between text-sm py-1.5 border-b last:border-0 hover:text-slate-600">
+                <div className="flex justify-between text-sm py-1.5 border-b last:border-0 hover:bg-slate-50 transition-colors rounded px-1">
                   <span>{inv.invoiceNumber}</span>
                   <span className="font-medium">${inv.total.toFixed(2)}</span>
                 </div>
