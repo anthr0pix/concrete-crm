@@ -33,7 +33,11 @@ export default function QuoteBuilder({ customers, jobs = [], defaultCustomerId, 
   const [jobId, setJobId] = useState(defaultJobId ?? "");
   const [taxRate, setTaxRate] = useState(0);
   const [notes, setNotes] = useState("");
-  const [validUntil, setValidUntil] = useState("");
+  const [validUntil, setValidUntil] = useState(() => {
+    const d = new Date();
+    d.setDate(d.getDate() + 7);
+    return d.toISOString().split("T")[0];
+  });
   const [depositAmount, setDepositAmount] = useState<number | null>(null);
   const [depositType, setDepositType] = useState<"FIXED" | "PERCENTAGE" | null>(null);
   const [submitting, setSubmitting] = useState(false);
