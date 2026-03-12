@@ -50,15 +50,14 @@ export default function PortalPayButton({ token, type, label, amount }: Props) {
       <button
         onClick={handlePay}
         disabled={state === "loading"}
-        className="inline-block px-8 py-3 rounded-lg text-white font-bold text-lg transition-all hover:opacity-90 disabled:opacity-50"
-        style={{ backgroundColor: "#e94560" }}
+        className="inline-block px-8 py-3 rounded-lg bg-primary hover:bg-primary/90 text-primary-foreground font-bold text-lg transition-all disabled:opacity-50"
       >
         {state === "loading"
           ? "Preparing payment..."
           : `${label} — $${amount.toFixed(2)}`}
       </button>
       {state === "error" && (
-        <p className="text-red-600 text-sm">
+        <p className="text-status-danger-text text-sm">
           {errorMsg} Please call{" "}
           <a href="tel:+14357096999" className="font-semibold underline">
             (435) 709-6999

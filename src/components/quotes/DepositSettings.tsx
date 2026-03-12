@@ -45,7 +45,7 @@ export default function DepositSettings({ depositAmount, depositType, quoteTotal
           id="deposit-toggle"
           checked={enabled}
           onChange={handleToggle}
-          className="h-4 w-4 rounded border-slate-300 text-slate-900 focus:ring-slate-900"
+          className="h-4 w-4 rounded border-border text-foreground focus:ring-ring"
         />
         <Label htmlFor="deposit-toggle" className="cursor-pointer">
           Require deposit before approval
@@ -53,14 +53,14 @@ export default function DepositSettings({ depositAmount, depositType, quoteTotal
       </div>
 
       {enabled && (
-        <div className="ml-6 space-y-3 border-l-2 border-slate-200 pl-4">
+        <div className="ml-6 space-y-3 border-l-2 border-border pl-4">
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
               <Label>Type</Label>
               <select
                 value={depositType ?? "FIXED"}
                 onChange={(e) => handleTypeChange(e.target.value as "FIXED" | "PERCENTAGE")}
-                className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
+                className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
               >
                 <option value="FIXED">Fixed Amount ($)</option>
                 <option value="PERCENTAGE">Percentage (%)</option>
@@ -80,7 +80,7 @@ export default function DepositSettings({ depositAmount, depositType, quoteTotal
           </div>
 
           {depositAmount !== null && depositAmount > 0 && (
-            <p className="text-sm text-slate-600 bg-slate-50 rounded px-3 py-2">
+            <p className="text-sm text-muted-foreground bg-muted rounded px-3 py-2">
               {depositType === "PERCENTAGE"
                 ? `Deposit: $${calculatedDeposit.toFixed(2)} (${depositAmount}% of $${quoteTotal.toFixed(2)})`
                 : `Deposit: $${calculatedDeposit.toFixed(2)}`

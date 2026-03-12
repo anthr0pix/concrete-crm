@@ -27,7 +27,7 @@ export default async function ExpensesPage() {
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Expenses</h1>
-          <p className="text-slate-500 text-sm mt-1">
+          <p className="text-muted-foreground text-sm mt-1">
             {expenses.length} expense{expenses.length !== 1 ? "s" : ""}
           </p>
         </div>
@@ -39,7 +39,7 @@ export default async function ExpensesPage() {
       </div>
 
       {expenses.length === 0 ? (
-        <div className="text-center py-16 text-slate-400">
+        <div className="text-center py-16 text-muted-foreground">
           <p className="text-lg font-medium">No expenses yet</p>
           <p className="text-sm mt-1">Track fuel, materials, and other costs. Link them to jobs to see per-job profitability.</p>
         </div>

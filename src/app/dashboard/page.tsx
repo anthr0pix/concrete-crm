@@ -8,10 +8,10 @@ import { format, startOfMonth, endOfMonth, startOfDay, endOfDay } from "date-fns
 export const dynamic = "force-dynamic";
 
 const ACCENT_COLORS: Record<string, { border: string; bg: string; icon: string }> = {
-  "Total Customers": { border: "border-l-blue-500", bg: "bg-blue-50", icon: "text-blue-600" },
-  "Active Jobs": { border: "border-l-orange-500", bg: "bg-orange-50", icon: "text-orange-600" },
-  "Revenue Collected": { border: "border-l-green-500", bg: "bg-green-50", icon: "text-green-600" },
-  "Unpaid Invoices": { border: "border-l-red-500", bg: "bg-red-50", icon: "text-red-600" },
+  "Total Customers": { border: "border-l-blue-500", bg: "bg-status-info-bg", icon: "text-status-info-text" },
+  "Active Jobs": { border: "border-l-orange-500", bg: "bg-status-orange-bg", icon: "text-status-orange-text" },
+  "Revenue Collected": { border: "border-l-green-500", bg: "bg-status-success-bg", icon: "text-status-success-text" },
+  "Unpaid Invoices": { border: "border-l-red-500", bg: "bg-status-danger-bg", icon: "text-status-danger-text" },
 };
 
 function getGreeting() {
@@ -87,10 +87,10 @@ export default async function DashboardPage() {
     (statusMap["SCHEDULED"] ?? 0) + (statusMap["IN_PROGRESS"] ?? 0);
 
   const stats = [
-    { label: "Total Customers", value: totalCustomers, icon: Users, href: "/customers", color: "text-blue-600" },
-    { label: "Active Jobs", subtitle: "Lead, Quoted, Scheduled & In Progress", value: activeJobs, icon: Briefcase, href: "/jobs", color: "text-orange-600" },
-    { label: "Revenue Collected", value: `$${(revenue._sum.total ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, icon: TrendingUp, href: "/invoices", color: "text-green-600" },
-    { label: "Unpaid Invoices", subtitle: overdueInvoiceCount > 0 ? `${overdueInvoiceCount} overdue` : undefined, value: `$${(openInvoices._sum.total ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, icon: Receipt, href: "/invoices", color: "text-red-600" },
+    { label: "Total Customers", value: totalCustomers, icon: Users, href: "/customers", color: "text-status-info-text" },
+    { label: "Active Jobs", subtitle: "Lead, Quoted, Scheduled & In Progress", value: activeJobs, icon: Briefcase, href: "/jobs", color: "text-status-orange-text" },
+    { label: "Revenue Collected", value: `$${(revenue._sum.total ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, icon: TrendingUp, href: "/invoices", color: "text-status-success-text" },
+    { label: "Unpaid Invoices", subtitle: overdueInvoiceCount > 0 ? `${overdueInvoiceCount} overdue` : undefined, value: `$${(openInvoices._sum.total ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, icon: Receipt, href: "/invoices", color: "text-status-danger-text" },
   ];
 
   const monthlyRevenue = monthlyPaidInvoices.reduce((sum, inv) => sum + inv.total, 0);
@@ -137,23 +137,23 @@ export default async function DashboardPage() {
       {/* Page header */}
       <div className="mb-6">
         <h1 className="text-3xl font-bold">{getGreeting()}</h1>
-        <p className="text-sm text-slate-500 mt-1">{format(now, "EEEE, MMMM d, yyyy")}</p>
+        <p className="text-sm text-muted-foreground mt-1">{format(now, "EEEE, MMMM d, yyyy")}</p>
       </div>
 
       {/* Getting Started — only shown for new users */}
       {isNewUser && (
-        <div className="bg-white rounded-xl shadow-sm border-2 border-dashed border-blue-200 p-6 mb-8">
+        <div className="bg-card rounded-xl shadow-sm border-2 border-dashed border-border p-6 mb-8">
           <h2 className="font-semibold text-lg mb-1">Welcome to Mountain West Surface CRM</h2>
-          <p className="text-sm text-slate-500 mb-4">Here&apos;s how to get started. Follow these steps in order:</p>
+          <p className="text-sm text-muted-foreground mb-4">Here&apos;s how to get started. Follow these steps in order:</p>
           <div className="space-y-3">
             {gettingStartedSteps.map((step, i) => (
-              <div key={i} className="flex items-center gap-4 bg-slate-50 rounded-lg px-4 py-3">
-                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold shrink-0 ${step.done ? "bg-green-100 text-green-700" : "bg-blue-100 text-blue-700"}`}>
+              <div key={i} className="flex items-center gap-4 bg-muted rounded-lg px-4 py-3">
+                <div className={`w-7 h-7 rounded-full flex items-center justify-center text-sm font-bold shrink-0 ${step.done ? "bg-status-success-bg text-status-success-text" : "bg-status-info-bg text-status-info-text"}`}>
                   {step.done ? "\u2713" : i + 1}
                 </div>
                 <div className="flex-1">
                   <p className="text-sm font-medium">{step.label}</p>
-                  <p className="text-xs text-slate-400">{step.description}</p>
+                  <p className="text-xs text-muted-foreground">{step.description}</p>
                 </div>
                 {!step.done && (
                   <Link href={step.href}>
@@ -174,13 +174,13 @@ export default async function DashboardPage() {
           const accent = ACCENT_COLORS[stat.label];
           return (
             <Link key={stat.label} href={stat.href}>
-              <div className={`bg-white rounded-xl shadow-sm border-l-4 ${accent.border} p-5 hover:shadow-md hover:-translate-y-px transition-all duration-150`}>
+              <div className={`bg-card rounded-xl shadow-sm border-l-4 ${accent.border} p-5 hover:shadow-md hover:-translate-y-px transition-all duration-150`}>
                 <div className={`w-9 h-9 rounded-lg ${accent.bg} flex items-center justify-center mb-3`}>
                   <stat.icon className={`w-5 h-5 ${accent.icon}`} />
                 </div>
                 <p className="text-3xl font-bold">{stat.value}</p>
-                <p className="text-sm text-slate-500 mt-0.5">{stat.label}</p>
-                {"subtitle" in stat && stat.subtitle && <p className="text-xs text-slate-400 mt-0.5">{stat.subtitle}</p>}
+                <p className="text-sm text-muted-foreground mt-0.5">{stat.label}</p>
+                {"subtitle" in stat && stat.subtitle && <p className="text-xs text-muted-foreground mt-0.5">{stat.subtitle}</p>}
               </div>
             </Link>
           );
@@ -188,14 +188,14 @@ export default async function DashboardPage() {
       </div>
 
       {/* Today's Jobs */}
-      <div className="bg-white rounded-xl shadow-sm border-l-4 border-l-green-500 p-5 mb-6">
+      <div className="bg-card rounded-xl shadow-sm border-l-4 border-l-green-500 p-5 mb-6">
         <div className="flex items-center gap-2 mb-3">
-          <Briefcase className="w-4 h-4 text-green-600" />
+          <Briefcase className="w-4 h-4 text-status-success-text" />
           <h2 className="font-semibold text-base">Today&apos;s Jobs</h2>
-          <span className="text-xs text-slate-400">{format(now, "EEEE, MMM d")}</span>
+          <span className="text-xs text-muted-foreground">{format(now, "EEEE, MMM d")}</span>
         </div>
         {todaysJobs.length === 0 ? (
-          <p className="text-sm text-slate-400">No jobs scheduled for today.</p>
+          <p className="text-sm text-muted-foreground">No jobs scheduled for today.</p>
         ) : (
           <div className="space-y-3">
             {todaysJobs.map((job) => {
@@ -203,16 +203,16 @@ export default async function DashboardPage() {
                 ? `${job.address}, ${job.city}, ${job.state} ${job.zip}`
                 : null;
               return (
-                <div key={job.id} className="flex flex-col sm:flex-row sm:items-start sm:justify-between bg-green-50/50 rounded-lg px-4 py-3 gap-2">
+                <div key={job.id} className="flex flex-col sm:flex-row sm:items-start sm:justify-between bg-status-success-bg/50 rounded-lg px-4 py-3 gap-2">
                   <div className="min-w-0 flex-1">
                     <Link href={`/jobs/${job.id}`} className="font-medium text-sm hover:underline">
                       {job.title}
                     </Link>
-                    <p className="text-xs text-slate-500 mt-0.5">
+                    <p className="text-xs text-muted-foreground mt-0.5">
                       {job.customer.firstName} {job.customer.lastName}
                     </p>
                     {addr && (
-                      <p className="text-xs text-slate-400 mt-0.5 truncate">{addr}</p>
+                      <p className="text-xs text-muted-foreground mt-0.5 truncate">{addr}</p>
                     )}
                   </div>
                   <div className="flex items-center gap-2 shrink-0 sm:ml-3">
@@ -222,7 +222,7 @@ export default async function DashboardPage() {
                     {job.customer.phone && (
                       <a
                         href={`tel:${job.customer.phone}`}
-                        className="p-1.5 rounded-md hover:bg-green-100 text-green-700"
+                        className="p-1.5 rounded-md hover:bg-status-success-bg text-status-success-text"
                         title="Call customer"
                       >
                         <Phone className="w-4 h-4" />
@@ -233,7 +233,7 @@ export default async function DashboardPage() {
                         href={`https://www.google.com/maps/dir/?api=1&destination=${encodeURIComponent(addr)}`}
                         target="_blank"
                         rel="noopener noreferrer"
-                        className="p-1.5 rounded-md hover:bg-green-100 text-green-700"
+                        className="p-1.5 rounded-md hover:bg-status-success-bg text-status-success-text"
                         title="Get directions"
                       >
                         <MapPin className="w-4 h-4" />
@@ -248,49 +248,49 @@ export default async function DashboardPage() {
       </div>
 
       {/* Monthly Profitability */}
-      <div className="bg-white rounded-xl shadow-sm p-5 mb-6">
+      <div className="bg-card rounded-xl shadow-sm p-5 mb-6">
         <h2 className="font-semibold text-base mb-1">This Month</h2>
-        <p className="text-xs text-slate-400 mb-3">{format(now, "MMMM yyyy")} — based on paid invoices and completed job costs.</p>
+        <p className="text-xs text-muted-foreground mb-3">{format(now, "MMMM yyyy")} — based on paid invoices and completed job costs.</p>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
           <div>
-            <p className="text-xs text-slate-400">Revenue</p>
+            <p className="text-xs text-muted-foreground">Revenue</p>
             <p className="text-lg font-bold">
-              <span className="inline-block bg-green-50 text-green-700 px-2 py-0.5 rounded-md">${fmt(monthlyRevenue)}</span>
+              <span className="inline-block bg-status-success-bg text-status-success-text px-2 py-0.5 rounded-md">${fmt(monthlyRevenue)}</span>
             </p>
           </div>
           <div>
-            <p className="text-xs text-slate-400">Labor</p>
-            <p className="text-lg font-bold text-slate-500">${fmt(monthlyLabor)}</p>
+            <p className="text-xs text-muted-foreground">Labor</p>
+            <p className="text-lg font-bold text-muted-foreground">${fmt(monthlyLabor)}</p>
           </div>
           <div>
-            <p className="text-xs text-slate-400">Materials</p>
-            <p className="text-lg font-bold text-slate-500">${fmt(monthlyMaterials)}</p>
+            <p className="text-xs text-muted-foreground">Materials</p>
+            <p className="text-lg font-bold text-muted-foreground">${fmt(monthlyMaterials)}</p>
           </div>
           <div>
-            <p className="text-xs text-slate-400">Profit</p>
-            <p className={`text-lg font-bold ${monthlyProfit >= 0 ? "text-green-600" : "text-red-600"}`}>${fmt(monthlyProfit)}</p>
+            <p className="text-xs text-muted-foreground">Profit</p>
+            <p className={`text-lg font-bold ${monthlyProfit >= 0 ? "text-status-success-text" : "text-status-danger-text"}`}>${fmt(monthlyProfit)}</p>
           </div>
         </div>
       </div>
 
       {/* Job Status Breakdown — horizontal bar chart */}
-      <div className="bg-white rounded-xl shadow-sm p-5 mb-6">
+      <div className="bg-card rounded-xl shadow-sm p-5 mb-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-semibold text-base">Jobs by Status</h2>
-          <span className="text-xs text-slate-400">{totalJobs} total</span>
+          <span className="text-xs text-muted-foreground">{totalJobs} total</span>
         </div>
         <div className="space-y-3">
           {statusEntries.map(({ status, label, count }) => (
             <Link key={status} href={`/jobs?status=${status}`}>
-              <div className="group flex items-center gap-3 hover:bg-slate-50 rounded-lg px-2 py-1.5 -mx-2 transition-colors">
-                <span className="text-sm text-slate-600 w-24 shrink-0">{label}</span>
-                <div className="flex-1 h-5 bg-slate-100 rounded-full overflow-hidden">
+              <div className="group flex items-center gap-3 hover:bg-muted rounded-lg px-2 py-1.5 -mx-2 transition-colors">
+                <span className="text-sm text-muted-foreground w-24 shrink-0">{label}</span>
+                <div className="flex-1 h-5 bg-muted rounded-full overflow-hidden">
                   <div
                     className={`h-full rounded-full ${STATUS_BAR_COLORS[status] ?? "bg-slate-400"} transition-all duration-300`}
                     style={{ width: `${Math.max((count / maxStatusCount) * 100, count > 0 ? 8 : 0)}%` }}
                   />
                 </div>
-                <span className="text-sm font-semibold text-slate-700 w-8 text-right">{count}</span>
+                <span className="text-sm font-semibold text-foreground w-8 text-right">{count}</span>
               </div>
             </Link>
           ))}
@@ -299,29 +299,29 @@ export default async function DashboardPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         {/* Upcoming Jobs */}
-        <div className="bg-white rounded-xl shadow-sm p-5">
+        <div className="bg-card rounded-xl shadow-sm p-5">
           <div className="flex items-center gap-2 mb-4">
-            <Clock className="w-4 h-4 text-slate-400" />
+            <Clock className="w-4 h-4 text-muted-foreground" />
             <h2 className="font-semibold text-base">Upcoming Scheduled</h2>
           </div>
           {upcomingJobs.length === 0 ? (
-            <p className="text-sm text-slate-400">No upcoming jobs scheduled</p>
+            <p className="text-sm text-muted-foreground">No upcoming jobs scheduled</p>
           ) : (
             <div className="space-y-1">
               {upcomingJobs.map((job) => (
                 <Link key={job.id} href={`/jobs/${job.id}`}>
-                  <div className="flex justify-between items-center hover:bg-slate-50 rounded-lg px-3 py-2.5 -mx-2 transition-colors group">
+                  <div className="flex justify-between items-center hover:bg-muted rounded-lg px-3 py-2.5 -mx-2 transition-colors group">
                     <div>
                       <p className="text-sm font-medium">{job.title}</p>
-                      <p className="text-xs text-slate-400">{job.customer.firstName} {job.customer.lastName}</p>
+                      <p className="text-xs text-muted-foreground">{job.customer.firstName} {job.customer.lastName}</p>
                     </div>
                     <div className="flex items-center gap-2">
                       {job.scheduledDate && (
-                        <span className="text-xs text-slate-500 whitespace-nowrap">
+                        <span className="text-xs text-muted-foreground whitespace-nowrap">
                           {format(new Date(job.scheduledDate), "MMM d")}
                         </span>
                       )}
-                      <ArrowRight className="w-3.5 h-3.5 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/50 opacity-0 group-hover:opacity-100 transition-opacity" />
                     </div>
                   </div>
                 </Link>
@@ -331,30 +331,30 @@ export default async function DashboardPage() {
         </div>
 
         {/* Recent Jobs */}
-        <div className="bg-white rounded-xl shadow-sm p-5">
+        <div className="bg-card rounded-xl shadow-sm p-5">
           <div className="flex items-center gap-2 mb-4">
-            <FileText className="w-4 h-4 text-slate-400" />
+            <FileText className="w-4 h-4 text-muted-foreground" />
             <h2 className="font-semibold text-base">Recent Jobs</h2>
           </div>
           {recentJobs.length === 0 ? (
             <div className="text-center py-8">
-              <Briefcase className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-              <p className="text-sm text-slate-400">No jobs yet</p>
+              <Briefcase className="w-8 h-8 text-muted-foreground/50 mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground">No jobs yet</p>
             </div>
           ) : (
             <div className="space-y-1">
               {recentJobs.map((job) => (
                 <Link key={job.id} href={`/jobs/${job.id}`}>
-                  <div className="flex justify-between items-center hover:bg-slate-50 rounded-lg px-3 py-2.5 -mx-2 transition-colors group">
+                  <div className="flex justify-between items-center hover:bg-muted rounded-lg px-3 py-2.5 -mx-2 transition-colors group">
                     <div>
                       <p className="text-sm font-medium">{job.title}</p>
-                      <p className="text-xs text-slate-400">{job.customer.firstName} {job.customer.lastName} · {SERVICE_TYPE_LABELS[job.serviceType]}</p>
+                      <p className="text-xs text-muted-foreground">{job.customer.firstName} {job.customer.lastName} · {SERVICE_TYPE_LABELS[job.serviceType]}</p>
                     </div>
                     <div className="flex items-center gap-2">
                       <span className={`text-xs font-medium px-2 py-0.5 rounded-full whitespace-nowrap ${STATUS_COLORS[job.status]}`}>
                         {JOB_STATUS_LABELS[job.status]}
                       </span>
-                      <ArrowRight className="w-3.5 h-3.5 text-slate-300 opacity-0 group-hover:opacity-100 transition-opacity" />
+                      <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/50 opacity-0 group-hover:opacity-100 transition-opacity" />
                     </div>
                   </div>
                 </Link>

@@ -61,7 +61,7 @@ export default async function CustomersPage({
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Customers</h1>
-          <p className="text-slate-500 text-sm mt-1">{totalCount} total</p>
+          <p className="text-muted-foreground text-sm mt-1">{totalCount} total</p>
         </div>
         <Link href="/customers/new">
           <Button>
@@ -76,24 +76,24 @@ export default async function CustomersPage({
         <form className="flex-1">
           {sort && <input type="hidden" name="sort" value={sort} />}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               name="search"
               defaultValue={search}
               placeholder="Search by name, phone, or email..."
-              className="w-full border rounded-md pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
+              className="w-full border rounded-md pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </div>
         </form>
-        <Suspense fallback={<div className="border rounded-md px-2 py-1.5 text-sm w-28 bg-white" />}>
+        <Suspense fallback={<div className="border rounded-md px-2 py-1.5 text-sm w-28 bg-card" />}>
           <SortSelect options={SORT_OPTIONS} basePath="/customers" />
         </Suspense>
       </div>
 
       {/* List */}
       {customers.length === 0 ? (
-        <div className="text-center py-16 text-slate-400">
-          <Users className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+        <div className="text-center py-16 text-muted-foreground">
+          <Users className="w-8 h-8 text-muted-foreground/50 mx-auto mb-2" />
           <p className="text-lg font-medium">No customers found</p>
           <p className="text-sm mt-1">
             {search ? "Try adjusting your search." : "Add your first customer to get started"}
@@ -103,15 +103,15 @@ export default async function CustomersPage({
         <div className="space-y-2">
           {customers.map((c) => (
             <Link key={c.id} href={`/customers/${c.id}`}>
-              <div className="flex items-center justify-between bg-white rounded-xl shadow-sm px-5 py-4 hover:shadow-md hover:-translate-y-px transition-all duration-150 cursor-pointer">
+              <div className="flex items-center justify-between bg-card rounded-xl shadow-sm px-5 py-4 hover:shadow-md hover:-translate-y-px transition-all duration-150 cursor-pointer">
                 <div className="flex-1 min-w-0">
                   <div className="flex items-center gap-3">
-                    <span className="font-semibold text-slate-900">
+                    <span className="font-semibold text-foreground">
                       {c.lastName}, {c.firstName}
                     </span>
                     <Badge variant="secondary">{c._count.jobs} jobs</Badge>
                   </div>
-                  <div className="flex items-center gap-4 mt-1 text-sm text-slate-500">
+                  <div className="flex items-center gap-4 mt-1 text-sm text-muted-foreground">
                     <span className="flex items-center gap-1">
                       <Phone className="w-3 h-3" />
                       {c.phone}
@@ -123,7 +123,7 @@ export default async function CustomersPage({
                   </div>
                 </div>
                 {c.email && (
-                  <span className="text-sm text-slate-400 ml-4 hidden sm:block">{c.email}</span>
+                  <span className="text-sm text-muted-foreground ml-4 hidden sm:block">{c.email}</span>
                 )}
               </div>
             </Link>

@@ -21,7 +21,7 @@ export default function JobDetailLoading() {
       {/* Info grid */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="bg-white border rounded-lg p-4">
+          <div key={i} className="bg-card border rounded-lg p-4">
             <Skeleton className="h-3 w-16 mb-2" />
             <Skeleton className="h-5 w-28" />
           </div>
@@ -29,7 +29,7 @@ export default function JobDetailLoading() {
       </div>
 
       {/* Photos */}
-      <div className="bg-white border rounded-lg p-6 mb-6">
+      <div className="bg-card border rounded-lg p-6 mb-6">
         <Skeleton className="h-6 w-20 mb-4" />
         <div className="grid grid-cols-3 sm:grid-cols-4 gap-3">
           {Array.from({ length: 4 }).map((_, i) => (
@@ -41,7 +41,7 @@ export default function JobDetailLoading() {
       {/* Quotes & Invoices */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {Array.from({ length: 2 }).map((_, i) => (
-          <div key={i} className="bg-white border rounded-lg p-4">
+          <div key={i} className="bg-card border rounded-lg p-4">
             <div className="flex items-center justify-between mb-3">
               <Skeleton className="h-5 w-20" />
               <Skeleton className="h-8 w-24 rounded-md" />

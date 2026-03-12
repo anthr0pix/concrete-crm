@@ -71,12 +71,12 @@ export default function JobForm({ customers, defaultValues, jobId }: Props) {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="bg-white rounded-xl shadow-sm p-6 space-y-6">
-      <p className="text-xs text-slate-400"><span className="text-red-500">*</span> Required</p>
+    <form onSubmit={handleSubmit(onSubmit)} className="bg-card rounded-xl shadow-sm p-6 space-y-6">
+      <p className="text-xs text-muted-foreground"><span className="text-destructive">*</span> Required</p>
       {!isEdit && (
         <div className="space-y-1">
           <RequiredLabel>Customer</RequiredLabel>
-          <select {...register("customerId")} className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900">
+          <select {...register("customerId")} className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
             <option value="">Select a customer...</option>
             {customers.map((c) => (
               <option key={c.id} value={c.id}>{c.lastName}, {c.firstName}</option>
@@ -95,7 +95,7 @@ export default function JobForm({ customers, defaultValues, jobId }: Props) {
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1">
           <RequiredLabel>Service Type</RequiredLabel>
-          <select {...register("serviceType")} className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900">
+          <select {...register("serviceType")} className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
             {Object.entries(SERVICE_TYPE_LABELS).map(([val, label]) => (
               <option key={val} value={val}>{label}</option>
             ))}
@@ -103,7 +103,7 @@ export default function JobForm({ customers, defaultValues, jobId }: Props) {
         </div>
         <div className="space-y-1">
           <RequiredLabel>Status</RequiredLabel>
-          <select {...register("status")} className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900">
+          <select {...register("status")} className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
             {Object.entries(JOB_STATUS_LABELS).map(([val, label]) => (
               <option key={val} value={val}>{label}</option>
             ))}
@@ -125,7 +125,7 @@ export default function JobForm({ customers, defaultValues, jobId }: Props) {
       <div className="space-y-1">
         <Label>Square Footage</Label>
         <Input {...register("squareFootage")} type="number" placeholder="0" />
-        <p className="text-xs text-slate-400">Total area to be sealed. Used for estimating materials.</p>
+        <p className="text-xs text-muted-foreground">Total area to be sealed. Used for estimating materials.</p>
       </div>
 
       <div className="space-y-1">
@@ -173,13 +173,13 @@ export default function JobForm({ customers, defaultValues, jobId }: Props) {
       <div className="space-y-1">
         <Label>Description</Label>
         <Textarea {...register("description")} rows={2} placeholder="Brief description of the work..." />
-        <p className="text-xs text-slate-400">Visible on quotes and invoices sent to the customer.</p>
+        <p className="text-xs text-muted-foreground">Visible on quotes and invoices sent to the customer.</p>
       </div>
 
       <div className="space-y-1">
         <Label>Notes</Label>
         <Textarea {...register("notes")} rows={3} placeholder="Internal notes, gate codes, special instructions..." />
-        <p className="text-xs text-slate-400">Internal only — not shown to the customer.</p>
+        <p className="text-xs text-muted-foreground">Internal only — not shown to the customer.</p>
       </div>
 
       <div className="flex gap-3">

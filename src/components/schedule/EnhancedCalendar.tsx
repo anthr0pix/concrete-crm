@@ -30,13 +30,13 @@ import Link from "next/link";
 import { SERVICE_TYPE_LABELS, JOB_STATUS_LABELS } from "@/types";
 
 const SERVICE_TYPE_COLORS: Record<string, string> = {
-  CONCRETE_SEALING: "bg-blue-100 text-blue-800",
-  PAVER_SEALING: "bg-purple-100 text-purple-800",
-  DRIVEWAY_SEALING: "bg-green-100 text-green-800",
-  PATIO_SEALING: "bg-amber-100 text-amber-800",
-  POOL_DECK_SEALING: "bg-cyan-100 text-cyan-800",
-  COMMERCIAL_SEALING: "bg-orange-100 text-orange-800",
-  OTHER: "bg-slate-100 text-slate-800",
+  CONCRETE_SEALING: "bg-status-info-bg text-status-info-text",
+  PAVER_SEALING: "bg-status-purple-bg text-status-purple-text",
+  DRIVEWAY_SEALING: "bg-status-success-bg text-status-success-text",
+  PATIO_SEALING: "bg-status-amber-bg text-status-amber-text",
+  POOL_DECK_SEALING: "bg-status-info-bg text-status-info-text",
+  COMMERCIAL_SEALING: "bg-status-orange-bg text-status-orange-text",
+  OTHER: "bg-status-neutral-bg text-status-neutral-text",
 };
 
 interface CalendarJob {
@@ -72,17 +72,17 @@ function DroppableDay({
   return (
     <div
       ref={setNodeRef}
-      className={`min-h-24 border-r border-b p-1.5 transition-colors ${
-        !isCurrentMonth ? "bg-slate-50" : ""
-      } ${isOver ? "bg-blue-50 ring-2 ring-inset ring-blue-300" : ""}`}
+      className={`min-h-24 border-r border-b border-border p-1.5 transition-colors ${
+        !isCurrentMonth ? "bg-muted" : ""
+      } ${isOver ? "bg-accent ring-2 ring-inset ring-ring" : ""}`}
     >
       <div
         className={`text-xs font-medium w-6 h-6 flex items-center justify-center rounded-full mb-1 ${
           isToday
             ? "bg-[#1a1a2e] text-white"
             : isCurrentMonth
-              ? "text-slate-700"
-              : "text-slate-300"
+              ? "text-foreground"
+              : "text-muted-foreground"
         }`}
       >
         {format(date, "d")}
@@ -268,13 +268,13 @@ export default function EnhancedCalendar({
           onDragStart={handleDragStart}
           onDragEnd={handleDragEnd}
         >
-          <div className="bg-white border rounded-lg overflow-hidden">
+          <div className="bg-card border border-border rounded-lg overflow-hidden">
             {/* Day headers */}
-            <div className="grid grid-cols-7 border-b">
+            <div className="grid grid-cols-7 border-b border-border">
               {["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"].map((d) => (
                 <div
                   key={d}
-                  className="text-center text-xs font-medium text-slate-500 py-2"
+                  className="text-center text-xs font-medium text-muted-foreground py-2"
                 >
                   {d}
                 </div>
@@ -323,7 +323,7 @@ export default function EnhancedCalendar({
       {/* Mobile: List view */}
       <div className="md:hidden">
         {monthJobs.length === 0 ? (
-          <p className="text-sm text-slate-400 text-center py-8">
+          <p className="text-sm text-muted-foreground text-center py-8">
             No jobs scheduled this month
           </p>
         ) : (
@@ -334,7 +334,7 @@ export default function EnhancedCalendar({
                 SERVICE_TYPE_COLORS.OTHER;
               return (
                 <Link key={job.id} href={`/jobs/${job.id}`}>
-                  <div className="flex items-center justify-between bg-white border rounded-lg px-4 py-3 hover:shadow-sm transition-shadow">
+                  <div className="flex items-center justify-between bg-card border border-border rounded-lg px-4 py-3 hover:shadow-sm transition-shadow">
                     <div>
                       <p className="font-medium text-sm">
                         {job.customer.firstName} {job.customer.lastName}
@@ -347,7 +347,7 @@ export default function EnhancedCalendar({
                             job.serviceType}
                         </span>
                         {job.city && (
-                          <span className="text-xs text-slate-500">
+                          <span className="text-xs text-muted-foreground">
                             {job.city}
                           </span>
                         )}
@@ -359,7 +359,7 @@ export default function EnhancedCalendar({
                           ? format(parseISO(job.scheduledDate), "MMM d")
                           : ""}
                       </p>
-                      <p className="text-xs text-slate-500">{JOB_STATUS_LABELS[job.status] ?? job.status}</p>
+                      <p className="text-xs text-muted-foreground">{JOB_STATUS_LABELS[job.status] ?? job.status}</p>
                     </div>
                   </div>
                 </Link>

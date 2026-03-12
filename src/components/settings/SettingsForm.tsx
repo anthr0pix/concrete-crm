@@ -53,7 +53,7 @@ export default function SettingsForm({ defaults }: { defaults: SettingsDefaults 
   return (
     <div className="space-y-6">
       {/* Review Requests Section */}
-      <div className="bg-white border rounded-lg p-6">
+      <div className="bg-card border rounded-lg p-6">
         <h2 className="font-semibold text-lg mb-4">Review Requests</h2>
         <div className="space-y-5">
           <label className="flex items-center gap-3 cursor-pointer">
@@ -61,11 +61,11 @@ export default function SettingsForm({ defaults }: { defaults: SettingsDefaults 
               type="checkbox"
               checked={reviewRequestEnabled}
               onChange={(e) => setReviewRequestEnabled(e.target.checked)}
-              className="w-4 h-4 rounded border-slate-300 text-[#e94560] focus:ring-[#e94560]"
+              className="w-4 h-4 rounded border-border text-primary focus:ring-ring"
             />
             <span className="text-sm font-medium">Enable automatic review requests</span>
           </label>
-          <p className="text-xs text-slate-500 -mt-3 ml-7">
+          <p className="text-xs text-muted-foreground -mt-3 ml-7">
             Automatically send review request emails to customers after job completion.
           </p>
 
@@ -80,7 +80,7 @@ export default function SettingsForm({ defaults }: { defaults: SettingsDefaults 
               onChange={(e) => setReviewDelayDays(Number(e.target.value))}
               className="max-w-[120px]"
             />
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-muted-foreground">
               How many days to wait after a job is marked complete before sending a review request (1-30).
             </p>
           </div>
@@ -94,7 +94,7 @@ export default function SettingsForm({ defaults }: { defaults: SettingsDefaults 
               value={googleReviewUrl}
               onChange={(e) => setGoogleReviewUrl(e.target.value)}
             />
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-muted-foreground">
               The direct link to your Google Business review page. Customers will be directed here to leave a review.
             </p>
           </div>
@@ -102,7 +102,7 @@ export default function SettingsForm({ defaults }: { defaults: SettingsDefaults 
       </div>
 
       {/* Reseal Reminders Section */}
-      <div className="bg-white border rounded-lg p-6">
+      <div className="bg-card border rounded-lg p-6">
         <h2 className="font-semibold text-lg mb-4">Reseal Reminders</h2>
         <div className="space-y-5">
           <label className="flex items-center gap-3 cursor-pointer">
@@ -110,11 +110,11 @@ export default function SettingsForm({ defaults }: { defaults: SettingsDefaults 
               type="checkbox"
               checked={resealReminderEnabled}
               onChange={(e) => setResealReminderEnabled(e.target.checked)}
-              className="w-4 h-4 rounded border-slate-300 text-[#e94560] focus:ring-[#e94560]"
+              className="w-4 h-4 rounded border-border text-primary focus:ring-ring"
             />
             <span className="text-sm font-medium">Enable reseal reminders</span>
           </label>
-          <p className="text-xs text-slate-500 -mt-3 ml-7">
+          <p className="text-xs text-muted-foreground -mt-3 ml-7">
             Automatically send reminder emails when a customer&apos;s surface is due for resealing.
           </p>
 
@@ -129,7 +129,7 @@ export default function SettingsForm({ defaults }: { defaults: SettingsDefaults 
               onChange={(e) => setResealReminderMonths(Number(e.target.value))}
               className="max-w-[120px]"
             />
-            <p className="text-xs text-slate-500">
+            <p className="text-xs text-muted-foreground">
               How many months after job completion to send a reseal reminder to the customer (1-60). Most concrete sealers recommend resealing every 24 months.
             </p>
           </div>

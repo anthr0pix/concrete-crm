@@ -71,7 +71,7 @@ export default async function QuotesPage({
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Quotes</h1>
-          <p className="text-slate-500 text-sm mt-1">{totalCount} total</p>
+          <p className="text-muted-foreground text-sm mt-1">{totalCount} total</p>
         </div>
         <Link href="/quotes/new">
           <Button><Plus className="w-4 h-4 mr-2" /> New Quote</Button>
@@ -84,16 +84,16 @@ export default async function QuotesPage({
           {activeStatus && <input type="hidden" name="status" value={activeStatus} />}
           {sort && <input type="hidden" name="sort" value={sort} />}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               name="search"
               defaultValue={search}
               placeholder="Search by quote number or customer name..."
-              className="w-full border rounded-md pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
+              className="w-full border rounded-md pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </div>
         </form>
-        <Suspense fallback={<div className="border rounded-md px-2 py-1.5 text-sm w-28 bg-white" />}>
+        <Suspense fallback={<div className="border rounded-md px-2 py-1.5 text-sm w-28 bg-card" />}>
           <SortSelect options={SORT_OPTIONS} basePath="/quotes" />
         </Suspense>
       </div>
@@ -114,9 +114,9 @@ export default async function QuotesPage({
                   "px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition-all duration-150",
                   isActive
                     ? "text-white"
-                    : "bg-white border text-slate-600 hover:bg-slate-50"
+                    : "bg-card border text-muted-foreground hover:bg-muted"
                 )}
-                style={isActive ? { background: "linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%)" } : {}}
+                style={isActive ? { background: "linear-gradient(135deg, var(--mws-navy) 0%, var(--secondary) 100%)" } : {}}
               >
                 {s === "ALL" ? "All" : QUOTE_STATUS_LABELS[s]}
               </button>
@@ -126,8 +126,8 @@ export default async function QuotesPage({
       </div>
 
       {quotes.length === 0 ? (
-        <div className="text-center py-16 text-slate-400">
-          <FileText className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+        <div className="text-center py-16 text-muted-foreground">
+          <FileText className="w-8 h-8 text-muted-foreground/50 mx-auto mb-2" />
           <p className="text-lg font-medium">No quotes found</p>
           <p className="text-sm mt-1">
             {search || activeStatus
@@ -141,7 +141,7 @@ export default async function QuotesPage({
             const isStale = q.status === "SENT" && new Date(q.updatedAt) < subDays(new Date(), 7);
             return (
             <Link key={q.id} href={`/quotes/${q.id}`}>
-              <div className="flex items-center justify-between bg-white rounded-xl shadow-sm px-5 py-4 hover:shadow-md hover:-translate-y-px transition-all duration-150 cursor-pointer">
+              <div className="flex items-center justify-between bg-card rounded-xl shadow-sm px-5 py-4 hover:shadow-md hover:-translate-y-px transition-all duration-150 cursor-pointer">
                 <div>
                   <div className="flex items-center gap-3">
                     <span className="font-semibold">{q.quoteNumber}</span>
@@ -149,19 +149,19 @@ export default async function QuotesPage({
                       {QUOTE_STATUS_LABELS[q.status]}
                     </span>
                     {isStale && (
-                      <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">
+                      <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-status-amber-bg text-status-amber-text">
                         Stale
                       </span>
                     )}
                   </div>
-                  <p className="text-sm text-slate-500 mt-0.5">
+                  <p className="text-sm text-muted-foreground mt-0.5">
                     {q.customer.firstName} {q.customer.lastName} · {format(new Date(q.createdAt), "MMM d, yyyy")}
                   </p>
                 </div>
                 <div className="text-right">
                   <p className="font-bold text-lg">${q.total.toFixed(2)}</p>
                   {q.validUntil && (
-                    <p className="text-xs text-slate-400">Valid until {format(new Date(q.validUntil), "MMM d")}</p>
+                    <p className="text-xs text-muted-foreground">Valid until {format(new Date(q.validUntil), "MMM d")}</p>
                   )}
                 </div>
               </div>

@@ -49,20 +49,20 @@ export const EXPENSE_CATEGORY_LABELS: Record<string, string> = {
 
 export const STATUS_COLORS: Record<string, string> = {
   // Job statuses
-  LEAD: "bg-purple-100 text-purple-700",
-  QUOTED: "bg-blue-100 text-blue-700",
-  SCHEDULED: "bg-yellow-100 text-yellow-700",
-  IN_PROGRESS: "bg-orange-100 text-orange-700",
-  COMPLETED: "bg-green-100 text-green-700",
-  CANCELLED: "bg-red-100 text-red-700",
+  LEAD: "bg-status-purple-bg text-status-purple-text",
+  QUOTED: "bg-status-info-bg text-status-info-text",
+  SCHEDULED: "bg-status-warning-bg text-status-warning-text",
+  IN_PROGRESS: "bg-status-orange-bg text-status-orange-text",
+  COMPLETED: "bg-status-success-bg text-status-success-text",
+  CANCELLED: "bg-status-danger-bg text-status-danger-text",
   // Quote statuses
-  DRAFT: "bg-amber-100 text-amber-700",
-  SENT: "bg-blue-100 text-blue-700",
-  ACCEPTED: "bg-green-100 text-green-700",
-  DECLINED: "bg-red-100 text-red-700",
-  EXPIRED: "bg-orange-100 text-orange-700",
+  DRAFT: "bg-status-amber-bg text-status-amber-text",
+  SENT: "bg-status-info-bg text-status-info-text",
+  ACCEPTED: "bg-status-success-bg text-status-success-text",
+  DECLINED: "bg-status-danger-bg text-status-danger-text",
+  EXPIRED: "bg-status-orange-bg text-status-orange-text",
   // Invoice statuses
-  PAID: "bg-green-100 text-green-700",
-  OVERDUE: "bg-red-100 text-red-700",
-  VOID: "bg-slate-200 text-slate-600",
+  PAID: "bg-status-success-bg text-status-success-text",
+  OVERDUE: "bg-status-danger-bg text-status-danger-text",
+  VOID: "bg-status-neutral-bg text-status-neutral-text",
 };

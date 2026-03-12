@@ -92,7 +92,7 @@ export default function ExpenseForm({ jobs, defaultValues, expenseId }: Props) {
           <Label>Category</Label>
           <select
             {...register("category")}
-            className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
+            className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           >
             {Object.entries(EXPENSE_CATEGORY_LABELS).map(([val, label]) => (
               <option key={val} value={val}>
@@ -118,7 +118,7 @@ export default function ExpenseForm({ jobs, defaultValues, expenseId }: Props) {
         <div className="space-y-1">
           <Label>Amount</Label>
           <div className="relative">
-            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-slate-500">
+            <span className="absolute left-3 top-1/2 -translate-y-1/2 text-sm text-muted-foreground">
               $
             </span>
             <Input
@@ -147,7 +147,7 @@ export default function ExpenseForm({ jobs, defaultValues, expenseId }: Props) {
         <Label>Link to Job (optional)</Label>
         <select
           {...register("jobId")}
-          className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
+          className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
         >
           <option value="">None — general business expense</option>
           {jobs.map((job) => (
@@ -156,7 +156,7 @@ export default function ExpenseForm({ jobs, defaultValues, expenseId }: Props) {
             </option>
           ))}
         </select>
-        <p className="text-xs text-slate-400">Link this expense to a specific job to track job-level costs.</p>
+        <p className="text-xs text-muted-foreground">Link this expense to a specific job to track job-level costs.</p>
       </div>
 
       <div className="space-y-1">
@@ -166,7 +166,7 @@ export default function ExpenseForm({ jobs, defaultValues, expenseId }: Props) {
           type="url"
           placeholder="https://..."
         />
-        <p className="text-xs text-slate-400">Paste a link to a photo or scan of the receipt, if you have one.</p>
+        <p className="text-xs text-muted-foreground">Paste a link to a photo or scan of the receipt, if you have one.</p>
         {errors.receiptUrl && (
           <p className="text-xs text-red-500">{errors.receiptUrl.message}</p>
         )}

@@ -33,25 +33,25 @@ function QuarterCard({ data }: { data: QuarterData }) {
   return (
     <div className="border rounded-lg overflow-hidden">
       <div className="p-4">
-        <h3 className="font-semibold text-gray-900 mb-3">
+        <h3 className="font-semibold text-foreground mb-3">
           {QUARTER_LABELS[data.quarter - 1]}
         </h3>
 
         <div className="grid grid-cols-3 gap-4 text-sm">
           <div>
-            <div className="text-gray-500 mb-1">Revenue</div>
+            <div className="text-muted-foreground mb-1">Revenue</div>
             <div className="font-semibold text-emerald-600 tabular-nums">
               {formatCurrency(data.revenue)}
             </div>
           </div>
           <div>
-            <div className="text-gray-500 mb-1">Expenses</div>
+            <div className="text-muted-foreground mb-1">Expenses</div>
             <div className="font-semibold text-red-600 tabular-nums">
               {formatCurrency(data.totalExpenses)}
             </div>
           </div>
           <div>
-            <div className="text-gray-500 mb-1">Net Income</div>
+            <div className="text-muted-foreground mb-1">Net Income</div>
             <div
               className={`font-semibold tabular-nums ${
                 data.netIncome >= 0 ? "text-emerald-600" : "text-red-600"
@@ -65,7 +65,7 @@ function QuarterCard({ data }: { data: QuarterData }) {
         {hasExpenses && (
           <button
             onClick={() => setExpanded(!expanded)}
-            className="mt-3 text-xs text-gray-500 hover:text-gray-700 flex items-center gap-1 transition-colors"
+            className="mt-3 text-xs text-muted-foreground hover:text-foreground flex items-center gap-1 transition-colors"
           >
             <svg
               className={`w-3 h-3 transition-transform ${expanded ? "rotate-90" : ""}`}
@@ -81,16 +81,16 @@ function QuarterCard({ data }: { data: QuarterData }) {
       </div>
 
       {expanded && hasExpenses && (
-        <div className="border-t bg-gray-50 p-4">
+        <div className="border-t bg-muted p-4">
           <div className="space-y-1.5">
             {Object.entries(data.expenses)
               .sort(([, a], [, b]) => b - a)
               .map(([category, amount]) => (
                 <div key={category} className="flex justify-between text-sm">
-                  <span className="text-gray-600">
+                  <span className="text-muted-foreground">
                     {EXPENSE_CATEGORY_LABELS[category] || category}
                   </span>
-                  <span className="tabular-nums text-gray-900">
+                  <span className="tabular-nums text-foreground">
                     {formatCurrency(amount)}
                   </span>
                 </div>
@@ -110,23 +110,23 @@ export default function TaxSummaryCard({ quarters }: TaxSummaryCardProps) {
   return (
     <div className="space-y-4">
       {/* Annual summary */}
-      <div className="bg-gray-50 border rounded-lg p-4">
-        <h3 className="text-sm font-semibold text-gray-700 mb-2">Annual Summary</h3>
+      <div className="bg-muted border rounded-lg p-4">
+        <h3 className="text-sm font-semibold text-foreground mb-2">Annual Summary</h3>
         <div className="grid grid-cols-3 gap-4 text-sm">
           <div>
-            <div className="text-gray-500 mb-1">Total Revenue</div>
+            <div className="text-muted-foreground mb-1">Total Revenue</div>
             <div className="text-lg font-bold text-emerald-600 tabular-nums">
               {formatCurrency(annualRevenue)}
             </div>
           </div>
           <div>
-            <div className="text-gray-500 mb-1">Total Expenses</div>
+            <div className="text-muted-foreground mb-1">Total Expenses</div>
             <div className="text-lg font-bold text-red-600 tabular-nums">
               {formatCurrency(annualExpenses)}
             </div>
           </div>
           <div>
-            <div className="text-gray-500 mb-1">Net Income</div>
+            <div className="text-muted-foreground mb-1">Net Income</div>
             <div
               className={`text-lg font-bold tabular-nums ${
                 annualNet >= 0 ? "text-emerald-600" : "text-red-600"

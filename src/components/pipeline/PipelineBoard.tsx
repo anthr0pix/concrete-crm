@@ -119,7 +119,7 @@ export default function PipelineBoard({
       <div className="mb-4">
         <button
           onClick={() => setShowClosed((v) => !v)}
-          className="text-sm text-slate-500 hover:text-slate-700 transition-colors"
+          className="text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           {showClosed ? "Hide Closed Jobs" : "Show Closed Jobs"}
         </button>

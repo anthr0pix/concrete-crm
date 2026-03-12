@@ -37,11 +37,11 @@ export default function ProfitLossChart({ data }: ProfitLossChartProps) {
       <div className="flex gap-6 text-sm mb-4">
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-sm bg-emerald-500" />
-          <span className="text-gray-600">Revenue</span>
+          <span className="text-muted-foreground">Revenue</span>
         </div>
         <div className="flex items-center gap-2">
           <div className="w-3 h-3 rounded-sm bg-red-400" />
-          <span className="text-gray-600">Expenses</span>
+          <span className="text-muted-foreground">Expenses</span>
         </div>
       </div>
 
@@ -52,7 +52,7 @@ export default function ProfitLossChart({ data }: ProfitLossChartProps) {
         return (
           <div key={d.month} className="flex items-center gap-3">
             {/* Month label */}
-            <div className="w-10 text-sm font-medium text-gray-500 text-right shrink-0">
+            <div className="w-10 text-sm font-medium text-muted-foreground text-right shrink-0">
               {MONTH_NAMES[d.month]}
             </div>
 
@@ -66,7 +66,7 @@ export default function ProfitLossChart({ data }: ProfitLossChartProps) {
                     style={{ width: `${revenueWidth}%` }}
                   />
                 </div>
-                <span className="text-xs text-gray-500 w-16 text-right shrink-0">
+                <span className="text-xs text-muted-foreground w-16 text-right shrink-0">
                   {formatCurrency(d.revenue)}
                 </span>
               </div>
@@ -79,7 +79,7 @@ export default function ProfitLossChart({ data }: ProfitLossChartProps) {
                     style={{ width: `${expensesWidth}%` }}
                   />
                 </div>
-                <span className="text-xs text-gray-500 w-16 text-right shrink-0">
+                <span className="text-xs text-muted-foreground w-16 text-right shrink-0">
                   {formatCurrency(d.expenses)}
                 </span>
               </div>
@@ -100,15 +100,15 @@ export default function ProfitLossChart({ data }: ProfitLossChartProps) {
 
       {/* Totals row */}
       <div className="border-t pt-3 mt-3 flex items-center gap-3">
-        <div className="w-10 text-sm font-bold text-gray-700 text-right shrink-0">
+        <div className="w-10 text-sm font-bold text-foreground text-right shrink-0">
           Total
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex justify-between text-sm">
-            <span className="text-gray-600">
+            <span className="text-muted-foreground">
               Revenue: {formatCurrency(data.reduce((s, d) => s + d.revenue, 0))}
             </span>
-            <span className="text-gray-600">
+            <span className="text-muted-foreground">
               Expenses: {formatCurrency(data.reduce((s, d) => s + d.expenses, 0))}
             </span>
           </div>

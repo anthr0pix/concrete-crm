@@ -68,7 +68,7 @@ export default function ExpenseTable({ expenses }: Props) {
         <select
           value={categoryFilter}
           onChange={(e) => setCategoryFilter(e.target.value)}
-          className="border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
+          className="border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
         >
           <option value="">All Categories</option>
           {Object.entries(EXPENSE_CATEGORY_LABELS).map(([val, label]) => (
@@ -78,27 +78,27 @@ export default function ExpenseTable({ expenses }: Props) {
           ))}
         </select>
         <div className="flex items-center gap-2">
-          <label className="text-sm text-slate-500">From</label>
+          <label className="text-sm text-muted-foreground">From</label>
           <input
             type="date"
             value={startDate}
             onChange={(e) => setStartDate(e.target.value)}
-            className="border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
+            className="border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
         <div className="flex items-center gap-2">
-          <label className="text-sm text-slate-500">To</label>
+          <label className="text-sm text-muted-foreground">To</label>
           <input
             type="date"
             value={endDate}
             onChange={(e) => setEndDate(e.target.value)}
-            className="border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
+            className="border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
           />
         </div>
       </div>
 
       {filtered.length === 0 ? (
-        <div className="text-center py-16 text-slate-400">
+        <div className="text-center py-16 text-muted-foreground">
           <p className="text-lg font-medium">No expenses found</p>
         </div>
       ) : (
@@ -132,7 +132,7 @@ export default function ExpenseTable({ expenses }: Props) {
                       </Badge>
                     </TableCell>
                     <TableCell>{expense.description}</TableCell>
-                    <TableCell className="text-slate-500">
+                    <TableCell className="text-muted-foreground">
                       {expense.vendor || "-"}
                     </TableCell>
                     <TableCell className="text-right font-medium">
@@ -147,15 +147,15 @@ export default function ExpenseTable({ expenses }: Props) {
                           {expense.job.title}
                         </Link>
                       ) : (
-                        <span className="text-slate-400">-</span>
+                        <span className="text-muted-foreground">-</span>
                       )}
                     </TableCell>
                     <TableCell>
                       <Link
                         href={`/expenses/${expense.id}/edit`}
-                        className="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-slate-100 transition-colors"
+                        className="inline-flex items-center justify-center w-8 h-8 rounded-md hover:bg-muted transition-colors"
                       >
-                        <Pencil className="w-4 h-4 text-slate-500" />
+                        <Pencil className="w-4 h-4 text-muted-foreground" />
                       </Link>
                     </TableCell>
                   </TableRow>
@@ -169,7 +169,7 @@ export default function ExpenseTable({ expenses }: Props) {
             {filtered.map((expense) => (
               <div
                 key={expense.id}
-                className="bg-white border rounded-lg p-4 space-y-2"
+                className="bg-card border rounded-lg p-4 space-y-2"
               >
                 <div className="flex items-center justify-between">
                   <Badge
@@ -182,10 +182,10 @@ export default function ExpenseTable({ expenses }: Props) {
                     ${expense.amount.toFixed(2)}
                   </span>
                 </div>
-                <p className="font-medium text-slate-900">
+                <p className="font-medium text-foreground">
                   {expense.description}
                 </p>
-                <div className="flex items-center justify-between text-sm text-slate-500">
+                <div className="flex items-center justify-between text-sm text-muted-foreground">
                   <span>
                     {format(new Date(expense.date), "MMM d, yyyy")}
                   </span>
@@ -202,7 +202,7 @@ export default function ExpenseTable({ expenses }: Props) {
                 <div className="flex justify-end">
                   <Link
                     href={`/expenses/${expense.id}/edit`}
-                    className="inline-flex items-center gap-1 text-sm text-slate-500 hover:text-slate-900"
+                    className="inline-flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground"
                   >
                     <Pencil className="w-3.5 h-3.5" /> Edit
                   </Link>
@@ -214,10 +214,10 @@ export default function ExpenseTable({ expenses }: Props) {
           {/* Total */}
           <div className="mt-4 flex justify-end border-t pt-4">
             <div className="text-right">
-              <p className="text-sm text-slate-500">
+              <p className="text-sm text-muted-foreground">
                 Total ({filtered.length} expense{filtered.length !== 1 ? "s" : ""})
               </p>
-              <p className="text-xl font-bold text-slate-900">
+              <p className="text-xl font-bold text-foreground">
                 ${total.toFixed(2)}
               </p>
             </div>

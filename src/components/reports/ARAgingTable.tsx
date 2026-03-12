@@ -34,9 +34,9 @@ export default function ARAgingTable({ buckets, totalOutstanding }: ARAgingTable
       <table className="w-full text-sm">
         <thead>
           <tr className="border-b">
-            <th className="text-left py-2 font-semibold text-gray-700">Period</th>
-            <th className="text-right py-2 font-semibold text-gray-700"># Invoices</th>
-            <th className="text-right py-2 font-semibold text-gray-700">Amount</th>
+            <th className="text-left py-2 font-semibold text-muted-foreground">Period</th>
+            <th className="text-right py-2 font-semibold text-muted-foreground"># Invoices</th>
+            <th className="text-right py-2 font-semibold text-muted-foreground">Amount</th>
           </tr>
         </thead>
         <tbody>
@@ -45,16 +45,16 @@ export default function ARAgingTable({ buckets, totalOutstanding }: ARAgingTable
             const style = BUCKET_STYLES[key] || "";
 
             return (
-              <tr key={key} className="border-b border-gray-100">
+              <tr key={key} className="border-b border-border">
                 <td className="py-2.5">
                   <span className={`inline-block px-2 py-0.5 rounded text-xs font-medium ${style}`}>
                     {BUCKET_LABELS[key]}
                   </span>
                 </td>
-                <td className="text-right py-2.5 tabular-nums text-gray-600">
+                <td className="text-right py-2.5 tabular-nums text-muted-foreground">
                   {bucket.count}
                 </td>
-                <td className="text-right py-2.5 tabular-nums text-gray-900">
+                <td className="text-right py-2.5 tabular-nums text-foreground">
                   {formatCurrency(bucket.total)}
                 </td>
               </tr>
@@ -63,11 +63,11 @@ export default function ARAgingTable({ buckets, totalOutstanding }: ARAgingTable
         </tbody>
         <tfoot>
           <tr className="border-t-2">
-            <td className="py-2.5 font-bold text-gray-900">Total Outstanding</td>
-            <td className="text-right py-2.5 font-bold tabular-nums text-gray-900">
+            <td className="py-2.5 font-bold text-foreground">Total Outstanding</td>
+            <td className="text-right py-2.5 font-bold tabular-nums text-foreground">
               {bucketOrder.reduce((sum, key) => sum + (buckets[key]?.count || 0), 0)}
             </td>
-            <td className="text-right py-2.5 font-bold tabular-nums text-gray-900">
+            <td className="text-right py-2.5 font-bold tabular-nums text-foreground">
               {formatCurrency(totalOutstanding)}
             </td>
           </tr>

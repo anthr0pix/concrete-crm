@@ -30,7 +30,7 @@ export default function CustomerDetailLoading() {
         </div>
         <div className="space-y-2">
           {Array.from({ length: 3 }).map((_, i) => (
-            <div key={i} className="flex items-center justify-between bg-white border rounded-lg px-4 py-3">
+            <div key={i} className="flex items-center justify-between bg-card border rounded-lg px-4 py-3">
               <div>
                 <Skeleton className="h-4 w-48 mb-1" />
                 <Skeleton className="h-3 w-36" />

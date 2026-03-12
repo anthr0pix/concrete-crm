@@ -40,11 +40,11 @@ export default function RequestChangesButton({ token }: Props) {
   if (state === "done") {
     return (
       <div className="flex flex-col items-center gap-3">
-        <div className="flex items-center gap-2 text-amber-700 font-semibold text-lg">
+        <div className="flex items-center gap-2 text-status-amber-text font-semibold text-lg">
           <CheckCircle className="w-6 h-6" />
           Request Sent
         </div>
-        <p className="text-gray-500 text-sm">
+        <p className="text-muted-foreground text-sm">
           We&apos;ll review your feedback and get back to you shortly.
         </p>
       </div>
@@ -54,7 +54,7 @@ export default function RequestChangesButton({ token }: Props) {
   if (state === "confirming" || state === "loading" || state === "error") {
     return (
       <div className="flex flex-col items-center gap-4 w-full max-w-md mx-auto">
-        <p className="text-gray-700 font-medium text-base">
+        <p className="text-foreground font-medium text-base">
           What changes would you like?
         </p>
         <textarea
@@ -63,13 +63,13 @@ export default function RequestChangesButton({ token }: Props) {
           placeholder="Describe the changes you'd like to this quote..."
           rows={4}
           maxLength={2000}
-          className="w-full border border-gray-300 rounded-lg px-4 py-3 text-sm focus:outline-none focus:ring-2 focus:ring-amber-400 resize-none"
+          className="w-full border border-border rounded-lg px-4 py-3 text-sm bg-card text-foreground focus:outline-none focus:ring-2 focus:ring-status-amber-text resize-none"
         />
         <div className="flex gap-3">
           <button
             onClick={handleSubmit}
             disabled={state === "loading" || !message.trim()}
-            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-colors bg-amber-500 text-white hover:bg-amber-600 disabled:opacity-60"
+            className="inline-flex items-center gap-2 px-6 py-3 rounded-lg font-semibold transition-colors bg-status-amber-text text-white hover:bg-status-amber-text/90 disabled:opacity-60"
           >
             <MessageSquare className="w-4 h-4" />
             {state === "loading" ? "Sending\u2026" : "Send Request"}
@@ -77,13 +77,13 @@ export default function RequestChangesButton({ token }: Props) {
           <button
             onClick={() => { setState("idle"); setMessage(""); setErrorMsg(""); }}
             disabled={state === "loading"}
-            className="px-6 py-3 rounded-lg border border-gray-300 text-gray-600 font-medium hover:bg-gray-50 transition-colors"
+            className="px-6 py-3 rounded-lg border border-border text-muted-foreground font-medium hover:bg-muted transition-colors"
           >
             Cancel
           </button>
         </div>
         {state === "error" && (
-          <p className="text-red-600 text-sm">
+          <p className="text-status-danger-text text-sm">
             {errorMsg || "Something went wrong."} Please call{" "}
             <a href="tel:+14357096999" className="font-semibold underline">(435) 709-6999</a>.
           </p>
@@ -95,7 +95,7 @@ export default function RequestChangesButton({ token }: Props) {
   return (
     <button
       onClick={() => setState("confirming")}
-      className="inline-flex items-center gap-2 px-8 py-3.5 rounded-lg font-semibold text-base transition-colors border-2 border-amber-500 text-amber-600 hover:bg-amber-50"
+      className="inline-flex items-center gap-2 px-8 py-3.5 rounded-lg font-semibold text-base transition-colors border-2 border-status-amber-text text-status-amber-text hover:bg-status-amber-bg"
     >
       <MessageSquare className="w-5 h-5" />
       Request Changes

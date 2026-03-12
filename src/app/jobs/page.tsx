@@ -75,10 +75,10 @@ export default async function JobsPage({
 
   const countMap = Object.fromEntries(statusCounts.map((s) => [s.status, s._count]));
   const summaryCards = [
-    { label: "Leads", count: countMap["LEAD"] ?? 0, color: "bg-slate-50 text-slate-700" },
-    { label: "Scheduled", count: countMap["SCHEDULED"] ?? 0, color: "bg-yellow-50 text-yellow-700" },
-    { label: "In Progress", count: countMap["IN_PROGRESS"] ?? 0, color: "bg-orange-50 text-orange-700" },
-    { label: "Completed", count: countMap["COMPLETED"] ?? 0, color: "bg-green-50 text-green-700" },
+    { label: "Leads", count: countMap["LEAD"] ?? 0, color: "bg-status-neutral-bg text-status-neutral-text" },
+    { label: "Scheduled", count: countMap["SCHEDULED"] ?? 0, color: "bg-status-warning-bg text-status-warning-text" },
+    { label: "In Progress", count: countMap["IN_PROGRESS"] ?? 0, color: "bg-status-orange-bg text-status-orange-text" },
+    { label: "Completed", count: countMap["COMPLETED"] ?? 0, color: "bg-status-success-bg text-status-success-text" },
   ];
 
   return (
@@ -86,7 +86,7 @@ export default async function JobsPage({
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Jobs</h1>
-          <p className="text-slate-500 text-sm mt-1">{totalCount} jobs</p>
+          <p className="text-muted-foreground text-sm mt-1">{totalCount} jobs</p>
         </div>
         <Link href="/jobs/new">
           <Button>
@@ -111,16 +111,16 @@ export default async function JobsPage({
           {activeStatus && <input type="hidden" name="status" value={activeStatus} />}
           {sort && <input type="hidden" name="sort" value={sort} />}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               name="search"
               defaultValue={search}
               placeholder="Search by job title or customer name..."
-              className="w-full border rounded-md pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
+              className="w-full border rounded-md pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </div>
         </form>
-        <Suspense fallback={<div className="border rounded-md px-2 py-1.5 text-sm w-28 bg-white" />}>
+        <Suspense fallback={<div className="border rounded-md px-2 py-1.5 text-sm w-28 bg-card" />}>
           <SortSelect options={SORT_OPTIONS} basePath="/jobs" />
         </Suspense>
       </div>
@@ -141,9 +141,9 @@ export default async function JobsPage({
                   "px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition-all duration-150",
                   isActive
                     ? "text-white"
-                    : "bg-white border text-slate-600 hover:bg-slate-50"
+                    : "bg-card border text-muted-foreground hover:bg-muted"
                 )}
-                style={isActive ? { background: "linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%)" } : {}}
+                style={isActive ? { background: "linear-gradient(135deg, var(--mws-navy) 0%, var(--secondary) 100%)" } : {}}
               >
                 {s === "ALL" ? "All" : JOB_STATUS_LABELS[s]}
               </button>
@@ -154,8 +154,8 @@ export default async function JobsPage({
 
       {/* Job list */}
       {jobs.length === 0 ? (
-        <div className="text-center py-16 text-slate-400">
-          <Briefcase className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+        <div className="text-center py-16 text-muted-foreground">
+          <Briefcase className="w-8 h-8 text-muted-foreground/50 mx-auto mb-2" />
           <p className="text-lg font-medium">No jobs found</p>
           <p className="text-sm mt-1">
             {search || activeStatus
@@ -170,23 +170,23 @@ export default async function JobsPage({
             return (
               <Link key={job.id} href={`/jobs/${job.id}`}>
                 <div className={cn(
-                  "flex items-center justify-between bg-white rounded-xl shadow-sm px-5 py-4 hover:shadow-md hover:-translate-y-px transition-all duration-150 cursor-pointer",
+                  "flex items-center justify-between bg-card rounded-xl shadow-sm px-5 py-4 hover:shadow-md hover:-translate-y-px transition-all duration-150 cursor-pointer",
                   isTodayJob && "border-l-4 border-l-green-500",
                 )}>
                   <div className="flex-1 min-w-0">
                     <div className="flex items-center gap-3">
-                      <span className="font-semibold text-slate-900">{job.title}</span>
+                      <span className="font-semibold text-foreground">{job.title}</span>
                       <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_COLORS[job.status]}`}>
                         {JOB_STATUS_LABELS[job.status]}
                       </span>
                       {isTodayJob && (
-                        <span className="flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full bg-green-100 text-green-700">
+                        <span className="flex items-center gap-1.5 text-xs font-medium px-2 py-0.5 rounded-full bg-status-success-bg text-status-success-text">
                           <span className="w-1.5 h-1.5 rounded-full bg-green-500 animate-pulse-dot" />
                           Today
                         </span>
                       )}
                     </div>
-                    <div className="flex flex-wrap items-center gap-x-4 gap-y-0.5 mt-1 text-sm text-slate-500">
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-0.5 mt-1 text-sm text-muted-foreground">
                       <span>{job.customer.firstName} {job.customer.lastName}</span>
                       <span className="hidden sm:inline">{SERVICE_TYPE_LABELS[job.serviceType]}</span>
                       {job.scheduledDate && (

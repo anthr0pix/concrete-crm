@@ -52,9 +52,9 @@ export default async function PortalPage({
     const depositDisplay = calculatedDeposit.toFixed(2);
 
     return (
-      <div className="min-h-screen" style={{ backgroundColor: "#f4f4f5" }}>
+      <div className="min-h-screen bg-background">
         {/* Header */}
-        <header style={{ backgroundColor: "#1a1a2e" }} className="px-6 py-5">
+        <header className="bg-[var(--mws-navy)] px-6 py-5">
           <div className="max-w-3xl mx-auto flex items-center justify-between">
             <div>
               <p className="text-white font-bold text-lg tracking-wide uppercase">Mountain West Surface</p>
@@ -68,30 +68,30 @@ export default async function PortalPage({
         </header>
 
         {/* Accent bar */}
-        <div style={{ backgroundColor: "#e94560", height: 4 }} />
+        <div className="bg-primary h-1" />
 
         <main className="max-w-3xl mx-auto px-6 py-10">
           {/* Quote Header */}
           <div className="flex items-start justify-between mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-gray-900">Quote</h1>
-              <p className="text-gray-500 text-sm mt-1">{quote.quoteNumber}</p>
-              <p className="text-gray-700 mt-1">
+              <h1 className="text-3xl font-bold text-foreground">Quote</h1>
+              <p className="text-muted-foreground text-sm mt-1">{quote.quoteNumber}</p>
+              <p className="text-foreground mt-1">
                 Prepared for <strong>{quote.customer.firstName} {quote.customer.lastName}</strong>
               </p>
               {quote.job?.address && (
-                <p className="text-gray-500 text-sm mt-0.5">Job: {quote.job.address}</p>
+                <p className="text-muted-foreground text-sm mt-0.5">Job: {quote.job.address}</p>
               )}
             </div>
             <div className="text-right">
-              <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${STATUS_COLORS[quote.status] ?? "bg-slate-100 text-slate-600"}`}>
+              <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${STATUS_COLORS[quote.status] ?? "bg-muted text-muted-foreground"}`}>
                 {quote.status}
               </span>
-              <p className="text-gray-400 text-xs mt-2">
+              <p className="text-muted-foreground text-xs mt-2">
                 {format(new Date(quote.createdAt), "MMMM d, yyyy")}
               </p>
               {quote.validUntil && (
-                <p className="text-gray-400 text-xs mt-1">
+                <p className="text-muted-foreground text-xs mt-1">
                   Valid until {format(new Date(quote.validUntil), "MMMM d, yyyy")}
                 </p>
               )}
@@ -99,9 +99,9 @@ export default async function PortalPage({
           </div>
 
           {/* Line Items */}
-          <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-6">
+          <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden mb-6">
             <table className="w-full text-sm">
-              <thead style={{ backgroundColor: "#1a1a2e" }}>
+              <thead className="bg-[var(--mws-navy)]">
                 <tr>
                   <th className="text-left px-5 py-3 text-white/80 font-medium text-xs uppercase tracking-wide">Description</th>
                   <th className="text-right px-5 py-3 text-white/80 font-medium text-xs uppercase tracking-wide">Sq Ft</th>
@@ -111,11 +111,11 @@ export default async function PortalPage({
               </thead>
               <tbody>
                 {quote.lineItems.map((item, i) => (
-                  <tr key={item.id} className={i % 2 === 1 ? "bg-gray-50" : ""}>
-                    <td className="px-5 py-3.5 text-gray-800">{item.description}</td>
-                    <td className="px-5 py-3.5 text-right text-gray-600">{item.quantity}</td>
-                    <td className="px-5 py-3.5 text-right text-gray-600">${item.unitPrice.toFixed(2)}</td>
-                    <td className="px-5 py-3.5 text-right font-semibold text-gray-900">${item.total.toFixed(2)}</td>
+                  <tr key={item.id} className={i % 2 === 1 ? "bg-muted" : ""}>
+                    <td className="px-5 py-3.5 text-foreground">{item.description}</td>
+                    <td className="px-5 py-3.5 text-right text-muted-foreground">{item.quantity}</td>
+                    <td className="px-5 py-3.5 text-right text-muted-foreground">${item.unitPrice.toFixed(2)}</td>
+                    <td className="px-5 py-3.5 text-right font-semibold text-foreground">${item.total.toFixed(2)}</td>
                   </tr>
                 ))}
               </tbody>
@@ -124,27 +124,27 @@ export default async function PortalPage({
 
           {/* Totals */}
           <div className="max-w-xs ml-auto space-y-2 mb-8">
-            <div className="flex justify-between text-sm text-gray-500">
+            <div className="flex justify-between text-sm text-muted-foreground">
               <span>Subtotal</span>
               <span>${quote.subtotal.toFixed(2)}</span>
             </div>
             {quote.taxRate > 0 && (
-              <div className="flex justify-between text-sm text-gray-500">
+              <div className="flex justify-between text-sm text-muted-foreground">
                 <span>Tax ({quote.taxRate}%)</span>
                 <span>${quote.taxAmount.toFixed(2)}</span>
               </div>
             )}
-            <div className="flex justify-between font-bold text-xl border-t pt-3" style={{ borderColor: "#e94560" }}>
-              <span className="text-gray-900">Total</span>
-              <span style={{ color: "#e94560" }}>${quote.total.toFixed(2)}</span>
+            <div className="flex justify-between font-bold text-xl border-t border-primary pt-3">
+              <span className="text-foreground">Total</span>
+              <span className="text-primary">${quote.total.toFixed(2)}</span>
             </div>
           </div>
 
           {/* Notes */}
           {quote.notes && (
-            <div className="bg-white rounded-xl border border-gray-100 p-5 mb-8">
-              <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: "#e94560" }}>Notes</p>
-              <p className="text-gray-700 text-sm leading-relaxed">{quote.notes}</p>
+            <div className="bg-card rounded-xl border border-border p-5 mb-8">
+              <p className="text-xs font-semibold uppercase tracking-wide mb-2 text-primary">Notes</p>
+              <p className="text-foreground text-sm leading-relaxed">{quote.notes}</p>
             </div>
           )}
 
@@ -153,7 +153,7 @@ export default async function PortalPage({
             <>
               {quote.depositAmount && !quote.depositPaid ? (
                 <div className="text-center space-y-4">
-                  <p className="text-gray-600 text-sm">
+                  <p className="text-muted-foreground text-sm">
                     A deposit of <strong>${depositDisplay}</strong> is required to approve this quote.
                   </p>
                   <PortalPayButton token={token} type="deposit" label="Pay Deposit & Approve" amount={calculatedDeposit} />
@@ -169,22 +169,22 @@ export default async function PortalPage({
           )}
 
           {quote.status === "ACCEPTED" && (
-            <div className="bg-green-50 border border-green-200 rounded-xl p-5 text-center">
-              <p className="text-green-700 font-semibold text-lg">Quote Accepted!</p>
-              <p className="text-green-600 text-sm mt-1">We'll be in touch soon to schedule your service.</p>
+            <div className="bg-status-success-bg border border-status-success-text/20 rounded-xl p-5 text-center">
+              <p className="text-status-success-text font-semibold text-lg">Quote Accepted!</p>
+              <p className="text-status-success-text/80 text-sm mt-1">We'll be in touch soon to schedule your service.</p>
             </div>
           )}
         </main>
 
         {/* Footer */}
-        <footer className="border-t border-gray-200 py-8 mt-12">
+        <footer className="border-t border-border py-8 mt-12">
           <div className="max-w-3xl mx-auto px-6 text-center">
-            <p className="text-gray-500 text-sm">
-              <strong className="text-gray-800">Mountain West Surface LLC</strong> ·{" "}
+            <p className="text-muted-foreground text-sm">
+              <strong className="text-foreground">Mountain West Surface LLC</strong> ·{" "}
               <a href="tel:+14357096999" className="hover:underline">(435) 709-6999</a> ·{" "}
               <a href="mailto:mwsurfaceco@gmail.com" className="hover:underline">mwsurfaceco@gmail.com</a>
             </p>
-            <p className="text-gray-400 text-xs mt-1">mountainwestsurface.com</p>
+            <p className="text-muted-foreground/50 text-xs mt-1">mountainwestsurface.com</p>
           </div>
         </footer>
       </div>
@@ -196,9 +196,9 @@ export default async function PortalPage({
   if (!invoice) notFound();
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "#f4f4f5" }}>
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header style={{ backgroundColor: "#1a1a2e" }} className="px-6 py-5">
+      <header className="bg-[var(--mws-navy)] px-6 py-5">
         <div className="max-w-3xl mx-auto flex items-center justify-between">
           <div>
             <p className="text-white font-bold text-lg tracking-wide uppercase">Mountain West Surface</p>
@@ -211,38 +211,38 @@ export default async function PortalPage({
         </div>
       </header>
 
-      <div style={{ backgroundColor: "#e94560", height: 4 }} />
+      <div className="bg-primary h-1" />
 
       <main className="max-w-3xl mx-auto px-6 py-10">
         {/* Invoice Header */}
         <div className="flex items-start justify-between mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-gray-900">Invoice</h1>
-            <p className="text-gray-500 text-sm mt-1">{invoice.invoiceNumber}</p>
-            <p className="text-gray-700 mt-1">
+            <h1 className="text-3xl font-bold text-foreground">Invoice</h1>
+            <p className="text-muted-foreground text-sm mt-1">{invoice.invoiceNumber}</p>
+            <p className="text-foreground mt-1">
               Billed to <strong>{invoice.customer.firstName} {invoice.customer.lastName}</strong>
             </p>
             {invoice.job && (
-              <p className="text-gray-500 text-sm mt-0.5">Job: {invoice.job.title}</p>
+              <p className="text-muted-foreground text-sm mt-0.5">Job: {invoice.job.title}</p>
             )}
             {invoice.quote && (
-              <p className="text-gray-500 text-sm">Ref: {invoice.quote.quoteNumber}</p>
+              <p className="text-muted-foreground text-sm">Ref: {invoice.quote.quoteNumber}</p>
             )}
           </div>
           <div className="text-right">
-            <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${STATUS_COLORS[invoice.status] ?? "bg-slate-100 text-slate-600"}`}>
+            <span className={`inline-block px-3 py-1 rounded-full text-xs font-semibold ${STATUS_COLORS[invoice.status] ?? "bg-muted text-muted-foreground"}`}>
               {invoice.status}
             </span>
-            <p className="text-gray-400 text-xs mt-2">
+            <p className="text-muted-foreground text-xs mt-2">
               {format(new Date(invoice.createdAt), "MMMM d, yyyy")}
             </p>
             {invoice.dueDate && (
-              <p className="text-gray-400 text-xs mt-1">
+              <p className="text-muted-foreground text-xs mt-1">
                 Due {format(new Date(invoice.dueDate), "MMMM d, yyyy")}
               </p>
             )}
             {invoice.paidDate && (
-              <p className="text-green-600 text-xs font-semibold mt-1">
+              <p className="text-status-success-text text-xs font-semibold mt-1">
                 Paid {format(new Date(invoice.paidDate), "MMMM d, yyyy")}
               </p>
             )}
@@ -250,9 +250,9 @@ export default async function PortalPage({
         </div>
 
         {/* Line Items */}
-        <div className="bg-white rounded-xl shadow-sm border border-gray-100 overflow-hidden mb-6">
+        <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden mb-6">
           <table className="w-full text-sm">
-            <thead style={{ backgroundColor: "#1a1a2e" }}>
+            <thead className="bg-[var(--mws-navy)]">
               <tr>
                 <th className="text-left px-5 py-3 text-white/80 font-medium text-xs uppercase tracking-wide">Description</th>
                 <th className="text-right px-5 py-3 text-white/80 font-medium text-xs uppercase tracking-wide">Sq Ft</th>
@@ -262,11 +262,11 @@ export default async function PortalPage({
             </thead>
             <tbody>
               {invoice.lineItems.map((item, i) => (
-                <tr key={item.id} className={i % 2 === 1 ? "bg-gray-50" : ""}>
-                  <td className="px-5 py-3.5 text-gray-800">{item.description}</td>
-                  <td className="px-5 py-3.5 text-right text-gray-600">{item.quantity}</td>
-                  <td className="px-5 py-3.5 text-right text-gray-600">${item.unitPrice.toFixed(2)}</td>
-                  <td className="px-5 py-3.5 text-right font-semibold text-gray-900">${item.total.toFixed(2)}</td>
+                <tr key={item.id} className={i % 2 === 1 ? "bg-muted" : ""}>
+                  <td className="px-5 py-3.5 text-foreground">{item.description}</td>
+                  <td className="px-5 py-3.5 text-right text-muted-foreground">{item.quantity}</td>
+                  <td className="px-5 py-3.5 text-right text-muted-foreground">${item.unitPrice.toFixed(2)}</td>
+                  <td className="px-5 py-3.5 text-right font-semibold text-foreground">${item.total.toFixed(2)}</td>
                 </tr>
               ))}
             </tbody>
@@ -275,27 +275,27 @@ export default async function PortalPage({
 
         {/* Totals */}
         <div className="max-w-xs ml-auto space-y-2 mb-8">
-          <div className="flex justify-between text-sm text-gray-500">
+          <div className="flex justify-between text-sm text-muted-foreground">
             <span>Subtotal</span>
             <span>${invoice.subtotal.toFixed(2)}</span>
           </div>
           {invoice.taxRate > 0 && (
-            <div className="flex justify-between text-sm text-gray-500">
+            <div className="flex justify-between text-sm text-muted-foreground">
               <span>Tax ({invoice.taxRate}%)</span>
               <span>${invoice.taxAmount.toFixed(2)}</span>
             </div>
           )}
-          <div className="flex justify-between font-bold text-xl border-t pt-3" style={{ borderColor: "#e94560" }}>
-            <span className="text-gray-900">Total</span>
-            <span style={{ color: "#e94560" }}>${invoice.total.toFixed(2)}</span>
+          <div className="flex justify-between font-bold text-xl border-t border-primary pt-3">
+            <span className="text-foreground">Total</span>
+            <span className="text-primary">${invoice.total.toFixed(2)}</span>
           </div>
         </div>
 
         {/* Notes */}
         {invoice.notes && (
-          <div className="bg-white rounded-xl border border-gray-100 p-5 mb-8">
-            <p className="text-xs font-semibold uppercase tracking-wide mb-2" style={{ color: "#e94560" }}>Notes</p>
-            <p className="text-gray-700 text-sm leading-relaxed">{invoice.notes}</p>
+          <div className="bg-card rounded-xl border border-border p-5 mb-8">
+            <p className="text-xs font-semibold uppercase tracking-wide mb-2 text-primary">Notes</p>
+            <p className="text-foreground text-sm leading-relaxed">{invoice.notes}</p>
           </div>
         )}
 
@@ -303,29 +303,29 @@ export default async function PortalPage({
         {invoice.status !== "PAID" && invoice.status !== "VOID" && (
           <div className="text-center space-y-3 mb-8">
             <PortalPayButton token={token} type="invoice" label="Pay Now" amount={invoice.total} />
-            <p className="text-gray-500 text-sm">
+            <p className="text-muted-foreground text-sm">
               Or call <a href="tel:+14357096999" className="font-semibold hover:underline">(435) 709-6999</a> to arrange payment.
             </p>
           </div>
         )}
 
         {invoice.status === "PAID" && (
-          <div className="bg-green-50 border border-green-200 rounded-xl p-5 text-center">
-            <p className="text-green-700 font-semibold text-lg">Paid in Full — Thank You!</p>
-            <p className="text-green-600 text-sm mt-1">We appreciate your business with Mountain West Surface.</p>
+          <div className="bg-status-success-bg border border-status-success-text/20 rounded-xl p-5 text-center">
+            <p className="text-status-success-text font-semibold text-lg">Paid in Full -- Thank You!</p>
+            <p className="text-status-success-text/80 text-sm mt-1">We appreciate your business with Mountain West Surface.</p>
           </div>
         )}
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-gray-200 py-8 mt-12">
+      <footer className="border-t border-border py-8 mt-12">
         <div className="max-w-3xl mx-auto px-6 text-center">
-          <p className="text-gray-500 text-sm">
-            <strong className="text-gray-800">Mountain West Surface LLC</strong> ·{" "}
+          <p className="text-muted-foreground text-sm">
+            <strong className="text-foreground">Mountain West Surface LLC</strong> ·{" "}
             <a href="tel:+14357096999" className="hover:underline">(435) 709-6999</a> ·{" "}
             <a href="mailto:mwsurfaceco@gmail.com" className="hover:underline">mwsurfaceco@gmail.com</a>
           </p>
-          <p className="text-gray-400 text-xs mt-1">mountainwestsurface.com</p>
+          <p className="text-muted-foreground/50 text-xs mt-1">mountainwestsurface.com</p>
         </div>
       </footer>
     </div>

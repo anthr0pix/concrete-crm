@@ -54,14 +54,14 @@ export default async function JobDetailPage({
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-6">
         <div>
           <h1 className="text-3xl font-bold">{job.title}</h1>
-          <p className="text-slate-500 text-sm mt-1">{SERVICE_TYPE_LABELS[job.serviceType]}</p>
+          <p className="text-muted-foreground text-sm mt-1">{SERVICE_TYPE_LABELS[job.serviceType]}</p>
         </div>
         <JobDetailActions jobId={job.id} currentStatus={job.status} />
       </div>
 
       {/* Quick actions — SCHEDULED / IN_PROGRESS only */}
       {(job.status === "SCHEDULED" || job.status === "IN_PROGRESS") && (
-        <div className="flex flex-wrap items-center gap-3 bg-white rounded-xl shadow-sm px-4 py-3 mb-6">
+        <div className="flex flex-wrap items-center gap-3 bg-card rounded-xl shadow-sm px-4 py-3 mb-6">
           <MarkCompleteButton jobId={job.id} />
           {job.customer.phone && (
             <a href={`tel:${job.customer.phone}`}>
@@ -84,8 +84,8 @@ export default async function JobDetailPage({
 
       {/* Next-step prompts */}
       {job.status === "LEAD" && job.quotes.length === 0 && (
-        <div className="border-l-4 border-l-purple-400 bg-purple-50 rounded-r-lg px-4 py-3 mb-6 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-sm text-purple-800">
+        <div className="border-l-4 border-l-purple-400 bg-status-purple-bg rounded-r-lg px-4 py-3 mb-6 flex items-center justify-between">
+          <div className="flex items-center gap-2 text-sm text-status-purple-text">
             <FileText className="w-4 h-4" />
             <span>New lead — ready to send a quote?</span>
           </div>
@@ -97,8 +97,8 @@ export default async function JobDetailPage({
         </div>
       )}
       {job.status === "COMPLETED" && job.invoices.length === 0 && (
-        <div className="border-l-4 border-l-green-400 bg-green-50 rounded-r-lg px-4 py-3 mb-6 flex items-center justify-between">
-          <div className="flex items-center gap-2 text-sm text-green-800">
+        <div className="border-l-4 border-l-green-400 bg-status-success-bg rounded-r-lg px-4 py-3 mb-6 flex items-center justify-between">
+          <div className="flex items-center gap-2 text-sm text-status-success-text">
             <Receipt className="w-4 h-4" />
             <span>Job complete — time to get paid!</span>
           </div>
@@ -122,40 +122,40 @@ export default async function JobDetailPage({
 
       {/* Info grid */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
-        <div className={`bg-white rounded-xl shadow-sm border-t-2 ${INFO_CARD_BORDERS["Customer"]} p-4`}>
-          <div className="flex items-center gap-1.5 text-slate-400 text-xs mb-1"><User className="w-3.5 h-3.5" /> Customer</div>
+        <div className={`bg-card rounded-xl shadow-sm border-t-2 ${INFO_CARD_BORDERS["Customer"]} p-4`}>
+          <div className="flex items-center gap-1.5 text-muted-foreground text-xs mb-1"><User className="w-3.5 h-3.5" /> Customer</div>
           <Link href={`/customers/${job.customer.id}`} className="font-medium text-sm hover:underline">
             {job.customer.firstName} {job.customer.lastName}
           </Link>
         </div>
-        <div className={`bg-white rounded-xl shadow-sm border-t-2 ${INFO_CARD_BORDERS["Scheduled"]} p-4`}>
-          <div className="flex items-center gap-1.5 text-slate-400 text-xs mb-1"><Calendar className="w-3.5 h-3.5" /> Scheduled</div>
+        <div className={`bg-card rounded-xl shadow-sm border-t-2 ${INFO_CARD_BORDERS["Scheduled"]} p-4`}>
+          <div className="flex items-center gap-1.5 text-muted-foreground text-xs mb-1"><Calendar className="w-3.5 h-3.5" /> Scheduled</div>
           <p className="font-medium text-sm">
             {job.scheduledDate ? format(new Date(job.scheduledDate), "MMM d, yyyy") : "Not set"}
           </p>
         </div>
-        <div className={`bg-white rounded-xl shadow-sm border-t-2 ${INFO_CARD_BORDERS["Location"]} p-4`}>
-          <div className="flex items-center gap-1.5 text-slate-400 text-xs mb-1"><MapPin className="w-3.5 h-3.5" /> Location</div>
+        <div className={`bg-card rounded-xl shadow-sm border-t-2 ${INFO_CARD_BORDERS["Location"]} p-4`}>
+          <div className="flex items-center gap-1.5 text-muted-foreground text-xs mb-1"><MapPin className="w-3.5 h-3.5" /> Location</div>
           <p className="font-medium text-xs leading-tight">{jobAddress}</p>
         </div>
-        <div className={`bg-white rounded-xl shadow-sm border-t-2 ${INFO_CARD_BORDERS["Square Feet"]} p-4`}>
-          <div className="flex items-center gap-1.5 text-slate-400 text-xs mb-1"><Ruler className="w-3.5 h-3.5" /> Square Feet</div>
+        <div className={`bg-card rounded-xl shadow-sm border-t-2 ${INFO_CARD_BORDERS["Square Feet"]} p-4`}>
+          <div className="flex items-center gap-1.5 text-muted-foreground text-xs mb-1"><Ruler className="w-3.5 h-3.5" /> Square Feet</div>
           <p className="font-medium text-sm">{job.squareFootage ? `${job.squareFootage.toLocaleString()} sq ft` : "\u2014"}</p>
         </div>
         {job.resealDueDate && (
-          <div className={`bg-white rounded-xl shadow-sm border-t-2 ${INFO_CARD_BORDERS["Reseal Due"]} p-4`}>
-            <div className="flex items-center gap-1.5 text-slate-400 text-xs mb-1">
+          <div className={`bg-card rounded-xl shadow-sm border-t-2 ${INFO_CARD_BORDERS["Reseal Due"]} p-4`}>
+            <div className="flex items-center gap-1.5 text-muted-foreground text-xs mb-1">
               <Calendar className="w-3.5 h-3.5" /> Reseal Due
             </div>
-            <p className={`font-medium text-sm ${new Date(job.resealDueDate) < new Date() ? "text-red-600" : ""}`}>
+            <p className={`font-medium text-sm ${new Date(job.resealDueDate) < new Date() ? "text-status-danger-text" : ""}`}>
               {format(new Date(job.resealDueDate), "MMM d, yyyy")}
             </p>
           </div>
         )}
         {job.reviewRequestSentAt && (
-          <div className={`bg-white rounded-xl shadow-sm border-t-2 ${INFO_CARD_BORDERS["Review Request"]} p-4`}>
-            <div className="flex items-center gap-1.5 text-slate-400 text-xs mb-1">Review Request</div>
-            <p className="font-medium text-sm text-green-600">
+          <div className={`bg-card rounded-xl shadow-sm border-t-2 ${INFO_CARD_BORDERS["Review Request"]} p-4`}>
+            <div className="flex items-center gap-1.5 text-muted-foreground text-xs mb-1">Review Request</div>
+            <p className="font-medium text-sm text-status-success-text">
               Sent {format(new Date(job.reviewRequestSentAt), "MMM d, yyyy")}
             </p>
           </div>
@@ -169,32 +169,32 @@ export default async function JobDetailPage({
 
       {/* Notes */}
       {job.notes && (
-        <div className="bg-amber-50 border-l-4 border-l-amber-400 rounded-r-lg px-4 py-3 mb-6 text-sm text-amber-900">
+        <div className="bg-status-amber-bg border-l-4 border-l-amber-400 rounded-r-lg px-4 py-3 mb-6 text-sm text-status-amber-text">
           <span className="font-medium">Notes: </span>{job.notes}
         </div>
       )}
 
       {/* Photos */}
-      <div className="bg-white rounded-xl shadow-sm p-6 mb-6">
+      <div className="bg-card rounded-xl shadow-sm p-6 mb-6">
         <div className="flex items-center gap-2 mb-4 border-b pb-2">
           <h2 className="font-semibold text-base">Photos</h2>
-          <span className="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">{job.photos.length}</span>
+          <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full">{job.photos.length}</span>
         </div>
         {job.photos.length === 0 ? (
           <div className="text-center py-6">
-            <Camera className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-            <p className="text-sm text-slate-400">No photos yet</p>
+            <Camera className="w-8 h-8 text-muted-foreground/50 mx-auto mb-2" />
+            <p className="text-sm text-muted-foreground">No photos yet</p>
           </div>
         ) : null}
         <PhotoUpload jobId={job.id} photos={job.photos} />
       </div>
 
       {/* Expenses */}
-      <div className="bg-white rounded-xl shadow-sm p-4 mb-6">
+      <div className="bg-card rounded-xl shadow-sm p-4 mb-6">
         <div className="flex items-center justify-between mb-3 border-b pb-2">
           <div className="flex items-center gap-2">
             <h2 className="font-semibold text-base">Expenses</h2>
-            <span className="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">{job.expenses.length}</span>
+            <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full">{job.expenses.length}</span>
           </div>
           <Link href={`/expenses/new?jobId=${job.id}`}>
             <Button size="sm" variant="outline">+ Add Expense</Button>
@@ -202,16 +202,16 @@ export default async function JobDetailPage({
         </div>
         {job.expenses.length === 0 ? (
           <div className="text-center py-6">
-            <DollarSign className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-            <p className="text-sm text-slate-400">No expenses recorded yet.</p>
+            <DollarSign className="w-8 h-8 text-muted-foreground/50 mx-auto mb-2" />
+            <p className="text-sm text-muted-foreground">No expenses recorded yet.</p>
           </div>
         ) : (
           <div className="space-y-1">
             {job.expenses.map((exp) => (
-              <div key={exp.id} className="flex justify-between text-sm py-1.5 border-b last:border-0 hover:bg-slate-50 transition-colors rounded px-1">
+              <div key={exp.id} className="flex justify-between text-sm py-1.5 border-b last:border-0 hover:bg-muted transition-colors rounded px-1">
                 <div>
                   <span className="font-medium">{exp.description}</span>
-                  <span className="text-slate-400 ml-2">{format(new Date(exp.date), "MMM d")}</span>
+                  <span className="text-muted-foreground ml-2">{format(new Date(exp.date), "MMM d")}</span>
                 </div>
                 <span className="font-medium">${exp.amount.toFixed(2)}</span>
               </div>
@@ -222,11 +222,11 @@ export default async function JobDetailPage({
 
       {/* Quotes & Invoices */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="bg-white rounded-xl shadow-sm p-4">
+        <div className="bg-card rounded-xl shadow-sm p-4">
           <div className="flex items-center justify-between mb-3 border-b pb-2">
             <div className="flex items-center gap-2">
               <h2 className="font-semibold text-base">Quotes</h2>
-              <span className="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">{job.quotes.length}</span>
+              <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full">{job.quotes.length}</span>
             </div>
             <Link href={`/quotes/new?jobId=${job.id}`}>
               <Button size="sm" variant="outline">+ New Quote</Button>
@@ -234,13 +234,13 @@ export default async function JobDetailPage({
           </div>
           {job.quotes.length === 0 ? (
             <div className="text-center py-6">
-              <FileText className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-              <p className="text-sm text-slate-400">No quotes yet</p>
+              <FileText className="w-8 h-8 text-muted-foreground/50 mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground">No quotes yet</p>
             </div>
           ) : (
             job.quotes.map((q) => (
               <Link key={q.id} href={`/quotes/${q.id}`}>
-                <div className="flex justify-between text-sm py-1.5 border-b last:border-0 hover:bg-slate-50 transition-colors rounded px-1">
+                <div className="flex justify-between text-sm py-1.5 border-b last:border-0 hover:bg-muted transition-colors rounded px-1">
                   <span>{q.quoteNumber}</span>
                   <span className="font-medium">${q.total.toFixed(2)}</span>
                 </div>
@@ -249,11 +249,11 @@ export default async function JobDetailPage({
           )}
         </div>
 
-        <div className="bg-white rounded-xl shadow-sm p-4">
+        <div className="bg-card rounded-xl shadow-sm p-4">
           <div className="flex items-center justify-between mb-3 border-b pb-2">
             <div className="flex items-center gap-2">
               <h2 className="font-semibold text-base">Invoices</h2>
-              <span className="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded-full">{job.invoices.length}</span>
+              <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full">{job.invoices.length}</span>
             </div>
             <Link href={`/invoices/new?jobId=${job.id}`}>
               <Button size="sm" variant="outline">+ New Invoice</Button>
@@ -261,13 +261,13 @@ export default async function JobDetailPage({
           </div>
           {job.invoices.length === 0 ? (
             <div className="text-center py-6">
-              <Receipt className="w-8 h-8 text-slate-300 mx-auto mb-2" />
-              <p className="text-sm text-slate-400">No invoices yet</p>
+              <Receipt className="w-8 h-8 text-muted-foreground/50 mx-auto mb-2" />
+              <p className="text-sm text-muted-foreground">No invoices yet</p>
             </div>
           ) : (
             job.invoices.map((inv) => (
               <Link key={inv.id} href={`/invoices/${inv.id}`}>
-                <div className="flex justify-between text-sm py-1.5 border-b last:border-0 hover:bg-slate-50 transition-colors rounded px-1">
+                <div className="flex justify-between text-sm py-1.5 border-b last:border-0 hover:bg-muted transition-colors rounded px-1">
                   <span>{inv.invoiceNumber}</span>
                   <span className="font-medium">${inv.total.toFixed(2)}</span>
                 </div>

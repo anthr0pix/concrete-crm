@@ -32,8 +32,8 @@ export default function MarkCompleteButton({ jobId }: { jobId: string }) {
   if (state === "confirming") {
     return (
       <div className="flex items-center gap-2">
-        <span className="text-sm text-slate-600">Mark complete?</span>
-        <Button size="sm" onClick={handleComplete} className="bg-green-600 hover:bg-green-700 text-white">
+        <span className="text-sm text-muted-foreground">Mark complete?</span>
+        <Button size="sm" onClick={handleComplete} className="bg-status-success-bg hover:bg-status-success-bg/80 text-status-success-text">
           Yes, complete
         </Button>
         <Button size="sm" variant="outline" onClick={() => setState("idle")}>
@@ -48,7 +48,7 @@ export default function MarkCompleteButton({ jobId }: { jobId: string }) {
       size="sm"
       onClick={() => setState("confirming")}
       disabled={state === "saving"}
-      className="bg-green-600 hover:bg-green-700 text-white"
+      className="bg-status-success-bg hover:bg-status-success-bg/80 text-status-success-text"
     >
       <CheckCircle className="w-4 h-4 mr-1.5" />
       {state === "saving" ? "Saving..." : "Mark Complete"}

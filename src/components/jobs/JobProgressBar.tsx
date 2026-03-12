@@ -110,7 +110,7 @@ export default function JobProgressBar({
   const allDone = doneCount === steps.length;
 
   return (
-    <div className="bg-white border rounded-lg px-5 py-4 mb-6">
+    <div className="bg-card border rounded-lg px-5 py-4 mb-6">
       {/* Desktop: horizontal steps */}
       <div className="hidden md:flex items-center justify-between">
         {steps.map((step, i) => (
@@ -118,25 +118,25 @@ export default function JobProgressBar({
             {/* Step circle + label */}
             <div className="flex flex-col items-center min-w-0">
               {step.status === "done" ? (
-                <div className="w-7 h-7 rounded-full bg-green-100 flex items-center justify-center">
-                  <Check className="w-4 h-4 text-green-600" />
+                <div className="w-7 h-7 rounded-full bg-status-success-bg flex items-center justify-center">
+                  <Check className="w-4 h-4 text-status-success-text" />
                 </div>
               ) : step.status === "current" ? (
-                <div className="w-7 h-7 rounded-full bg-blue-600 flex items-center justify-center ring-4 ring-blue-100">
-                  <span className="text-xs font-bold text-white">{i + 1}</span>
+                <div className="w-7 h-7 rounded-full bg-status-info-bg flex items-center justify-center ring-4 ring-status-info-bg/30">
+                  <span className="text-xs font-bold text-status-info-text">{i + 1}</span>
                 </div>
               ) : (
-                <div className="w-7 h-7 rounded-full bg-slate-100 flex items-center justify-center">
-                  <span className="text-xs font-medium text-slate-400">{i + 1}</span>
+                <div className="w-7 h-7 rounded-full bg-muted flex items-center justify-center">
+                  <span className="text-xs font-medium text-muted-foreground">{i + 1}</span>
                 </div>
               )}
               <span
                 className={`text-[11px] mt-1.5 text-center leading-tight font-medium ${
                   step.status === "done"
-                    ? "text-green-700"
+                    ? "text-status-success-text"
                     : step.status === "current"
-                      ? "text-blue-700"
-                      : "text-slate-400"
+                      ? "text-status-info-text"
+                      : "text-muted-foreground"
                 }`}
               >
                 {step.label}
@@ -145,12 +145,12 @@ export default function JobProgressBar({
                 step.href ? (
                   <Link
                     href={step.href}
-                    className="text-[10px] text-blue-600 hover:underline mt-0.5"
+                    className="text-[10px] text-status-info-text hover:underline mt-0.5"
                   >
                     {step.hint} →
                   </Link>
                 ) : (
-                  <span className="text-[10px] text-blue-500 mt-0.5">{step.hint}</span>
+                  <span className="text-[10px] text-status-info-text mt-0.5">{step.hint}</span>
                 )
               )}
             </div>
@@ -160,7 +160,7 @@ export default function JobProgressBar({
               <div className="flex-1 mx-2 mt-[-16px]">
                 <div
                   className={`h-0.5 w-full rounded ${
-                    step.status === "done" ? "bg-green-300" : "bg-slate-200"
+                    step.status === "done" ? "bg-status-success-bg" : "bg-muted"
                   }`}
                 />
               </div>
@@ -172,30 +172,30 @@ export default function JobProgressBar({
       {/* Mobile: compact layout */}
       <div className="md:hidden">
         <div className="flex items-center gap-3 mb-2">
-          <span className="text-sm font-medium text-slate-600">
+          <span className="text-sm font-medium text-muted-foreground">
             Step {allDone ? steps.length : Math.max(currentStepIdx + 1, doneCount + 1)} of {steps.length}
           </span>
-          <div className="flex-1 h-2 bg-slate-100 rounded-full overflow-hidden">
+          <div className="flex-1 h-2 bg-muted rounded-full overflow-hidden">
             <div
-              className={`h-full rounded-full transition-all ${allDone ? "bg-green-500" : "bg-blue-500"}`}
+              className={`h-full rounded-full transition-all ${allDone ? "bg-status-success-bg" : "bg-status-info-bg"}`}
               style={{ width: `${(doneCount / steps.length) * 100}%` }}
             />
           </div>
         </div>
         {allDone ? (
-          <div className="bg-green-50 border border-green-200 rounded-lg px-3 py-2 text-sm font-medium text-green-700">
+          <div className="bg-status-success-bg/20 border border-status-success-bg rounded-lg px-3 py-2 text-sm font-medium text-status-success-text">
             All steps complete
           </div>
         ) : currentStep ? (
-          <div className="bg-blue-50 border border-blue-200 rounded-lg px-3 py-2">
-            <p className="text-sm font-medium text-blue-800">{currentStep.label}</p>
+          <div className="bg-status-info-bg/20 border border-status-info-bg rounded-lg px-3 py-2">
+            <p className="text-sm font-medium text-status-info-text">{currentStep.label}</p>
             {currentStep.hint && (
               currentStep.href ? (
-                <Link href={currentStep.href} className="text-xs text-blue-600 hover:underline">
+                <Link href={currentStep.href} className="text-xs text-status-info-text hover:underline">
                   {currentStep.hint} →
                 </Link>
               ) : (
-                <p className="text-xs text-blue-500">{currentStep.hint}</p>
+                <p className="text-xs text-status-info-text">{currentStep.hint}</p>
               )
             )}
           </div>

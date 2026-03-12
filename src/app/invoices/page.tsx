@@ -79,7 +79,7 @@ export default async function InvoicesPage({
       <div className="flex items-center justify-between mb-6">
         <div>
           <h1 className="text-2xl font-bold">Invoices</h1>
-          <p className="text-slate-500 text-sm mt-1">{totalCount} total</p>
+          <p className="text-muted-foreground text-sm mt-1">{totalCount} total</p>
         </div>
         <Link href="/invoices/new">
           <Button><Plus className="w-4 h-4 mr-2" /> New Invoice</Button>
@@ -88,13 +88,13 @@ export default async function InvoicesPage({
 
       {/* Summary */}
       <div className="grid grid-cols-2 gap-4 mb-6">
-        <div className="bg-green-50 rounded-xl shadow-sm border-l-4 border-l-green-500 p-4">
-          <p className="text-sm text-green-700 font-medium">Total Collected</p>
-          <p className="text-2xl font-bold text-green-800">${totalPaid.toLocaleString("en-US", { minimumFractionDigits: 2 })}</p>
+        <div className="bg-status-success-bg rounded-xl shadow-sm border-l-4 border-l-green-500 p-4">
+          <p className="text-sm text-status-success-text font-medium">Total Collected</p>
+          <p className="text-2xl font-bold text-status-success-text">${totalPaid.toLocaleString("en-US", { minimumFractionDigits: 2 })}</p>
         </div>
-        <div className="bg-orange-50 rounded-xl shadow-sm border-l-4 border-l-orange-500 p-4">
-          <p className="text-sm text-orange-700 font-medium">Unpaid Invoices</p>
-          <p className="text-2xl font-bold text-orange-800">${totalOutstanding.toLocaleString("en-US", { minimumFractionDigits: 2 })}</p>
+        <div className="bg-status-orange-bg rounded-xl shadow-sm border-l-4 border-l-orange-500 p-4">
+          <p className="text-sm text-status-orange-text font-medium">Unpaid Invoices</p>
+          <p className="text-2xl font-bold text-status-orange-text">${totalOutstanding.toLocaleString("en-US", { minimumFractionDigits: 2 })}</p>
         </div>
       </div>
 
@@ -104,16 +104,16 @@ export default async function InvoicesPage({
           {activeStatus && <input type="hidden" name="status" value={activeStatus} />}
           {sort && <input type="hidden" name="sort" value={sort} />}
           <div className="relative">
-            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-400" />
+            <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
             <input
               name="search"
               defaultValue={search}
               placeholder="Search by invoice number or customer name..."
-              className="w-full border rounded-md pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900"
+              className="w-full border rounded-md pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
             />
           </div>
         </form>
-        <Suspense fallback={<div className="border rounded-md px-2 py-1.5 text-sm w-28 bg-white" />}>
+        <Suspense fallback={<div className="border rounded-md px-2 py-1.5 text-sm w-28 bg-card" />}>
           <SortSelect options={SORT_OPTIONS} basePath="/invoices" />
         </Suspense>
       </div>
@@ -134,9 +134,9 @@ export default async function InvoicesPage({
                   "px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition-all duration-150",
                   isActive
                     ? "text-white"
-                    : "bg-white border text-slate-600 hover:bg-slate-50"
+                    : "bg-card border text-muted-foreground hover:bg-muted"
                 )}
-                style={isActive ? { background: "linear-gradient(135deg, #1a1a2e 0%, #0f3460 100%)" } : {}}
+                style={isActive ? { background: "linear-gradient(135deg, var(--mws-navy) 0%, var(--secondary) 100%)" } : {}}
               >
                 {s === "ALL" ? "All" : INVOICE_STATUS_LABELS[s]}
               </button>
@@ -146,8 +146,8 @@ export default async function InvoicesPage({
       </div>
 
       {invoices.length === 0 ? (
-        <div className="text-center py-16 text-slate-400">
-          <Receipt className="w-8 h-8 text-slate-300 mx-auto mb-2" />
+        <div className="text-center py-16 text-muted-foreground">
+          <Receipt className="w-8 h-8 text-muted-foreground/50 mx-auto mb-2" />
           <p className="text-lg font-medium">No invoices found</p>
           <p className="text-sm mt-1">
             {search || activeStatus
@@ -163,8 +163,8 @@ export default async function InvoicesPage({
             return (
               <Link key={inv.id} href={`/invoices/${inv.id}`}>
                 <div className={cn(
-                  "flex items-center justify-between bg-white rounded-xl shadow-sm px-5 py-4 hover:shadow-md hover:-translate-y-px transition-all duration-150 cursor-pointer",
-                  isOverdue && "border-l-4 border-l-red-500 bg-red-50/50",
+                  "flex items-center justify-between bg-card rounded-xl shadow-sm px-5 py-4 hover:shadow-md hover:-translate-y-px transition-all duration-150 cursor-pointer",
+                  isOverdue && "border-l-4 border-l-red-500 bg-status-danger-bg/50",
                 )}>
                   <div>
                     <div className="flex items-center gap-3">
@@ -173,12 +173,12 @@ export default async function InvoicesPage({
                         {INVOICE_STATUS_LABELS[inv.status]}
                       </span>
                       {isPastDue && (
-                        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-amber-100 text-amber-700">
+                        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-status-amber-bg text-status-amber-text">
                           Past due
                         </span>
                       )}
                     </div>
-                    <p className="text-sm text-slate-500 mt-0.5">
+                    <p className="text-sm text-muted-foreground mt-0.5">
                       {inv.customer.firstName} {inv.customer.lastName} · {format(new Date(inv.createdAt), "MMM d, yyyy")}
                       {inv.dueDate && ` · Due ${format(new Date(inv.dueDate), "MMM d")}`}
                     </p>

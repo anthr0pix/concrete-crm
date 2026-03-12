@@ -8,7 +8,7 @@ export default function DashboardLoading() {
       {/* KPI Cards */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
         {Array.from({ length: 4 }).map((_, i) => (
-          <div key={i} className="bg-white border rounded-lg p-5">
+          <div key={i} className="bg-card border rounded-lg p-5">
             <Skeleton className="h-5 w-5 mb-3 rounded" />
             <Skeleton className="h-8 w-24 mb-1" />
             <Skeleton className="h-4 w-28" />
@@ -17,7 +17,7 @@ export default function DashboardLoading() {
       </div>
 
       {/* Today's Jobs */}
-      <div className="bg-white border-2 border-green-200 rounded-lg p-5 mb-6">
+      <div className="bg-card border-2 border-green-200 rounded-lg p-5 mb-6">
         <Skeleton className="h-5 w-32 mb-3" />
         <div className="space-y-3">
           {Array.from({ length: 2 }).map((_, i) => (
@@ -27,7 +27,7 @@ export default function DashboardLoading() {
       </div>
 
       {/* Monthly Stats */}
-      <div className="bg-white border rounded-lg p-5 mb-6">
+      <div className="bg-card border rounded-lg p-5 mb-6">
         <Skeleton className="h-5 w-28 mb-1" />
         <Skeleton className="h-3 w-60 mb-3" />
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -41,7 +41,7 @@ export default function DashboardLoading() {
       </div>
 
       {/* Job Status Pills */}
-      <div className="bg-white border rounded-lg p-5 mb-6">
+      <div className="bg-card border rounded-lg p-5 mb-6">
         <Skeleton className="h-5 w-32 mb-4" />
         <div className="flex flex-wrap gap-3">
           {Array.from({ length: 6 }).map((_, i) => (
@@ -53,7 +53,7 @@ export default function DashboardLoading() {
       {/* Two-column bottom */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         {Array.from({ length: 2 }).map((_, i) => (
-          <div key={i} className="bg-white border rounded-lg p-5">
+          <div key={i} className="bg-card border rounded-lg p-5">
             <Skeleton className="h-5 w-40 mb-4" />
             <div className="space-y-3">
               {Array.from({ length: 5 }).map((_, j) => (

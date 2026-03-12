@@ -50,9 +50,9 @@ export default async function PaymentSuccessPage({
   }
 
   return (
-    <div className="min-h-screen" style={{ backgroundColor: "#f4f4f5" }}>
+    <div className="min-h-screen bg-background">
       {/* Header */}
-      <header style={{ backgroundColor: "#1a1a2e" }} className="px-6 py-5">
+      <header className="bg-[var(--mws-navy)] px-6 py-5">
         <div className="max-w-3xl mx-auto flex items-center justify-between">
           <div>
             <p className="text-white font-bold text-lg tracking-wide uppercase">Mountain West Surface</p>
@@ -66,15 +66,15 @@ export default async function PaymentSuccessPage({
       </header>
 
       {/* Accent bar */}
-      <div style={{ backgroundColor: "#e94560", height: 4 }} />
+      <div className="bg-primary h-1" />
 
       <main className="max-w-3xl mx-auto px-6 py-16">
         {/* Success box */}
-        <div className="bg-green-50 border border-green-200 rounded-xl p-8 text-center">
+        <div className="bg-status-success-bg border border-status-success-text/20 rounded-xl p-8 text-center">
           {/* Check icon */}
-          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-green-100">
+          <div className="mx-auto mb-4 flex h-16 w-16 items-center justify-center rounded-full bg-status-success-bg">
             <svg
-              className="h-8 w-8 text-green-600"
+              className="h-8 w-8 text-status-success-text"
               fill="none"
               viewBox="0 0 24 24"
               strokeWidth={2.5}
@@ -84,11 +84,11 @@ export default async function PaymentSuccessPage({
             </svg>
           </div>
 
-          <h1 className="text-2xl font-bold text-green-800 mb-2">{title}</h1>
-          <p className="text-green-700 text-sm mb-1">{subtitle}</p>
-          <p className="text-green-800 text-xl font-semibold mb-4">{detail}</p>
+          <h1 className="text-2xl font-bold text-status-success-text mb-2">{title}</h1>
+          <p className="text-status-success-text/80 text-sm mb-1">{subtitle}</p>
+          <p className="text-status-success-text text-xl font-semibold mb-4">{detail}</p>
 
-          <p className="text-green-600 text-sm leading-relaxed max-w-md mx-auto">
+          <p className="text-status-success-text/70 text-sm leading-relaxed max-w-md mx-auto">
             Thank you for your payment. We&apos;ll be in touch soon to confirm details and schedule your service.
           </p>
         </div>
@@ -97,8 +97,7 @@ export default async function PaymentSuccessPage({
         <div className="text-center mt-8">
           <Link
             href={`/portal/${token}`}
-            className="inline-block px-6 py-2.5 text-sm font-medium rounded-lg transition-colors"
-            style={{ backgroundColor: "#1a1a2e", color: "#fff" }}
+            className="inline-block px-6 py-2.5 text-sm font-medium rounded-lg transition-colors bg-[var(--mws-navy)] text-white"
           >
             Back to Portal
           </Link>
@@ -106,14 +105,14 @@ export default async function PaymentSuccessPage({
       </main>
 
       {/* Footer */}
-      <footer className="border-t border-gray-200 py-8 mt-12">
+      <footer className="border-t border-border py-8 mt-12">
         <div className="max-w-3xl mx-auto px-6 text-center">
-          <p className="text-gray-500 text-sm">
-            <strong className="text-gray-800">Mountain West Surface LLC</strong> ·{" "}
+          <p className="text-muted-foreground text-sm">
+            <strong className="text-foreground">Mountain West Surface LLC</strong> ·{" "}
             <a href="tel:+14357096999" className="hover:underline">(435) 709-6999</a> ·{" "}
             <a href="mailto:mwsurfaceco@gmail.com" className="hover:underline">mwsurfaceco@gmail.com</a>
           </p>
-          <p className="text-gray-400 text-xs mt-1">mountainwestsurface.com</p>
+          <p className="text-muted-foreground/50 text-xs mt-1">mountainwestsurface.com</p>
         </div>
       </footer>
     </div>

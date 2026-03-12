@@ -18,6 +18,7 @@ import {
   X,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { ThemeToggle } from "@/components/ThemeToggle";
 
 const nav = [
   { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
@@ -100,8 +101,9 @@ export default function Sidebar({ open = false, onClose }: SidebarProps) {
         </div>
       </nav>
 
-      {/* Sign Out */}
-      <div className="px-3 py-4" style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+      {/* Theme Toggle + Sign Out */}
+      <div className="px-3 py-4 space-y-0.5" style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+        <ThemeToggle />
         <form action="/api/auth/logout" method="POST">
           <button
             type="submit"

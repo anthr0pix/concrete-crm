@@ -13,7 +13,7 @@ import { JobPhoto } from "@prisma/client";
 const ALLOWED_TYPES = ["image/jpeg", "image/png", "image/webp", "image/heic"];
 
 const COMPRESSION_OPTIONS = {
-  maxSizeMB: 0.5,          // target ≤ 500 KB
+  maxSizeMB: 0.5,          // target <= 500 KB
   maxWidthOrHeight: 1200,   // shrink anything larger than 1200px
   useWebWorker: true,
   fileType: "image/jpeg",   // normalize everything to JPEG (HEIC included)
@@ -56,7 +56,7 @@ export default function PhotoUpload({ jobId, photos }: Props) {
 
       const { error } = await supabase.storage.from("job-photos").upload(path, compressed, {
         contentType: "image/jpeg",
-        cacheControl: "31536000", // 1 year — photos don't change
+        cacheControl: "31536000", // 1 year -- photos don't change
         upsert: false,
       });
       if (error) throw error;
@@ -73,7 +73,7 @@ export default function PhotoUpload({ jobId, photos }: Props) {
 
       const originalKB = Math.round(file.size / 1024);
       const compressedKB = Math.round(compressed.size / 1024);
-      toast.success(`Uploaded (${originalKB}KB → ${compressedKB}KB)`);
+      toast.success(`Uploaded (${originalKB}KB -> ${compressedKB}KB)`);
       router.refresh();
     } catch {
       toast.error("Upload failed");
@@ -101,13 +101,13 @@ export default function PhotoUpload({ jobId, photos }: Props) {
         <div className="flex rounded-md border overflow-hidden">
           <button
             onClick={() => setIsBefore(true)}
-            className={`px-4 py-1.5 text-sm font-medium ${isBefore ? "bg-slate-900 text-white" : "bg-white text-slate-600"}`}
+            className={`px-4 py-1.5 text-sm font-medium ${isBefore ? "bg-foreground text-background" : "bg-card text-muted-foreground"}`}
           >
             Before
           </button>
           <button
             onClick={() => setIsBefore(false)}
-            className={`px-4 py-1.5 text-sm font-medium ${!isBefore ? "bg-slate-900 text-white" : "bg-white text-slate-600"}`}
+            className={`px-4 py-1.5 text-sm font-medium ${!isBefore ? "bg-foreground text-background" : "bg-card text-muted-foreground"}`}
           >
             After
           </button>
@@ -128,20 +128,20 @@ export default function PhotoUpload({ jobId, photos }: Props) {
           className="hidden"
           onChange={(e) => { const f = e.target.files?.[0]; if (f) upload(f); }}
         />
-        <span className="text-xs text-slate-400">Select &quot;Before&quot; or &quot;After&quot;, then upload a photo.</span>
+        <span className="text-xs text-muted-foreground">Select &quot;Before&quot; or &quot;After&quot;, then upload a photo.</span>
 
         {/* View mode toggle */}
         <div className="flex rounded-md border overflow-hidden ml-auto">
           <button
             onClick={() => setViewMode("grid")}
-            className={`px-3 py-1.5 text-sm font-medium flex items-center gap-1 ${viewMode === "grid" ? "bg-slate-900 text-white" : "bg-white text-slate-600"}`}
+            className={`px-3 py-1.5 text-sm font-medium flex items-center gap-1 ${viewMode === "grid" ? "bg-foreground text-background" : "bg-card text-muted-foreground"}`}
           >
             <LayoutGrid className="w-3.5 h-3.5" /> Grid
           </button>
           <button
             onClick={() => setViewMode("compare")}
             disabled={beforePhotos.length === 0 || afterPhotos.length === 0}
-            className={`px-3 py-1.5 text-sm font-medium flex items-center gap-1 disabled:opacity-40 disabled:cursor-not-allowed ${viewMode === "compare" ? "bg-slate-900 text-white" : "bg-white text-slate-600"}`}
+            className={`px-3 py-1.5 text-sm font-medium flex items-center gap-1 disabled:opacity-40 disabled:cursor-not-allowed ${viewMode === "compare" ? "bg-foreground text-background" : "bg-card text-muted-foreground"}`}
           >
             <Columns2 className="w-3.5 h-3.5" /> Compare
           </button>
@@ -153,17 +153,17 @@ export default function PhotoUpload({ jobId, photos }: Props) {
           {/* Before / After grid */}
           {[{ label: "Before", list: beforePhotos }, { label: "After", list: afterPhotos }].map(({ label, list }) => (
             <div key={label}>
-              <h3 className="text-sm font-semibold text-slate-500 mb-2">{label} Photos</h3>
+              <h3 className="text-sm font-semibold text-muted-foreground mb-2">{label} Photos</h3>
               {list.length === 0 ? (
-                <p className="text-sm text-slate-300 italic">No {label.toLowerCase()} photos yet</p>
+                <p className="text-sm text-muted-foreground/50 italic">No {label.toLowerCase()} photos yet</p>
               ) : (
                 <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
                   {list.map((photo) => (
-                    <div key={photo.id} className="relative group rounded-lg overflow-hidden border aspect-square bg-slate-100">
+                    <div key={photo.id} className="relative group rounded-lg overflow-hidden border aspect-square bg-muted">
                       <Image src={photo.url} alt={photo.caption ?? label} fill className="object-cover" />
                       <button
                         onClick={() => deletePhoto(photo.id)}
-                        className="absolute top-1 right-1 bg-red-500 text-white rounded p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                        className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                       >
                         <Trash2 className="w-3 h-3" />
                       </button>
@@ -178,43 +178,43 @@ export default function PhotoUpload({ jobId, photos }: Props) {
           ))}
         </>
       ) : (
-        /* Compare view — side-by-side pairing */
+        /* Compare view -- side-by-side pairing */
         <div>
           <div className="grid grid-cols-2 gap-4">
-            <h3 className="text-sm font-semibold text-slate-500 mb-1">Before</h3>
-            <h3 className="text-sm font-semibold text-slate-500 mb-1">After</h3>
+            <h3 className="text-sm font-semibold text-muted-foreground mb-1">Before</h3>
+            <h3 className="text-sm font-semibold text-muted-foreground mb-1">After</h3>
           </div>
           <div className="space-y-4">
             {Array.from({ length: Math.max(beforePhotos.length, afterPhotos.length) }).map((_, i) => (
               <div key={i} className="grid grid-cols-2 gap-4">
                 {beforePhotos[i] ? (
-                  <div className="relative group rounded-lg overflow-hidden border aspect-square bg-slate-100">
+                  <div className="relative group rounded-lg overflow-hidden border aspect-square bg-muted">
                     <Image src={beforePhotos[i].url} alt={beforePhotos[i].caption ?? "Before"} fill className="object-cover" />
                     <button
                       onClick={() => deletePhoto(beforePhotos[i].id)}
-                      className="absolute top-1 right-1 bg-red-500 text-white rounded p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       <Trash2 className="w-3 h-3" />
                     </button>
                   </div>
                 ) : (
-                  <div className="rounded-lg border-2 border-dashed border-slate-200 aspect-square bg-slate-50 flex items-center justify-center">
-                    <span className="text-sm text-slate-300">No photo</span>
+                  <div className="rounded-lg border-2 border-dashed border-border aspect-square bg-muted/50 flex items-center justify-center">
+                    <span className="text-sm text-muted-foreground/50">No photo</span>
                   </div>
                 )}
                 {afterPhotos[i] ? (
-                  <div className="relative group rounded-lg overflow-hidden border aspect-square bg-slate-100">
+                  <div className="relative group rounded-lg overflow-hidden border aspect-square bg-muted">
                     <Image src={afterPhotos[i].url} alt={afterPhotos[i].caption ?? "After"} fill className="object-cover" />
                     <button
                       onClick={() => deletePhoto(afterPhotos[i].id)}
-                      className="absolute top-1 right-1 bg-red-500 text-white rounded p-1 opacity-0 group-hover:opacity-100 transition-opacity"
+                      className="absolute top-1 right-1 bg-destructive text-destructive-foreground rounded p-1 opacity-0 group-hover:opacity-100 transition-opacity"
                     >
                       <Trash2 className="w-3 h-3" />
                     </button>
                   </div>
                 ) : (
-                  <div className="rounded-lg border-2 border-dashed border-slate-200 aspect-square bg-slate-50 flex items-center justify-center">
-                    <span className="text-sm text-slate-300">No photo</span>
+                  <div className="rounded-lg border-2 border-dashed border-border aspect-square bg-muted/50 flex items-center justify-center">
+                    <span className="text-sm text-muted-foreground/50">No photo</span>
                   </div>
                 )}
               </div>

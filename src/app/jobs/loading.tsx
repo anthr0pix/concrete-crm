@@ -35,7 +35,7 @@ export default function JobsLoading() {
       {/* Job list */}
       <div className="space-y-2">
         {Array.from({ length: 8 }).map((_, i) => (
-          <div key={i} className="bg-white border rounded-lg px-5 py-4">
+          <div key={i} className="bg-card border rounded-lg px-5 py-4">
             <div className="flex items-center gap-3 mb-1">
               <Skeleton className="h-5 w-48" />
               <Skeleton className="h-5 w-20 rounded-full" />

@@ -62,8 +62,8 @@ export default function CustomerForm({ defaultValues, customerId }: Props) {
   };
 
   return (
-    <form onSubmit={handleSubmit(onSubmit)} className="bg-white rounded-xl shadow-sm p-6 space-y-6">
-      <p className="text-xs text-slate-400"><span className="text-red-500">*</span> Required</p>
+    <form onSubmit={handleSubmit(onSubmit)} className="bg-card rounded-xl shadow-sm p-6 space-y-6">
+      <p className="text-xs text-muted-foreground"><span className="text-destructive">*</span> Required</p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1">
           <RequiredLabel>First Name</RequiredLabel>

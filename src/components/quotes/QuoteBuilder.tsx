@@ -75,12 +75,12 @@ export default function QuoteBuilder({ customers, jobs = [], defaultCustomerId, 
   };
 
   return (
-    <form onSubmit={onSubmit} className="bg-white rounded-xl shadow-sm p-6 space-y-6">
-      <p className="text-xs text-slate-400"><span className="text-red-500">*</span> Required</p>
+    <form onSubmit={onSubmit} className="bg-card rounded-xl shadow-sm p-6 space-y-6">
+      <p className="text-xs text-muted-foreground"><span className="text-destructive">*</span> Required</p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1">
           <RequiredLabel>Customer</RequiredLabel>
-          <select value={customerId} onChange={(e) => setCustomerId(e.target.value)} className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900">
+          <select value={customerId} onChange={(e) => setCustomerId(e.target.value)} className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
             <option value="">Select customer...</option>
             {customers.map((c) => <option key={c.id} value={c.id}>{c.lastName}, {c.firstName}</option>)}
           </select>
@@ -88,7 +88,7 @@ export default function QuoteBuilder({ customers, jobs = [], defaultCustomerId, 
         {jobs.length > 0 && (
           <div className="space-y-1">
             <Label>Link to Job (optional)</Label>
-            <select value={jobId} onChange={(e) => setJobId(e.target.value)} className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-slate-900">
+            <select value={jobId} onChange={(e) => setJobId(e.target.value)} className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
               <option value="">No job</option>
               {jobs.map((j) => <option key={j.id} value={j.id}>{j.title}</option>)}
             </select>
@@ -99,15 +99,15 @@ export default function QuoteBuilder({ customers, jobs = [], defaultCustomerId, 
       {/* Line Items */}
       <div>
         <RequiredLabel className="mb-2 block">Line Items</RequiredLabel>
-        <p className="text-xs text-slate-400 mb-2">Add at least one line item with a description.</p>
+        <p className="text-xs text-muted-foreground mb-2">Add at least one line item with a description.</p>
 
         {/* Desktop layout */}
         <div className="hidden sm:block">
           <div className="grid grid-cols-12 gap-2 mb-1">
-            <div className="col-span-6"><span className="text-xs font-medium text-slate-500">Description</span></div>
-            <div className="col-span-2"><span className="text-xs font-medium text-slate-500">Sq Ft</span></div>
-            <div className="col-span-3"><span className="text-xs font-medium text-slate-500">Price per Sq Ft</span></div>
-            <div className="col-span-1"><span className="text-xs font-medium text-slate-500">Total</span></div>
+            <div className="col-span-6"><span className="text-xs font-medium text-muted-foreground">Description</span></div>
+            <div className="col-span-2"><span className="text-xs font-medium text-muted-foreground">Sq Ft</span></div>
+            <div className="col-span-3"><span className="text-xs font-medium text-muted-foreground">Price per Sq Ft</span></div>
+            <div className="col-span-1"><span className="text-xs font-medium text-muted-foreground">Total</span></div>
           </div>
           <div className="space-y-2">
             {lineItems.map((item, i) => (
@@ -140,11 +140,11 @@ export default function QuoteBuilder({ customers, jobs = [], defaultCustomerId, 
                   />
                 </div>
                 <div className="col-span-1 flex items-center justify-between">
-                  <span className="text-sm text-slate-500 whitespace-nowrap">
+                  <span className="text-sm text-muted-foreground whitespace-nowrap">
                     ${(item.quantity * item.unitPrice).toFixed(2)}
                   </span>
                   {lineItems.length > 1 && (
-                    <button type="button" onClick={() => removeLine(i)} className="p-1 rounded text-red-400 hover:text-red-600 hover:bg-red-50">
+                    <button type="button" onClick={() => removeLine(i)} className="p-1 rounded text-red-400 hover:text-destructive hover:bg-status-danger-bg">
                       <Trash2 className="w-4 h-4" />
                     </button>
                   )}
@@ -160,7 +160,7 @@ export default function QuoteBuilder({ customers, jobs = [], defaultCustomerId, 
             <div key={i} className="border rounded-lg p-3 space-y-3">
               <div className="flex items-start justify-between gap-2">
                 <div className="flex-1 space-y-1">
-                  <span className="text-xs font-medium text-slate-500">Description</span>
+                  <span className="text-xs font-medium text-muted-foreground">Description</span>
                   <Input
                     placeholder="e.g. Driveway sealing"
                     value={item.description}
@@ -168,14 +168,14 @@ export default function QuoteBuilder({ customers, jobs = [], defaultCustomerId, 
                   />
                 </div>
                 {lineItems.length > 1 && (
-                  <button type="button" onClick={() => removeLine(i)} className="p-2 rounded text-red-400 hover:text-red-600 hover:bg-red-50 mt-5">
+                  <button type="button" onClick={() => removeLine(i)} className="p-2 rounded text-red-400 hover:text-destructive hover:bg-status-danger-bg mt-5">
                     <Trash2 className="w-4 h-4" />
                   </button>
                 )}
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <span className="text-xs font-medium text-slate-500">Sq Ft</span>
+                  <span className="text-xs font-medium text-muted-foreground">Sq Ft</span>
                   <Input
                     type="number"
                     placeholder="0"
@@ -186,7 +186,7 @@ export default function QuoteBuilder({ customers, jobs = [], defaultCustomerId, 
                   />
                 </div>
                 <div className="space-y-1">
-                  <span className="text-xs font-medium text-slate-500">Price / Sq Ft</span>
+                  <span className="text-xs font-medium text-muted-foreground">Price / Sq Ft</span>
                   <Input
                     type="number"
                     placeholder="0.00"
@@ -197,7 +197,7 @@ export default function QuoteBuilder({ customers, jobs = [], defaultCustomerId, 
                   />
                 </div>
               </div>
-              <div className="text-right text-sm font-medium text-slate-700">
+              <div className="text-right text-sm font-medium text-foreground">
                 Total: ${(item.quantity * item.unitPrice).toFixed(2)}
               </div>
             </div>
@@ -210,13 +210,13 @@ export default function QuoteBuilder({ customers, jobs = [], defaultCustomerId, 
       </div>
 
       {/* Totals */}
-      <div className="bg-slate-50 rounded-lg p-4 space-y-2 max-w-xs ml-auto">
+      <div className="bg-muted rounded-lg p-4 space-y-2 max-w-xs ml-auto">
         <div className="flex justify-between text-sm">
-          <span className="text-slate-500">Subtotal</span>
+          <span className="text-muted-foreground">Subtotal</span>
           <span>${subtotal.toFixed(2)}</span>
         </div>
         <div className="flex justify-between text-sm items-center gap-2">
-          <span className="text-slate-500">Tax (%)</span>
+          <span className="text-muted-foreground">Tax (%)</span>
           <Input
             type="number"
             min="0"
@@ -229,7 +229,7 @@ export default function QuoteBuilder({ customers, jobs = [], defaultCustomerId, 
         </div>
         {taxRate > 0 && (
           <div className="flex justify-between text-sm">
-            <span className="text-slate-500">Tax</span>
+            <span className="text-muted-foreground">Tax</span>
             <span>${taxAmount.toFixed(2)}</span>
           </div>
         )}
@@ -243,7 +243,7 @@ export default function QuoteBuilder({ customers, jobs = [], defaultCustomerId, 
         <div className="space-y-1">
           <Label>Valid Until</Label>
           <Input type="date" value={validUntil} onChange={(e) => setValidUntil(e.target.value)} />
-          <p className="text-xs text-slate-400">How long the customer has to accept this quote.</p>
+          <p className="text-xs text-muted-foreground">How long the customer has to accept this quote.</p>
         </div>
       </div>
 
@@ -260,7 +260,7 @@ export default function QuoteBuilder({ customers, jobs = [], defaultCustomerId, 
       <div className="space-y-1">
         <Label>Notes</Label>
         <Textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Terms, conditions, additional info..." />
-        <p className="text-xs text-slate-400">Shown to the customer on the quote PDF and portal page.</p>
+        <p className="text-xs text-muted-foreground">Shown to the customer on the quote PDF and portal page.</p>
       </div>
 
       <div className="flex gap-3">

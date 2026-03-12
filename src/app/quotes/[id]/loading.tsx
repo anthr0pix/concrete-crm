@@ -21,8 +21,8 @@ export default function QuoteDetailLoading() {
       </div>
 
       {/* Line items table */}
-      <div className="hidden sm:block bg-white border rounded-lg overflow-hidden mb-4">
-        <div className="bg-slate-50 border-b px-4 py-3 flex justify-between">
+      <div className="hidden sm:block bg-card border rounded-lg overflow-hidden mb-4">
+        <div className="bg-muted/50 border-b px-4 py-3 flex justify-between">
           <Skeleton className="h-4 w-24" />
           <div className="flex gap-12">
             <Skeleton className="h-4 w-12" />

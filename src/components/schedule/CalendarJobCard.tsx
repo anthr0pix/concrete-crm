@@ -5,13 +5,13 @@ import { SERVICE_TYPE_LABELS } from "@/types";
 import Link from "next/link";
 
 const SERVICE_TYPE_COLORS: Record<string, string> = {
-  CONCRETE_SEALING: "bg-blue-100 text-blue-800",
-  PAVER_SEALING: "bg-purple-100 text-purple-800",
-  DRIVEWAY_SEALING: "bg-green-100 text-green-800",
-  PATIO_SEALING: "bg-amber-100 text-amber-800",
-  POOL_DECK_SEALING: "bg-cyan-100 text-cyan-800",
-  COMMERCIAL_SEALING: "bg-orange-100 text-orange-800",
-  OTHER: "bg-slate-100 text-slate-800",
+  CONCRETE_SEALING: "bg-status-info-bg text-status-info-text",
+  PAVER_SEALING: "bg-status-purple-bg text-status-purple-text",
+  DRIVEWAY_SEALING: "bg-status-success-bg text-status-success-text",
+  PATIO_SEALING: "bg-status-amber-bg text-status-amber-text",
+  POOL_DECK_SEALING: "bg-status-info-bg text-status-info-text",
+  COMMERCIAL_SEALING: "bg-status-orange-bg text-status-orange-text",
+  OTHER: "bg-status-neutral-bg text-status-neutral-text",
 };
 
 interface CalendarJobCardProps {
@@ -45,7 +45,7 @@ export default function CalendarJobCard({ job }: CalendarJobCardProps) {
     return (
       <div
         ref={setNodeRef}
-        className="rounded px-1.5 py-0.5 text-xs opacity-30 bg-slate-100"
+        className="rounded px-1.5 py-0.5 text-xs opacity-30 bg-muted"
       >
         <span className="truncate block">
           {job.customer.firstName} {job.customer.lastName}

@@ -25,28 +25,28 @@ export default function PipelineCard({ job }: { job: PipelineJob }) {
       style={style}
       {...listeners}
       {...attributes}
-      className={`bg-white border border-slate-200 rounded-lg p-3 cursor-grab active:cursor-grabbing transition-shadow hover:shadow-sm ${
+      className={`bg-card border border-border rounded-lg p-3 cursor-grab active:cursor-grabbing transition-shadow hover:shadow-sm ${
         isDragging ? "opacity-50 shadow-md" : ""
       }`}
     >
       <Link href={`/jobs/${job.id}`} className="block" onClick={(e) => { if (isDragging) e.preventDefault(); }}>
-        <p className="font-semibold text-sm text-slate-900 truncate">
+        <p className="font-semibold text-sm text-foreground truncate">
           {job.customer.firstName} {job.customer.lastName}
         </p>
-        <p className="text-xs text-slate-500 mt-0.5 truncate">{job.title}</p>
+        <p className="text-xs text-muted-foreground mt-0.5 truncate">{job.title}</p>
         <div className="flex items-center gap-2 mt-2">
-          <span className="inline-flex items-center text-[11px] font-medium px-1.5 py-0.5 rounded bg-slate-100 text-slate-600">
+          <span className="inline-flex items-center text-[11px] font-medium px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
             {SERVICE_TYPE_LABELS[job.serviceType] || job.serviceType}
           </span>
         </div>
         <div className="flex items-center justify-between mt-2">
-          <span className="text-[11px] text-slate-400">
+          <span className="text-[11px] text-muted-foreground">
             {job.scheduledDate
               ? format(new Date(job.scheduledDate), "MMM d, yyyy")
               : format(new Date(job.createdAt), "MMM d, yyyy")}
           </span>
           {job.quoteTotal !== null && job.quoteTotal > 0 && (
-            <span className="text-xs font-semibold text-slate-700">
+            <span className="text-xs font-semibold text-foreground">
               ${job.quoteTotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}
             </span>
           )}

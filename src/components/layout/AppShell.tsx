@@ -20,7 +20,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   if (isFullscreenPage) return <>{children}</>;
 
   return (
-    <div className="flex min-h-screen" style={{ backgroundColor: "#f8f9fb" }}>
+    <div className="flex min-h-screen bg-background">
       {/* Mobile backdrop */}
       {sidebarOpen && (
         <div
@@ -33,13 +33,13 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
       <div className="flex-1 flex flex-col min-w-0">
         {/* Mobile top bar */}
-        <div className="md:hidden flex items-center gap-3 px-4 py-3 border-b bg-white sticky top-0 z-20 shadow-sm">
+        <div className="md:hidden flex items-center gap-3 px-4 py-3 border-b bg-card sticky top-0 z-20 shadow-sm">
           <button
             onClick={() => setSidebarOpen(true)}
-            className="p-1.5 rounded-md hover:bg-slate-100 transition-colors"
+            className="p-1.5 rounded-md hover:bg-muted transition-colors"
             aria-label="Open menu"
           >
-            <Menu className="w-5 h-5 text-slate-600" />
+            <Menu className="w-5 h-5 text-muted-foreground" />
           </button>
           <Image
             src="/logo-white.png"

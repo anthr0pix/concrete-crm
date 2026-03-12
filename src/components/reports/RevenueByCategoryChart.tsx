@@ -35,7 +35,7 @@ export default function RevenueByCategoryChart({ data }: RevenueByCategoryChartP
 
   if (data.length === 0) {
     return (
-      <p className="text-sm text-gray-500 py-4 text-center">
+      <p className="text-sm text-muted-foreground py-4 text-center">
         No revenue data available for this period.
       </p>
     );
@@ -50,12 +50,12 @@ export default function RevenueByCategoryChart({ data }: RevenueByCategoryChartP
         return (
           <div key={d.serviceType}>
             <div className="flex justify-between items-baseline mb-1">
-              <span className="text-sm font-medium text-gray-700">{d.label}</span>
-              <span className="text-sm text-gray-500 tabular-nums">
+              <span className="text-sm font-medium text-foreground">{d.label}</span>
+              <span className="text-sm text-muted-foreground tabular-nums">
                 {formatCurrency(d.revenue)}
               </span>
             </div>
-            <div className="h-6 bg-gray-100 rounded-sm overflow-hidden">
+            <div className="h-6 bg-muted rounded-sm overflow-hidden">
               <div
                 className={`h-full ${colorClass} rounded-sm transition-all duration-300`}
                 style={{ width: `${barWidth}%` }}
@@ -67,8 +67,8 @@ export default function RevenueByCategoryChart({ data }: RevenueByCategoryChartP
 
       {/* Total */}
       <div className="border-t pt-3 mt-3 flex justify-between items-baseline">
-        <span className="text-sm font-bold text-gray-700">Total Revenue</span>
-        <span className="text-sm font-bold text-gray-900 tabular-nums">
+        <span className="text-sm font-bold text-foreground">Total Revenue</span>
+        <span className="text-sm font-bold text-foreground tabular-nums">
           {formatCurrency(totalRevenue)}
         </span>
       </div>
