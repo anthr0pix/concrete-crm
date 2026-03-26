@@ -3,7 +3,7 @@ import Link from "next/link";
 import { Users, Briefcase, FileText, Receipt, TrendingUp, Clock, ArrowRight, Phone, MapPin, AlertTriangle } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { JOB_STATUS_LABELS, SERVICE_TYPE_LABELS, STATUS_COLORS } from "@/types";
-import { format, startOfMonth, endOfMonth, startOfDay, endOfDay } from "date-fns";
+import { format, startOfMonth, endOfMonth, startOfDay, endOfDay, subDays, addDays, formatDistanceToNow } from "date-fns";
 
 export const dynamic = "force-dynamic";
 
@@ -40,6 +40,11 @@ export default async function DashboardPage() {
     monthlyCompletedJobs,
     todaysJobs,
     overdueInvoiceCount,
+    unquotedLeads,
+    staleQuotes,
+    expiringQuotes,
+    overdueInvoices,
+    unbilledJobs,
   ] = await Promise.all([
     prisma.customer.count(),
     prisma.job.groupBy({ by: ["status"], _count: true }),
@@ -80,6 +85,56 @@ export default async function DashboardPage() {
       },
     }),
     prisma.invoice.count({ where: { status: "OVERDUE" } }),
+    // Needs Attention queries
+    prisma.job.findMany({
+      where: {
+        status: "LEAD",
+        quotes: { none: {} },
+        createdAt: { lt: subDays(now, 3) },
+      },
+      orderBy: { createdAt: "asc" },
+      take: 10,
+      include: { customer: { select: { firstName: true, lastName: true } } },
+    }),
+    prisma.quote.findMany({
+      where: {
+        status: "SENT",
+        updatedAt: { lt: subDays(now, 7) },
+      },
+      orderBy: { updatedAt: "asc" },
+      take: 10,
+      include: { customer: { select: { firstName: true, lastName: true } } },
+    }),
+    prisma.quote.findMany({
+      where: {
+        status: "SENT",
+        validUntil: { gte: now, lte: addDays(now, 3) },
+      },
+      orderBy: { validUntil: "asc" },
+      take: 10,
+      include: { customer: { select: { firstName: true, lastName: true } } },
+    }),
+    // Overdue invoices — SENT with dueDate in the past
+    prisma.invoice.findMany({
+      where: {
+        status: "SENT",
+        dueDate: { lt: now },
+      },
+      orderBy: { dueDate: "asc" },
+      take: 10,
+      include: { customer: { select: { firstName: true, lastName: true } } },
+    }),
+    // Completed jobs with no invoice — work done but not billed (last 30 days)
+    prisma.job.findMany({
+      where: {
+        status: "COMPLETED",
+        invoices: { none: {} },
+        completedDate: { gte: subDays(now, 30) },
+      },
+      orderBy: { completedDate: "asc" },
+      take: 10,
+      include: { customer: { select: { firstName: true, lastName: true } } },
+    }),
   ]);
 
   const statusMap = Object.fromEntries(jobCounts.map((j) => [j.status, j._count]));
@@ -135,8 +190,8 @@ export default async function DashboardPage() {
   return (
     <div className="p-4 sm:p-6 max-w-5xl mx-auto">
       {/* Page header */}
-      <div className="mb-6">
-        <h1 className="text-3xl font-bold">{getGreeting()}</h1>
+      <div className="mb-6 bg-muted/40 rounded-xl px-5 py-4 -mx-1">
+        <h1 className="text-2xl sm:text-3xl font-bold">{getGreeting()}</h1>
         <p className="text-sm text-muted-foreground mt-1">{format(now, "EEEE, MMMM d, yyyy")}</p>
       </div>
 
@@ -174,11 +229,11 @@ export default async function DashboardPage() {
           const accent = ACCENT_COLORS[stat.label];
           return (
             <Link key={stat.label} href={stat.href}>
-              <div className={`bg-card rounded-xl shadow-sm border-l-4 ${accent.border} p-5 hover:shadow-md hover:-translate-y-px transition-all duration-150`}>
+              <div className={`bg-card rounded-xl shadow-sm border-l-4 ${accent.border} p-3 sm:p-5 hover:shadow-md hover:-translate-y-px active:scale-[0.98] transition-all duration-150`}>
                 <div className={`w-9 h-9 rounded-lg ${accent.bg} flex items-center justify-center mb-3`}>
                   <stat.icon className={`w-5 h-5 ${accent.icon}`} />
                 </div>
-                <p className="text-3xl font-bold">{stat.value}</p>
+                <p className="text-2xl sm:text-3xl font-bold">{stat.value}</p>
                 <p className="text-sm text-muted-foreground mt-0.5">{stat.label}</p>
                 {"subtitle" in stat && stat.subtitle && <p className="text-xs text-muted-foreground mt-0.5">{stat.subtitle}</p>}
               </div>
@@ -186,6 +241,149 @@ export default async function DashboardPage() {
           );
         })}
       </div>
+
+      {/* Needs Attention */}
+      {(unquotedLeads.length > 0 || staleQuotes.length > 0 || expiringQuotes.length > 0 || overdueInvoices.length > 0 || unbilledJobs.length > 0) && (
+        <div className="bg-card rounded-xl shadow-sm border-l-4 border-l-amber-500 p-5 mb-6">
+          <div className="flex items-center gap-2 mb-3">
+            <AlertTriangle className="w-4 h-4 text-amber-500" />
+            <h2 className="font-semibold text-base">Needs Attention</h2>
+            <span className="text-xs text-muted-foreground">
+              {unquotedLeads.length + staleQuotes.length + expiringQuotes.length + overdueInvoices.length + unbilledJobs.length} items
+            </span>
+          </div>
+          <div className="space-y-4">
+            {unquotedLeads.length > 0 && (
+              <div>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">Unquoted Leads</p>
+                <div className="space-y-1">
+                  {unquotedLeads.map((job) => (
+                    <Link key={job.id} href={`/jobs/${job.id}`}>
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-0 hover:bg-muted rounded-lg px-3 py-2 -mx-2 transition-colors group">
+                        <div className="flex items-center gap-2 min-w-0 sm:flex-1">
+                          <span className="text-sm font-medium truncate">{job.title}</span>
+                          <span className="text-xs text-muted-foreground shrink-0">
+                            {job.customer.firstName} {job.customer.lastName}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0 sm:ml-2">
+                          <span className="text-xs text-status-amber-text">
+                            {formatDistanceToNow(new Date(job.createdAt), { addSuffix: true })}
+                          </span>
+                          <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/50 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+            {staleQuotes.length > 0 && (
+              <div>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">Stale Quotes</p>
+                <div className="space-y-1">
+                  {staleQuotes.map((quote) => (
+                    <Link key={quote.id} href={`/quotes/${quote.id}`}>
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-0 hover:bg-muted rounded-lg px-3 py-2 -mx-2 transition-colors group">
+                        <div className="flex items-center gap-2 min-w-0 sm:flex-1">
+                          <span className="text-sm font-medium">{quote.quoteNumber}</span>
+                          <span className="text-xs text-muted-foreground shrink-0">
+                            {quote.customer.firstName} {quote.customer.lastName}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0 sm:ml-2">
+                          <span className="text-xs text-status-amber-text">
+                            sent {formatDistanceToNow(new Date(quote.updatedAt), { addSuffix: true })}
+                          </span>
+                          <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/50 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+            {expiringQuotes.length > 0 && (
+              <div>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">Expiring Soon</p>
+                <div className="space-y-1">
+                  {expiringQuotes.map((quote) => (
+                    <Link key={quote.id} href={`/quotes/${quote.id}`}>
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-0 hover:bg-muted rounded-lg px-3 py-2 -mx-2 transition-colors group">
+                        <div className="flex items-center gap-2 min-w-0 sm:flex-1">
+                          <span className="text-sm font-medium">{quote.quoteNumber}</span>
+                          <span className="text-xs text-muted-foreground shrink-0">
+                            {quote.customer.firstName} {quote.customer.lastName}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0 sm:ml-2">
+                          <span className="text-xs text-status-danger-text">
+                            expires {formatDistanceToNow(new Date(quote.validUntil!), { addSuffix: true })}
+                          </span>
+                          <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/50 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+            {overdueInvoices.length > 0 && (
+              <div>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">Overdue Invoices</p>
+                <div className="space-y-1">
+                  {overdueInvoices.map((invoice) => (
+                    <Link key={invoice.id} href={`/invoices/${invoice.id}`}>
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-0 hover:bg-muted rounded-lg px-3 py-2 -mx-2 transition-colors group">
+                        <div className="flex items-center gap-2 min-w-0 sm:flex-1">
+                          <span className="text-sm font-medium">{invoice.invoiceNumber}</span>
+                          <span className="text-xs text-muted-foreground shrink-0">
+                            {invoice.customer.firstName} {invoice.customer.lastName}
+                          </span>
+                          <span className="text-xs font-medium text-muted-foreground shrink-0">
+                            ${invoice.total.toFixed(2)}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0 sm:ml-2">
+                          <span className="text-xs text-status-danger-text">
+                            due {formatDistanceToNow(new Date(invoice.dueDate!), { addSuffix: true })}
+                          </span>
+                          <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/50 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+            {unbilledJobs.length > 0 && (
+              <div>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">Completed — No Invoice</p>
+                <div className="space-y-1">
+                  {unbilledJobs.map((job) => (
+                    <Link key={job.id} href={`/jobs/${job.id}`}>
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-0 hover:bg-muted rounded-lg px-3 py-2 -mx-2 transition-colors group">
+                        <div className="flex items-center gap-2 min-w-0 sm:flex-1">
+                          <span className="text-sm font-medium truncate">{job.title}</span>
+                          <span className="text-xs text-muted-foreground shrink-0">
+                            {job.customer.firstName} {job.customer.lastName}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0 sm:ml-2">
+                          <span className="text-xs text-status-amber-text">
+                            completed {job.completedDate ? formatDistanceToNow(new Date(job.completedDate), { addSuffix: true }) : ""}
+                          </span>
+                          <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/50 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+          </div>
+        </div>
+      )}
 
       {/* Today's Jobs */}
       <div className="bg-card rounded-xl shadow-sm border-l-4 border-l-green-500 p-5 mb-6">

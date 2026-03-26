@@ -9,7 +9,6 @@ import { Label } from "@/components/ui/label";
 import { RequiredLabel } from "@/components/ui/required-label";
 import { Textarea } from "@/components/ui/textarea";
 import { Plus, Trash2 } from "lucide-react";
-import DepositSettings from "@/components/quotes/DepositSettings";
 import NewCustomerDialog from "@/components/customers/NewCustomerDialog";
 
 interface LineItem {
@@ -26,35 +25,22 @@ interface Props {
   jobs?: Job[];
   defaultCustomerId?: string;
   defaultJobId?: string;
-  quoteId?: string;
-  defaultLineItems?: LineItem[];
-  defaultTaxRate?: number;
-  defaultNotes?: string;
-  defaultValidUntil?: string;
-  defaultDepositAmount?: number | null;
-  defaultDepositType?: "FIXED" | "PERCENTAGE" | null;
 }
 
-export default function QuoteBuilder({ customers, jobs = [], defaultCustomerId, defaultJobId, quoteId, defaultLineItems, defaultTaxRate, defaultNotes, defaultValidUntil, defaultDepositAmount, defaultDepositType }: Props) {
-  const isEdit = !!quoteId;
+export default function InvoiceBuilder({ customers, jobs = [], defaultCustomerId, defaultJobId }: Props) {
   const router = useRouter();
   const [customerList, setCustomerList] = useState<Customer[]>(customers);
   const [customerId, setCustomerId] = useState(defaultCustomerId ?? "");
   const [jobId, setJobId] = useState(defaultJobId ?? "");
-  const [taxRate, setTaxRate] = useState(defaultTaxRate ?? 0);
-  const [notes, setNotes] = useState(defaultNotes ?? "");
-  const [validUntil, setValidUntil] = useState(() => {
-    if (defaultValidUntil) return defaultValidUntil;
+  const [taxRate, setTaxRate] = useState(0);
+  const [notes, setNotes] = useState("");
+  const [dueDate, setDueDate] = useState(() => {
     const d = new Date();
-    d.setDate(d.getDate() + 7);
+    d.setDate(d.getDate() + 30);
     return d.toISOString().split("T")[0];
   });
-  const [depositAmount, setDepositAmount] = useState<number | null>(defaultDepositAmount ?? null);
-  const [depositType, setDepositType] = useState<"FIXED" | "PERCENTAGE" | null>(defaultDepositType ?? null);
   const [submitting, setSubmitting] = useState(false);
-  const [lineItems, setLineItems] = useState<LineItem[]>(
-    defaultLineItems ?? [{ description: "", quantity: 1, unitPrice: 0 }]
-  );
+  const [lineItems, setLineItems] = useState<LineItem[]>([{ description: "", quantity: 1, unitPrice: 0 }]);
 
   const addLine = () => setLineItems([...lineItems, { description: "", quantity: 1, unitPrice: 0 }]);
   const removeLine = (i: number) => setLineItems(lineItems.filter((_, idx) => idx !== i));
@@ -67,32 +53,28 @@ export default function QuoteBuilder({ customers, jobs = [], defaultCustomerId, 
 
   const onSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!isEdit && !customerId) { toast.error("Select a customer"); return; }
+    if (!customerId) { toast.error("Select a customer"); return; }
     if (lineItems.some((l) => !l.description)) { toast.error("All line items need a description"); return; }
 
     setSubmitting(true);
-    const url = isEdit ? `/api/quotes/${quoteId}` : "/api/quotes";
-    const method = isEdit ? "PATCH" : "POST";
-    const res = await fetch(url, {
-      method,
+    const res = await fetch("/api/invoices", {
+      method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
-        ...(isEdit ? {} : { customerId }),
-        jobId: jobId || null,
+        customerId,
+        jobId: jobId || undefined,
         taxRate,
-        notes,
-        validUntil: validUntil || undefined,
+        notes: notes || undefined,
+        dueDate: dueDate || undefined,
         lineItems,
-        depositAmount,
-        depositType,
       }),
     });
     setSubmitting(false);
 
-    if (!res.ok) { toast.error(isEdit ? "Failed to update quote" : "Failed to create quote"); return; }
-    const quote = await res.json();
-    toast.success(isEdit ? "Quote updated" : `Quote ${quote.quoteNumber} created`);
-    router.push(`/quotes/${isEdit ? quoteId : quote.id}`);
+    if (!res.ok) { toast.error("Failed to create invoice"); return; }
+    const invoice = await res.json();
+    toast.success(`Invoice ${invoice.invoiceNumber} created`);
+    router.push(`/invoices/${invoice.id}`);
     router.refresh();
   };
 
@@ -100,21 +82,19 @@ export default function QuoteBuilder({ customers, jobs = [], defaultCustomerId, 
     <form onSubmit={onSubmit} className="bg-card rounded-xl shadow-sm p-4 sm:p-6 space-y-6">
       <p className="text-xs text-muted-foreground"><span className="text-destructive">*</span> Required</p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        {!isEdit && (
-          <div className="space-y-1">
-            <RequiredLabel>Customer</RequiredLabel>
-            <div className="flex gap-2">
-              <select value={customerId} onChange={(e) => setCustomerId(e.target.value)} className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
-                <option value="">Select customer...</option>
-                {customerList.map((c) => <option key={c.id} value={c.id}>{c.lastName}, {c.firstName}</option>)}
-              </select>
-              <NewCustomerDialog onCustomerCreated={(c) => {
-                setCustomerList((prev) => [...prev, c].sort((a, b) => a.lastName.localeCompare(b.lastName)));
-                setCustomerId(c.id);
-              }} />
-            </div>
+        <div className="space-y-1">
+          <RequiredLabel>Customer</RequiredLabel>
+          <div className="flex gap-2">
+            <select value={customerId} onChange={(e) => setCustomerId(e.target.value)} className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
+              <option value="">Select customer...</option>
+              {customerList.map((c) => <option key={c.id} value={c.id}>{c.lastName}, {c.firstName}</option>)}
+            </select>
+            <NewCustomerDialog onCustomerCreated={(c) => {
+              setCustomerList((prev) => [...prev, c].sort((a, b) => a.lastName.localeCompare(b.lastName)));
+              setCustomerId(c.id);
+            }} />
           </div>
-        )}
+        </div>
         {jobs.length > 0 && (
           <div className="space-y-1">
             <Label>Link to Job (optional)</Label>
@@ -135,44 +115,24 @@ export default function QuoteBuilder({ customers, jobs = [], defaultCustomerId, 
         <div className="hidden sm:block">
           <div className="grid grid-cols-12 gap-2 mb-1">
             <div className="col-span-6"><span className="text-xs font-medium text-muted-foreground">Description</span></div>
-            <div className="col-span-2"><span className="text-xs font-medium text-muted-foreground">Sq Ft</span></div>
-            <div className="col-span-3"><span className="text-xs font-medium text-muted-foreground">Price per Sq Ft</span></div>
+            <div className="col-span-2"><span className="text-xs font-medium text-muted-foreground">Qty</span></div>
+            <div className="col-span-3"><span className="text-xs font-medium text-muted-foreground">Unit Price</span></div>
             <div className="col-span-1"><span className="text-xs font-medium text-muted-foreground">Total</span></div>
           </div>
           <div className="space-y-2">
             {lineItems.map((item, i) => (
               <div key={i} className="grid grid-cols-12 gap-2 items-center">
                 <div className="col-span-6">
-                  <Input
-                    placeholder="e.g. Driveway sealing"
-                    value={item.description}
-                    onChange={(e) => updateLine(i, "description", e.target.value)}
-                  />
+                  <Input placeholder="e.g. Driveway sealing" value={item.description} onChange={(e) => updateLine(i, "description", e.target.value)} />
                 </div>
                 <div className="col-span-2">
-                  <Input
-                    type="number"
-                    placeholder="0"
-                    min="0.01"
-                    step="0.01"
-                    value={item.quantity}
-                    onChange={(e) => updateLine(i, "quantity", parseFloat(e.target.value) || 0)}
-                  />
+                  <Input type="number" placeholder="0" min="0.01" step="0.01" value={item.quantity} onChange={(e) => updateLine(i, "quantity", parseFloat(e.target.value) || 0)} />
                 </div>
                 <div className="col-span-3">
-                  <Input
-                    type="number"
-                    placeholder="0.00"
-                    min="0"
-                    step="0.01"
-                    value={item.unitPrice}
-                    onChange={(e) => updateLine(i, "unitPrice", parseFloat(e.target.value) || 0)}
-                  />
+                  <Input type="number" placeholder="0.00" min="0" step="0.01" value={item.unitPrice} onChange={(e) => updateLine(i, "unitPrice", parseFloat(e.target.value) || 0)} />
                 </div>
                 <div className="col-span-1 flex items-center justify-between">
-                  <span className="text-sm text-muted-foreground whitespace-nowrap">
-                    ${(item.quantity * item.unitPrice).toFixed(2)}
-                  </span>
+                  <span className="text-sm text-muted-foreground whitespace-nowrap">${(item.quantity * item.unitPrice).toFixed(2)}</span>
                   {lineItems.length > 1 && (
                     <button type="button" onClick={() => removeLine(i)} className="p-1 rounded text-muted-foreground hover:text-destructive hover:bg-status-danger-bg">
                       <Trash2 className="w-4 h-4" />
@@ -191,11 +151,7 @@ export default function QuoteBuilder({ customers, jobs = [], defaultCustomerId, 
               <div className="flex items-start justify-between gap-2">
                 <div className="flex-1 space-y-1">
                   <span className="text-xs font-medium text-muted-foreground">Description</span>
-                  <Input
-                    placeholder="e.g. Driveway sealing"
-                    value={item.description}
-                    onChange={(e) => updateLine(i, "description", e.target.value)}
-                  />
+                  <Input placeholder="e.g. Driveway sealing" value={item.description} onChange={(e) => updateLine(i, "description", e.target.value)} />
                 </div>
                 {lineItems.length > 1 && (
                   <button type="button" onClick={() => removeLine(i)} className="p-2 rounded text-muted-foreground hover:text-destructive hover:bg-status-danger-bg mt-5">
@@ -205,26 +161,12 @@ export default function QuoteBuilder({ customers, jobs = [], defaultCustomerId, 
               </div>
               <div className="grid grid-cols-2 gap-3">
                 <div className="space-y-1">
-                  <span className="text-xs font-medium text-muted-foreground">Sq Ft</span>
-                  <Input
-                    type="number"
-                    placeholder="0"
-                    min="0.01"
-                    step="0.01"
-                    value={item.quantity}
-                    onChange={(e) => updateLine(i, "quantity", parseFloat(e.target.value) || 0)}
-                  />
+                  <span className="text-xs font-medium text-muted-foreground">Qty</span>
+                  <Input type="number" placeholder="0" min="0.01" step="0.01" value={item.quantity} onChange={(e) => updateLine(i, "quantity", parseFloat(e.target.value) || 0)} />
                 </div>
                 <div className="space-y-1">
-                  <span className="text-xs font-medium text-muted-foreground">Price / Sq Ft</span>
-                  <Input
-                    type="number"
-                    placeholder="0.00"
-                    min="0"
-                    step="0.01"
-                    value={item.unitPrice}
-                    onChange={(e) => updateLine(i, "unitPrice", parseFloat(e.target.value) || 0)}
-                  />
+                  <span className="text-xs font-medium text-muted-foreground">Unit Price</span>
+                  <Input type="number" placeholder="0.00" min="0" step="0.01" value={item.unitPrice} onChange={(e) => updateLine(i, "unitPrice", parseFloat(e.target.value) || 0)} />
                 </div>
               </div>
               <div className="text-right text-sm font-medium text-foreground">
@@ -247,15 +189,7 @@ export default function QuoteBuilder({ customers, jobs = [], defaultCustomerId, 
         </div>
         <div className="flex justify-between text-sm items-center gap-2">
           <span className="text-muted-foreground">Tax (%)</span>
-          <Input
-            type="number"
-            min="0"
-            max="100"
-            step="0.1"
-            value={taxRate}
-            onChange={(e) => setTaxRate(parseFloat(e.target.value) || 0)}
-            className="w-20 h-7 text-right text-sm"
-          />
+          <Input type="number" min="0" max="100" step="0.1" value={taxRate} onChange={(e) => setTaxRate(parseFloat(e.target.value) || 0)} className="w-20 h-7 text-right text-sm" />
         </div>
         {taxRate > 0 && (
           <div className="flex justify-between text-sm">
@@ -271,33 +205,23 @@ export default function QuoteBuilder({ customers, jobs = [], defaultCustomerId, 
 
       <div className="sm:max-w-xs">
         <div className="space-y-1">
-          <Label>Valid Until</Label>
-          <Input type="date" value={validUntil} onChange={(e) => setValidUntil(e.target.value)} />
-          <p className="text-xs text-muted-foreground">How long the customer has to accept this quote.</p>
+          <Label>Due Date</Label>
+          <Input type="date" value={dueDate} onChange={(e) => setDueDate(e.target.value)} />
+          <p className="text-xs text-muted-foreground">When payment is due. Defaults to 30 days from today.</p>
         </div>
       </div>
 
-      <DepositSettings
-        depositAmount={depositAmount}
-        depositType={depositType}
-        quoteTotal={total}
-        onChange={(amount, type) => {
-          setDepositAmount(amount);
-          setDepositType(type);
-        }}
-      />
-
       <div className="space-y-1">
         <Label>Notes</Label>
-        <Textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Terms, conditions, additional info..." />
-        <p className="text-xs text-muted-foreground">Shown to the customer on the quote PDF and portal page.</p>
+        <Textarea rows={3} value={notes} onChange={(e) => setNotes(e.target.value)} placeholder="Payment terms, additional info..." />
+        <p className="text-xs text-muted-foreground">Shown to the customer on the invoice PDF and portal page.</p>
       </div>
 
       {/* Sticky submit bar on mobile, normal on desktop */}
       <div className="sticky bottom-0 bg-card py-3 -mx-4 px-4 sm:-mx-6 sm:px-6 border-t md:static md:border-0 md:py-0 md:mx-0 md:px-0">
         <div className="flex gap-3">
           <Button type="submit" disabled={submitting} className="h-11 md:h-9 flex-1 md:flex-none">
-            {submitting ? (isEdit ? "Saving..." : "Creating...") : (isEdit ? "Save Changes" : "Create Quote")}
+            {submitting ? "Creating..." : "Create Invoice"}
           </Button>
           <Button type="button" variant="outline" onClick={() => router.back()} className="h-11 md:h-9">Cancel</Button>
         </div>

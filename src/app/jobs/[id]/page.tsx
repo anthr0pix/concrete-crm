@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { User, MapPin, Calendar, Ruler, Phone, Navigation, FileText, Receipt, Camera, DollarSign } from "lucide-react";
+import { User, MapPin, Calendar, Ruler, Phone, Navigation, FileText, Receipt, Camera, DollarSign, Clock } from "lucide-react";
 import Breadcrumbs from "@/components/layout/Breadcrumbs";
 import { SERVICE_TYPE_LABELS } from "@/types";
 import { format } from "date-fns";
@@ -44,6 +44,7 @@ export default async function JobDetailPage({
     "Square Feet": "border-t-orange-400",
     "Reseal Due": "border-t-red-400",
     "Review Request": "border-t-purple-400",
+    Submitted: "border-t-slate-400",
   };
 
   return (
@@ -53,16 +54,18 @@ export default async function JobDetailPage({
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-6">
         <div>
-          <h1 className="text-3xl font-bold">{job.title}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">{job.title}</h1>
           <p className="text-muted-foreground text-sm mt-1">{SERVICE_TYPE_LABELS[job.serviceType]}</p>
         </div>
         <JobDetailActions jobId={job.id} currentStatus={job.status} />
       </div>
 
-      {/* Quick actions — SCHEDULED / IN_PROGRESS only */}
-      {(job.status === "SCHEDULED" || job.status === "IN_PROGRESS") && (
+      {/* Quick actions — all jobs with address/phone */}
+      {(job.customer.phone || jobAddress) && (
         <div className="flex flex-wrap items-center gap-3 bg-card rounded-xl shadow-sm px-4 py-3 mb-6">
-          <MarkCompleteButton jobId={job.id} />
+          {(job.status === "SCHEDULED" || job.status === "IN_PROGRESS") && (
+            <MarkCompleteButton jobId={job.id} />
+          )}
           {job.customer.phone && (
             <a href={`tel:${job.customer.phone}`}>
               <Button size="sm" variant="outline">
@@ -84,9 +87,9 @@ export default async function JobDetailPage({
 
       {/* Next-step prompts */}
       {job.status === "LEAD" && job.quotes.length === 0 && (
-        <div className="border-l-4 border-l-purple-400 bg-status-purple-bg rounded-r-lg px-4 py-3 mb-6 flex items-center justify-between">
+        <div className="border-l-4 border-l-purple-400 bg-status-purple-bg rounded-r-lg px-4 py-3 mb-6 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-sm text-status-purple-text">
-            <FileText className="w-4 h-4" />
+            <FileText className="w-4 h-4 shrink-0" />
             <span>New lead — ready to send a quote?</span>
           </div>
           <Link href={`/quotes/new?customerId=${job.customer.id}&jobId=${job.id}`}>
@@ -97,13 +100,13 @@ export default async function JobDetailPage({
         </div>
       )}
       {job.status === "COMPLETED" && job.invoices.length === 0 && (
-        <div className="border-l-4 border-l-green-400 bg-status-success-bg rounded-r-lg px-4 py-3 mb-6 flex items-center justify-between">
+        <div className="border-l-4 border-l-green-400 bg-status-success-bg rounded-r-lg px-4 py-3 mb-6 flex flex-wrap items-center justify-between gap-3">
           <div className="flex items-center gap-2 text-sm text-status-success-text">
-            <Receipt className="w-4 h-4" />
+            <Receipt className="w-4 h-4 shrink-0" />
             <span>Job complete — time to get paid!</span>
           </div>
           <Link href={`/invoices/new?customerId=${job.customer.id}&jobId=${job.id}`}>
-            <Button size="sm" className="bg-green-600 hover:bg-green-700 text-white">
+            <Button size="sm" className="bg-status-success-text text-white hover:bg-status-success-text/90">
               Create Invoice
             </Button>
           </Link>
@@ -127,6 +130,10 @@ export default async function JobDetailPage({
           <Link href={`/customers/${job.customer.id}`} className="font-medium text-sm hover:underline">
             {job.customer.firstName} {job.customer.lastName}
           </Link>
+        </div>
+        <div className={`bg-card rounded-xl shadow-sm border-t-2 ${INFO_CARD_BORDERS["Submitted"]} p-4`}>
+          <div className="flex items-center gap-1.5 text-muted-foreground text-xs mb-1"><Clock className="w-3.5 h-3.5" /> Submitted</div>
+          <p className="font-medium text-sm">{format(new Date(job.createdAt), "MMM d, yyyy")}</p>
         </div>
         <div className={`bg-card rounded-xl shadow-sm border-t-2 ${INFO_CARD_BORDERS["Scheduled"]} p-4`}>
           <div className="flex items-center gap-1.5 text-muted-foreground text-xs mb-1"><Calendar className="w-3.5 h-3.5" /> Scheduled</div>
@@ -175,7 +182,7 @@ export default async function JobDetailPage({
       )}
 
       {/* Photos */}
-      <div className="bg-card rounded-xl shadow-sm p-6 mb-6">
+      <div className="bg-card rounded-xl shadow-sm p-4 sm:p-6 mb-6">
         <div className="flex items-center gap-2 mb-4 border-b pb-2">
           <h2 className="font-semibold text-base">Photos</h2>
           <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full">{job.photos.length}</span>

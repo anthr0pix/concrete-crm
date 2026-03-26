@@ -54,7 +54,7 @@ export default async function PortalPage({
     return (
       <div className="min-h-screen bg-background">
         {/* Header */}
-        <header className="bg-[var(--mws-navy)] px-6 py-5">
+        <header className="bg-[var(--mws-navy)] px-4 sm:px-6 py-4 sm:py-5">
           <div className="max-w-3xl mx-auto flex items-center justify-between">
             <div>
               <p className="text-white font-bold text-lg tracking-wide uppercase">Mountain West Surface</p>
@@ -70,11 +70,11 @@ export default async function PortalPage({
         {/* Accent bar */}
         <div className="bg-primary h-1" />
 
-        <main className="max-w-3xl mx-auto px-6 py-10">
+        <main className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
           {/* Quote Header */}
-          <div className="flex items-start justify-between mb-8">
+          <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
             <div>
-              <h1 className="text-3xl font-bold text-foreground">Quote</h1>
+              <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Quote</h1>
               <p className="text-muted-foreground text-sm mt-1">{quote.quoteNumber}</p>
               <p className="text-foreground mt-1">
                 Prepared for <strong>{quote.customer.firstName} {quote.customer.lastName}</strong>
@@ -98,8 +98,8 @@ export default async function PortalPage({
             </div>
           </div>
 
-          {/* Line Items */}
-          <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden mb-6">
+          {/* Line Items — Desktop Table */}
+          <div className="hidden sm:block bg-card rounded-xl shadow-sm border border-border overflow-hidden mb-6">
             <table className="w-full text-sm">
               <thead className="bg-[var(--mws-navy)]">
                 <tr>
@@ -122,8 +122,22 @@ export default async function PortalPage({
             </table>
           </div>
 
+          {/* Line Items — Mobile Cards */}
+          <div className="sm:hidden space-y-3 mb-6">
+            {quote.lineItems.map((item) => (
+              <div key={item.id} className="bg-card rounded-xl shadow-sm border border-border p-4">
+                <p className="font-medium text-sm mb-2">{item.description}</p>
+                <div className="flex justify-between text-sm text-muted-foreground">
+                  <span>{item.quantity} sq ft</span>
+                  <span>${item.unitPrice.toFixed(2)} / sq ft</span>
+                  <span className="font-semibold text-foreground">${item.total.toFixed(2)}</span>
+                </div>
+              </div>
+            ))}
+          </div>
+
           {/* Totals */}
-          <div className="max-w-xs ml-auto space-y-2 mb-8">
+          <div className="sm:max-w-xs sm:ml-auto space-y-2 mb-8">
             <div className="flex justify-between text-sm text-muted-foreground">
               <span>Subtotal</span>
               <span>${quote.subtotal.toFixed(2)}</span>
@@ -178,7 +192,7 @@ export default async function PortalPage({
 
         {/* Footer */}
         <footer className="border-t border-border py-8 mt-12">
-          <div className="max-w-3xl mx-auto px-6 text-center">
+          <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
             <p className="text-muted-foreground text-sm">
               <strong className="text-foreground">Mountain West Surface LLC</strong> ·{" "}
               <a href="tel:+14357096999" className="hover:underline">(435) 709-6999</a> ·{" "}
@@ -198,7 +212,7 @@ export default async function PortalPage({
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-[var(--mws-navy)] px-6 py-5">
+      <header className="bg-[var(--mws-navy)] px-4 sm:px-6 py-4 sm:py-5">
         <div className="max-w-3xl mx-auto flex items-center justify-between">
           <div>
             <p className="text-white font-bold text-lg tracking-wide uppercase">Mountain West Surface</p>
@@ -213,11 +227,11 @@ export default async function PortalPage({
 
       <div className="bg-primary h-1" />
 
-      <main className="max-w-3xl mx-auto px-6 py-10">
+      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-6 sm:py-10">
         {/* Invoice Header */}
-        <div className="flex items-start justify-between mb-8">
+        <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-8">
           <div>
-            <h1 className="text-3xl font-bold text-foreground">Invoice</h1>
+            <h1 className="text-2xl sm:text-3xl font-bold text-foreground">Invoice</h1>
             <p className="text-muted-foreground text-sm mt-1">{invoice.invoiceNumber}</p>
             <p className="text-foreground mt-1">
               Billed to <strong>{invoice.customer.firstName} {invoice.customer.lastName}</strong>
@@ -249,8 +263,8 @@ export default async function PortalPage({
           </div>
         </div>
 
-        {/* Line Items */}
-        <div className="bg-card rounded-xl shadow-sm border border-border overflow-hidden mb-6">
+        {/* Line Items — Desktop Table */}
+        <div className="hidden sm:block bg-card rounded-xl shadow-sm border border-border overflow-hidden mb-6">
           <table className="w-full text-sm">
             <thead className="bg-[var(--mws-navy)]">
               <tr>
@@ -273,8 +287,22 @@ export default async function PortalPage({
           </table>
         </div>
 
+        {/* Line Items — Mobile Cards */}
+        <div className="sm:hidden space-y-3 mb-6">
+          {invoice.lineItems.map((item) => (
+            <div key={item.id} className="bg-card rounded-xl shadow-sm border border-border p-4">
+              <p className="font-medium text-sm mb-2">{item.description}</p>
+              <div className="flex justify-between text-sm text-muted-foreground">
+                <span>{item.quantity} sq ft</span>
+                <span>${item.unitPrice.toFixed(2)} / sq ft</span>
+                <span className="font-semibold text-foreground">${item.total.toFixed(2)}</span>
+              </div>
+            </div>
+          ))}
+        </div>
+
         {/* Totals */}
-        <div className="max-w-xs ml-auto space-y-2 mb-8">
+        <div className="sm:max-w-xs sm:ml-auto space-y-2 mb-8">
           <div className="flex justify-between text-sm text-muted-foreground">
             <span>Subtotal</span>
             <span>${invoice.subtotal.toFixed(2)}</span>
@@ -319,7 +347,7 @@ export default async function PortalPage({
 
       {/* Footer */}
       <footer className="border-t border-border py-8 mt-12">
-        <div className="max-w-3xl mx-auto px-6 text-center">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
           <p className="text-muted-foreground text-sm">
             <strong className="text-foreground">Mountain West Surface LLC</strong> ·{" "}
             <a href="tel:+14357096999" className="hover:underline">(435) 709-6999</a> ·{" "}

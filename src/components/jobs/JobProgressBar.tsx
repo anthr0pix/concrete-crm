@@ -110,7 +110,7 @@ export default function JobProgressBar({
   const allDone = doneCount === steps.length;
 
   return (
-    <div className="bg-card border rounded-lg px-5 py-4 mb-6">
+    <div className="bg-card border rounded-xl px-5 py-4 mb-6">
       {/* Desktop: horizontal steps */}
       <div className="hidden md:flex items-center justify-between">
         {steps.map((step, i) => (

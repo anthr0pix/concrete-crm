@@ -53,7 +53,7 @@ export default function SettingsForm({ defaults }: { defaults: SettingsDefaults 
   return (
     <div className="space-y-6">
       {/* Review Requests Section */}
-      <div className="bg-card border rounded-lg p-6">
+      <div className="bg-card border rounded-xl p-4 sm:p-6">
         <h2 className="font-semibold text-lg mb-4">Review Requests</h2>
         <div className="space-y-5">
           <label className="flex items-center gap-3 cursor-pointer">
@@ -102,7 +102,7 @@ export default function SettingsForm({ defaults }: { defaults: SettingsDefaults 
       </div>
 
       {/* Reseal Reminders Section */}
-      <div className="bg-card border rounded-lg p-6">
+      <div className="bg-card border rounded-xl p-4 sm:p-6">
         <h2 className="font-semibold text-lg mb-4">Reseal Reminders</h2>
         <div className="space-y-5">
           <label className="flex items-center gap-3 cursor-pointer">

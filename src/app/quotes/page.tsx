@@ -68,7 +68,7 @@ export default async function QuotesPage({
 
   return (
     <div className="p-4 sm:p-6 max-w-5xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6 bg-muted/40 rounded-xl px-5 py-4 -mx-1">
         <div>
           <h1 className="text-2xl font-bold">Quotes</h1>
           <p className="text-muted-foreground text-sm mt-1">{totalCount} total</p>
@@ -93,7 +93,7 @@ export default async function QuotesPage({
             />
           </div>
         </form>
-        <Suspense fallback={<div className="border rounded-md px-2 py-1.5 text-sm w-28 bg-card" />}>
+        <Suspense fallback={<div className="border rounded-md px-2 py-2 sm:py-1.5 text-sm w-28 bg-card" />}>
           <SortSelect options={SORT_OPTIONS} basePath="/quotes" />
         </Suspense>
       </div>
@@ -111,7 +111,7 @@ export default async function QuotesPage({
             <Link key={s} href={href}>
               <button
                 className={cn(
-                  "px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition-all duration-150",
+                  "px-3 py-2 sm:py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition-all duration-150",
                   isActive
                     ? "text-white"
                     : "bg-card border text-muted-foreground hover:bg-muted"
@@ -126,14 +126,17 @@ export default async function QuotesPage({
       </div>
 
       {quotes.length === 0 ? (
-        <div className="text-center py-16 text-muted-foreground">
-          <FileText className="w-8 h-8 text-muted-foreground/50 mx-auto mb-2" />
-          <p className="text-lg font-medium">No quotes found</p>
-          <p className="text-sm mt-1">
+        <div className="text-center py-20 rounded-xl border-2 border-dashed border-border">
+          <FileText className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
+          <p className="text-lg font-semibold text-foreground mb-1">No quotes found</p>
+          <p className="text-sm text-muted-foreground mb-5">
             {search || activeStatus
               ? "Try adjusting your search or filter."
               : "Create a quote to send a price estimate to a customer."}
           </p>
+          {!search && !activeStatus && (
+            <Link href="/quotes/new"><Button>+ New Quote</Button></Link>
+          )}
         </div>
       ) : (
         <div className="space-y-2">
@@ -141,15 +144,15 @@ export default async function QuotesPage({
             const isStale = q.status === "SENT" && new Date(q.updatedAt) < subDays(new Date(), 7);
             return (
             <Link key={q.id} href={`/quotes/${q.id}`}>
-              <div className="flex items-center justify-between bg-card rounded-xl shadow-sm px-5 py-4 hover:shadow-md hover:-translate-y-px transition-all duration-150 cursor-pointer">
+              <div className="flex items-center justify-between bg-card rounded-xl shadow-sm px-5 py-4 hover:shadow-md hover:-translate-y-px active:scale-[0.98] transition-all duration-150 cursor-pointer">
                 <div>
                   <div className="flex items-center gap-3">
                     <span className="font-semibold">{q.quoteNumber}</span>
-                    <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_COLORS[q.status]}`}>
+                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${STATUS_COLORS[q.status]}`}>
                       {QUOTE_STATUS_LABELS[q.status]}
                     </span>
                     {isStale && (
-                      <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-status-amber-bg text-status-amber-text">
+                      <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-status-amber-bg text-status-amber-text">
                         Stale
                       </span>
                     )}

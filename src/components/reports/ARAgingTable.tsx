@@ -8,10 +8,10 @@ function formatCurrency(amount: number): string {
 }
 
 const BUCKET_STYLES: Record<string, string> = {
-  "0-30": "text-emerald-700 bg-emerald-50",
-  "31-60": "text-yellow-700 bg-yellow-50",
-  "61-90": "text-orange-700 bg-orange-50",
-  "90+": "text-red-700 bg-red-50",
+  "0-30": "text-status-success-text bg-status-success-bg",
+  "31-60": "text-status-warning-text bg-status-warning-bg",
+  "61-90": "text-status-orange-text bg-status-orange-bg",
+  "90+": "text-status-danger-text bg-status-danger-bg",
 };
 
 const BUCKET_LABELS: Record<string, string> = {

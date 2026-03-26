@@ -83,7 +83,7 @@ export default async function JobsPage({
 
   return (
     <div className="p-4 sm:p-6 max-w-5xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6 bg-muted/40 rounded-xl px-5 py-4 -mx-1">
         <div>
           <h1 className="text-2xl font-bold">Jobs</h1>
           <p className="text-muted-foreground text-sm mt-1">{totalCount} jobs</p>
@@ -120,7 +120,7 @@ export default async function JobsPage({
             />
           </div>
         </form>
-        <Suspense fallback={<div className="border rounded-md px-2 py-1.5 text-sm w-28 bg-card" />}>
+        <Suspense fallback={<div className="border rounded-md px-2 py-2 sm:py-1.5 text-sm w-28 bg-card" />}>
           <SortSelect options={SORT_OPTIONS} basePath="/jobs" />
         </Suspense>
       </div>
@@ -138,7 +138,7 @@ export default async function JobsPage({
             <Link key={s} href={href}>
               <button
                 className={cn(
-                  "px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition-all duration-150",
+                  "px-3 py-2 sm:py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition-all duration-150",
                   isActive
                     ? "text-white"
                     : "bg-card border text-muted-foreground hover:bg-muted"
@@ -154,14 +154,17 @@ export default async function JobsPage({
 
       {/* Job list */}
       {jobs.length === 0 ? (
-        <div className="text-center py-16 text-muted-foreground">
-          <Briefcase className="w-8 h-8 text-muted-foreground/50 mx-auto mb-2" />
-          <p className="text-lg font-medium">No jobs found</p>
-          <p className="text-sm mt-1">
+        <div className="text-center py-20 rounded-xl border-2 border-dashed border-border">
+          <Briefcase className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
+          <p className="text-lg font-semibold text-foreground mb-1">No jobs found</p>
+          <p className="text-sm text-muted-foreground mb-5">
             {search || activeStatus
               ? "Try adjusting your search or filter."
-              : "Click 'New Job' to create one."}
+              : "Create your first job to start tracking work."}
           </p>
+          {!search && !activeStatus && (
+            <Link href="/jobs/new"><Button>+ New Job</Button></Link>
+          )}
         </div>
       ) : (
         <div className="space-y-2">
@@ -170,13 +173,13 @@ export default async function JobsPage({
             return (
               <Link key={job.id} href={`/jobs/${job.id}`}>
                 <div className={cn(
-                  "flex items-center justify-between bg-card rounded-xl shadow-sm px-5 py-4 hover:shadow-md hover:-translate-y-px transition-all duration-150 cursor-pointer",
+                  "flex items-center justify-between bg-card rounded-xl shadow-sm px-5 py-4 hover:shadow-md hover:-translate-y-px active:scale-[0.98] transition-all duration-150 cursor-pointer",
                   isTodayJob && "border-l-4 border-l-green-500",
                 )}>
                   <div className="flex-1 min-w-0">
-                    <div className="flex items-center gap-3">
+                    <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                       <span className="font-semibold text-foreground">{job.title}</span>
-                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_COLORS[job.status]}`}>
+                      <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${STATUS_COLORS[job.status]}`}>
                         {JOB_STATUS_LABELS[job.status]}
                       </span>
                       {isTodayJob && (
@@ -189,8 +192,10 @@ export default async function JobsPage({
                     <div className="flex flex-wrap items-center gap-x-4 gap-y-0.5 mt-1 text-sm text-muted-foreground">
                       <span>{job.customer.firstName} {job.customer.lastName}</span>
                       <span className="hidden sm:inline">{SERVICE_TYPE_LABELS[job.serviceType]}</span>
-                      {job.scheduledDate && (
+                      {job.scheduledDate ? (
                         <span>{format(new Date(job.scheduledDate), "MMM d, yyyy")}</span>
+                      ) : (
+                        <span>Submitted {format(new Date(job.createdAt), "MMM d, yyyy")}</span>
                       )}
                     </div>
                   </div>

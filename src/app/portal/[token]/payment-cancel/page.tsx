@@ -21,7 +21,7 @@ export default async function PaymentCancelPage({
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="bg-[var(--mws-navy)] px-6 py-5">
+      <header className="bg-[var(--mws-navy)] px-4 sm:px-6 py-5">
         <div className="max-w-3xl mx-auto flex items-center justify-between">
           <div>
             <p className="text-white font-bold text-lg tracking-wide uppercase">Mountain West Surface</p>
@@ -37,7 +37,7 @@ export default async function PaymentCancelPage({
       {/* Accent bar */}
       <div className="bg-primary h-1" />
 
-      <main className="max-w-3xl mx-auto px-6 py-16">
+      <main className="max-w-3xl mx-auto px-4 sm:px-6 py-16">
         {/* Cancelled notice box */}
         <div className="bg-status-amber-bg border border-status-amber-text/20 rounded-xl p-8 text-center">
           {/* Warning icon */}
@@ -80,7 +80,7 @@ export default async function PaymentCancelPage({
 
       {/* Footer */}
       <footer className="border-t border-border py-8 mt-12">
-        <div className="max-w-3xl mx-auto px-6 text-center">
+        <div className="max-w-3xl mx-auto px-4 sm:px-6 text-center">
           <p className="text-muted-foreground text-sm">
             <strong className="text-foreground">Mountain West Surface LLC</strong> ·{" "}
             <a href="tel:+14357096999" className="hover:underline">(435) 709-6999</a> ·{" "}

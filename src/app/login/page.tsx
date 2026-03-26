@@ -38,7 +38,7 @@ export default function LoginPage() {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="bg-card border rounded-xl shadow-sm p-8 w-full max-w-sm">
+      <div className="bg-card border rounded-xl shadow-sm p-6 sm:p-8 w-full max-w-sm">
         <div className="mb-8 text-center">
           <Image src="/logo.png" alt="Mountain West Surface" width={180} height={60} className="mx-auto mb-3" priority />
           <h1 className="text-2xl font-bold">Mountain West Surface</h1>
@@ -69,7 +69,7 @@ export default function LoginPage() {
           </div>
 
           {error && (
-            <p className="text-sm text-red-500 text-center">{error}</p>
+            <p className="text-sm text-destructive text-center">{error}</p>
           )}
 
           <Button type="submit" className="w-full" disabled={loading}>

@@ -31,7 +31,7 @@ function QuarterCard({ data }: { data: QuarterData }) {
   const hasExpenses = Object.keys(data.expenses).length > 0;
 
   return (
-    <div className="border rounded-lg overflow-hidden">
+    <div className="border rounded-xl overflow-hidden">
       <div className="p-4">
         <h3 className="font-semibold text-foreground mb-3">
           {QUARTER_LABELS[data.quarter - 1]}
@@ -40,13 +40,13 @@ function QuarterCard({ data }: { data: QuarterData }) {
         <div className="grid grid-cols-3 gap-4 text-sm">
           <div>
             <div className="text-muted-foreground mb-1">Revenue</div>
-            <div className="font-semibold text-emerald-600 tabular-nums">
+            <div className="font-semibold text-status-success-text tabular-nums">
               {formatCurrency(data.revenue)}
             </div>
           </div>
           <div>
             <div className="text-muted-foreground mb-1">Expenses</div>
-            <div className="font-semibold text-red-600 tabular-nums">
+            <div className="font-semibold text-status-danger-text tabular-nums">
               {formatCurrency(data.totalExpenses)}
             </div>
           </div>
@@ -54,7 +54,7 @@ function QuarterCard({ data }: { data: QuarterData }) {
             <div className="text-muted-foreground mb-1">Net Income</div>
             <div
               className={`font-semibold tabular-nums ${
-                data.netIncome >= 0 ? "text-emerald-600" : "text-red-600"
+                data.netIncome >= 0 ? "text-status-success-text" : "text-status-danger-text"
               }`}
             >
               {formatCurrency(data.netIncome)}
@@ -110,18 +110,18 @@ export default function TaxSummaryCard({ quarters }: TaxSummaryCardProps) {
   return (
     <div className="space-y-4">
       {/* Annual summary */}
-      <div className="bg-muted border rounded-lg p-4">
+      <div className="bg-muted border rounded-xl p-4">
         <h3 className="text-sm font-semibold text-foreground mb-2">Annual Summary</h3>
         <div className="grid grid-cols-3 gap-4 text-sm">
           <div>
             <div className="text-muted-foreground mb-1">Total Revenue</div>
-            <div className="text-lg font-bold text-emerald-600 tabular-nums">
+            <div className="text-lg font-bold text-status-success-text tabular-nums">
               {formatCurrency(annualRevenue)}
             </div>
           </div>
           <div>
             <div className="text-muted-foreground mb-1">Total Expenses</div>
-            <div className="text-lg font-bold text-red-600 tabular-nums">
+            <div className="text-lg font-bold text-status-danger-text tabular-nums">
               {formatCurrency(annualExpenses)}
             </div>
           </div>
@@ -129,7 +129,7 @@ export default function TaxSummaryCard({ quarters }: TaxSummaryCardProps) {
             <div className="text-muted-foreground mb-1">Net Income</div>
             <div
               className={`text-lg font-bold tabular-nums ${
-                annualNet >= 0 ? "text-emerald-600" : "text-red-600"
+                annualNet >= 0 ? "text-status-success-text" : "text-status-danger-text"
               }`}
             >
               {formatCurrency(annualNet)}

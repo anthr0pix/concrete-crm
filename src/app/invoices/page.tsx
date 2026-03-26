@@ -76,7 +76,7 @@ export default async function InvoicesPage({
 
   return (
     <div className="p-4 sm:p-6 max-w-5xl mx-auto">
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6 bg-muted/40 rounded-xl px-5 py-4 -mx-1">
         <div>
           <h1 className="text-2xl font-bold">Invoices</h1>
           <p className="text-muted-foreground text-sm mt-1">{totalCount} total</p>
@@ -113,7 +113,7 @@ export default async function InvoicesPage({
             />
           </div>
         </form>
-        <Suspense fallback={<div className="border rounded-md px-2 py-1.5 text-sm w-28 bg-card" />}>
+        <Suspense fallback={<div className="border rounded-md px-2 py-2 sm:py-1.5 text-sm w-28 bg-card" />}>
           <SortSelect options={SORT_OPTIONS} basePath="/invoices" />
         </Suspense>
       </div>
@@ -131,7 +131,7 @@ export default async function InvoicesPage({
             <Link key={s} href={href}>
               <button
                 className={cn(
-                  "px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition-all duration-150",
+                  "px-3 py-2 sm:py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition-all duration-150",
                   isActive
                     ? "text-white"
                     : "bg-card border text-muted-foreground hover:bg-muted"
@@ -146,14 +146,17 @@ export default async function InvoicesPage({
       </div>
 
       {invoices.length === 0 ? (
-        <div className="text-center py-16 text-muted-foreground">
-          <Receipt className="w-8 h-8 text-muted-foreground/50 mx-auto mb-2" />
-          <p className="text-lg font-medium">No invoices found</p>
-          <p className="text-sm mt-1">
+        <div className="text-center py-20 rounded-xl border-2 border-dashed border-border">
+          <Receipt className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
+          <p className="text-lg font-semibold text-foreground mb-1">No invoices found</p>
+          <p className="text-sm text-muted-foreground mb-5">
             {search || activeStatus
               ? "Try adjusting your search or filter."
               : "Invoices are created from accepted quotes, or you can create one manually."}
           </p>
+          {!search && !activeStatus && (
+            <Link href="/invoices/new"><Button>+ New Invoice</Button></Link>
+          )}
         </div>
       ) : (
         <div className="space-y-2">
@@ -163,17 +166,17 @@ export default async function InvoicesPage({
             return (
               <Link key={inv.id} href={`/invoices/${inv.id}`}>
                 <div className={cn(
-                  "flex items-center justify-between bg-card rounded-xl shadow-sm px-5 py-4 hover:shadow-md hover:-translate-y-px transition-all duration-150 cursor-pointer",
+                  "flex items-center justify-between bg-card rounded-xl shadow-sm px-5 py-4 hover:shadow-md hover:-translate-y-px active:scale-[0.98] transition-all duration-150 cursor-pointer",
                   isOverdue && "border-l-4 border-l-red-500 bg-status-danger-bg/50",
                 )}>
                   <div>
                     <div className="flex items-center gap-3">
                       <span className="font-semibold">{inv.invoiceNumber}</span>
-                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_COLORS[inv.status]}`}>
+                      <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${STATUS_COLORS[inv.status]}`}>
                         {INVOICE_STATUS_LABELS[inv.status]}
                       </span>
                       {isPastDue && (
-                        <span className="text-xs font-medium px-2 py-0.5 rounded-full bg-status-amber-bg text-status-amber-text">
+                        <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-status-amber-bg text-status-amber-text">
                           Past due
                         </span>
                       )}

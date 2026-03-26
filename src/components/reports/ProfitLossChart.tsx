@@ -88,7 +88,7 @@ export default function ProfitLossChart({ data }: ProfitLossChartProps) {
             {/* Profit */}
             <div
               className={`w-20 text-right text-sm font-semibold shrink-0 ${
-                d.profit >= 0 ? "text-emerald-600" : "text-red-600"
+                d.profit >= 0 ? "text-status-success-text" : "text-status-danger-text"
               }`}
             >
               {d.profit >= 0 ? "+" : ""}
@@ -116,8 +116,8 @@ export default function ProfitLossChart({ data }: ProfitLossChartProps) {
         <div
           className={`w-20 text-right text-sm font-bold shrink-0 ${
             data.reduce((s, d) => s + d.profit, 0) >= 0
-              ? "text-emerald-600"
-              : "text-red-600"
+              ? "text-status-success-text"
+              : "text-status-danger-text"
           }`}
         >
           {data.reduce((s, d) => s + d.profit, 0) >= 0 ? "+" : ""}
