@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { User, MapPin, Calendar, Ruler, Phone, Navigation, FileText, Receipt, Camera, DollarSign, Clock } from "lucide-react";
+import { User, MapPin, Calendar, Ruler, Phone, Mail, Navigation, FileText, Receipt, Camera, DollarSign, Clock } from "lucide-react";
 import Breadcrumbs from "@/components/layout/Breadcrumbs";
 import { SERVICE_TYPE_LABELS } from "@/types";
 import { formatPhone } from "@/lib/utils";
@@ -62,7 +62,7 @@ export default async function JobDetailPage({
       </div>
 
       {/* Quick actions — all jobs with address/phone */}
-      {(job.customer.phone || jobAddress) && (
+      {(job.customer.phone || job.customer.email || jobAddress) && (
         <div className="flex flex-wrap items-center gap-3 bg-card border rounded-xl shadow-sm px-4 py-3 mb-6">
           {(job.status === "SCHEDULED" || job.status === "IN_PROGRESS") && (
             <MarkCompleteButton jobId={job.id} />
@@ -71,6 +71,13 @@ export default async function JobDetailPage({
             <a href={`tel:${job.customer.phone}`}>
               <Button size="sm" variant="outline">
                 <Phone className="w-4 h-4 mr-1.5" /> {formatPhone(job.customer.phone)}
+              </Button>
+            </a>
+          )}
+          {job.customer.email && (
+            <a href={`mailto:${job.customer.email}`}>
+              <Button size="sm" variant="outline">
+                <Mail className="w-4 h-4 mr-1.5" /> {job.customer.email}
               </Button>
             </a>
           )}
