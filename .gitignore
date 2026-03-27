@@ -47,3 +47,4 @@ next-env.d.ts
 
 # supabase temp files (contains project ref)
 supabase/.temp/
+.claude/worktrees/
