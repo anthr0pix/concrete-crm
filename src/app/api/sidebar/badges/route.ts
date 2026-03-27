@@ -6,12 +6,19 @@ export async function GET() {
   try {
     const now = new Date();
 
-    const [unquotedLeads, staleQuotes, overdueInvoices, overdueFollowUps] = await Promise.all([
+    const [unquotedLeads, staleContacted, staleQuotes, overdueInvoices, overdueFollowUps] = await Promise.all([
       prisma.job.count({
         where: {
           status: "LEAD",
           quotes: { none: {} },
           createdAt: { lt: subDays(now, 3) },
+        },
+      }),
+      prisma.job.count({
+        where: {
+          status: "CONTACTED",
+          quotes: { none: {} },
+          updatedAt: { lt: subDays(now, 3) },
         },
       }),
       prisma.quote.count({
@@ -37,8 +44,8 @@ export async function GET() {
       }),
     ]);
 
-    return NextResponse.json({ unquotedLeads, staleQuotes, overdueInvoices, overdueFollowUps });
+    return NextResponse.json({ unquotedLeads, staleContacted, staleQuotes, overdueInvoices, overdueFollowUps });
   } catch {
-    return NextResponse.json({ unquotedLeads: 0, staleQuotes: 0, overdueInvoices: 0, overdueFollowUps: 0 });
+    return NextResponse.json({ unquotedLeads: 0, staleContacted: 0, staleQuotes: 0, overdueInvoices: 0, overdueFollowUps: 0 });
   }
 }

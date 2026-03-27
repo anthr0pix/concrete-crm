@@ -15,6 +15,12 @@ const COLUMN_COLORS: Record<
     badge: "bg-status-neutral-bg text-status-neutral-text",
     dropBg: "bg-muted",
   },
+  CONTACTED: {
+    border: "border-t-sky-400",
+    bg: "bg-status-info-bg",
+    badge: "bg-status-info-bg text-status-info-text",
+    dropBg: "bg-muted",
+  },
   QUOTED: {
     border: "border-t-blue-400",
     bg: "bg-status-info-bg",

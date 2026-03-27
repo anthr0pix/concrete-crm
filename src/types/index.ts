@@ -3,6 +3,7 @@ export { JobStatus, QuoteStatus, InvoiceStatus, ServiceType, DepositType, Expens
 
 export const JOB_STATUS_LABELS: Record<string, string> = {
   LEAD: "Lead",
+  CONTACTED: "Contacted",
   QUOTED: "Quoted",
   SCHEDULED: "Scheduled",
   IN_PROGRESS: "In Progress",
@@ -59,6 +60,7 @@ export const OUTREACH_STATUS_LABELS: Record<string, string> = {
 export const STATUS_COLORS: Record<string, string> = {
   // Job statuses
   LEAD: "bg-status-purple-bg text-status-purple-text",
+  CONTACTED: "bg-status-info-bg text-status-info-text",
   QUOTED: "bg-status-info-bg text-status-info-text",
   SCHEDULED: "bg-status-warning-bg text-status-warning-text",
   IN_PROGRESS: "bg-status-orange-bg text-status-orange-text",
@@ -76,7 +78,7 @@ export const STATUS_COLORS: Record<string, string> = {
   VOID: "bg-status-neutral-bg text-status-neutral-text",
   // Outreach statuses
   PROSPECT: "bg-status-neutral-bg text-status-neutral-text",
-  CONTACTED: "bg-status-info-bg text-status-info-text",
+  // CONTACTED already defined above (shared by job + outreach)
   IN_CONVERSATION: "bg-status-warning-bg text-status-warning-text",
   PROPOSAL_SENT: "bg-status-purple-bg text-status-purple-text",
   WON: "bg-status-success-bg text-status-success-text",

@@ -7,6 +7,7 @@ import {
   Briefcase,
   FileText,
   Receipt,
+  Megaphone,
   Plus,
   Loader2,
 } from "lucide-react";
@@ -32,9 +33,10 @@ interface SearchResults {
   jobs: SearchResult[];
   quotes: SearchResult[];
   invoices: SearchResult[];
+  prospects: SearchResult[];
 }
 
-const EMPTY: SearchResults = { customers: [], jobs: [], quotes: [], invoices: [] };
+const EMPTY: SearchResults = { customers: [], jobs: [], quotes: [], invoices: [], prospects: [] };
 
 export default function CommandPalette() {
   const router = useRouter();
@@ -109,7 +111,8 @@ export default function CommandPalette() {
     results.customers.length > 0 ||
     results.jobs.length > 0 ||
     results.quotes.length > 0 ||
-    results.invoices.length > 0;
+    results.invoices.length > 0 ||
+    results.prospects.length > 0;
 
   const showSearch = query.trim().length >= 2;
 
@@ -118,10 +121,10 @@ export default function CommandPalette() {
       open={open}
       onOpenChange={setOpen}
       title="Search"
-      description="Search customers, jobs, quotes, and invoices"
+      description="Search customers, jobs, quotes, invoices, and prospects"
     >
       <CommandInput
-        placeholder="Search customers, jobs, quotes, invoices..."
+        placeholder="Search customers, jobs, quotes, invoices, prospects..."
         value={query}
         onValueChange={(val) => {
           setQuery(val);
@@ -210,6 +213,26 @@ export default function CommandPalette() {
               >
                 <Receipt className="text-orange-500" />
                 <span>{item.label}</span>
+                {item.sub && (
+                  <span className="ml-auto text-xs text-muted-foreground truncate">
+                    {item.sub}
+                  </span>
+                )}
+              </CommandItem>
+            ))}
+          </CommandGroup>
+        )}
+
+        {results.prospects.length > 0 && (
+          <CommandGroup heading="Prospects">
+            {results.prospects.map((item) => (
+              <CommandItem
+                key={item.id}
+                value={`prospect-${item.label}`}
+                onSelect={() => handleSelect(item.href)}
+              >
+                <Megaphone className="text-purple-500" />
+                <span className="truncate">{item.label}</span>
                 {item.sub && (
                   <span className="ml-auto text-xs text-muted-foreground truncate">
                     {item.sub}

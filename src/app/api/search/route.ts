@@ -10,7 +10,7 @@ export async function GET(request: Request) {
   }
 
   try {
-    const [customers, jobs, quotes, invoices] = await Promise.all([
+    const [customers, jobs, quotes, invoices, prospects] = await Promise.all([
       prisma.customer.findMany({
         where: {
           OR: [
@@ -72,6 +72,19 @@ export async function GET(request: Request) {
         take: 5,
         orderBy: { createdAt: "desc" },
       }),
+      prisma.propertyManager.findMany({
+        where: {
+          OR: [
+            { companyName: { contains: q, mode: "insensitive" } },
+            { contactName: { contains: q, mode: "insensitive" } },
+            { email: { contains: q, mode: "insensitive" } },
+            { phone: { contains: q } },
+          ],
+        },
+        select: { id: true, companyName: true, contactName: true, city: true, state: true },
+        take: 5,
+        orderBy: { companyName: "asc" },
+      }),
     ]);
 
     return NextResponse.json({
@@ -98,6 +111,12 @@ export async function GET(request: Request) {
         label: i.invoiceNumber,
         sub: `${i.customer.firstName} ${i.customer.lastName}`,
         href: `/invoices/${i.id}`,
+      })),
+      prospects: prospects.map((p) => ({
+        id: p.id,
+        label: p.companyName,
+        sub: [p.contactName, p.city && p.state ? `${p.city}, ${p.state}` : null].filter(Boolean).join(" · ") || undefined,
+        href: `/outreach/${p.id}`,
       })),
     });
   } catch (error) {

@@ -26,6 +26,7 @@ export interface PipelineJob {
 
 const ACTIVE_STATUSES = [
   { key: "LEAD", label: "Lead" },
+  { key: "CONTACTED", label: "Contacted" },
   { key: "QUOTED", label: "Quoted" },
   { key: "SCHEDULED", label: "Scheduled" },
   { key: "IN_PROGRESS", label: "In Progress" },

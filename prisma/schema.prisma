@@ -8,6 +8,7 @@ datasource db {
 
 enum JobStatus {
   LEAD
+  CONTACTED
   QUOTED
   SCHEDULED
   IN_PROGRESS

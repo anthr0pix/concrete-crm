@@ -3,7 +3,7 @@ import PipelineBoard from "@/components/pipeline/PipelineBoard";
 
 export const dynamic = "force-dynamic";
 
-const STATUSES = ["LEAD", "QUOTED", "SCHEDULED", "IN_PROGRESS", "COMPLETED", "CANCELLED"] as const;
+const STATUSES = ["LEAD", "CONTACTED", "QUOTED", "SCHEDULED", "IN_PROGRESS", "COMPLETED", "CANCELLED"] as const;
 
 export default async function PipelinePage() {
   const jobs = await prisma.job.findMany({

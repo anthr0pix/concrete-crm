@@ -58,7 +58,7 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
     let autoStatus: JobStatus | undefined;
     if (scheduledDate && !rest.status) {
       const current = await prisma.job.findUnique({ where: { id }, select: { status: true } });
-      if (current && (current.status === "LEAD" || current.status === "QUOTED")) {
+      if (current && (current.status === "LEAD" || current.status === "CONTACTED" || current.status === "QUOTED")) {
         autoStatus = "SCHEDULED";
       }
     }

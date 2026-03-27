@@ -72,7 +72,7 @@ export default async function SchedulePage({
   const [scheduledJobs, unscheduledJobs] = await Promise.all([
     prisma.job.findMany({
       where: {
-        status: { in: ["LEAD", "QUOTED", "SCHEDULED", "IN_PROGRESS"] },
+        status: { in: ["LEAD", "CONTACTED", "QUOTED", "SCHEDULED", "IN_PROGRESS"] },
         scheduledDate: { gte: rangeStart, lte: rangeEnd },
       },
       select: selectFields,
@@ -82,7 +82,7 @@ export default async function SchedulePage({
       ? prisma.job.findMany({
           where: {
             scheduledDate: null,
-            status: { in: ["LEAD", "QUOTED", "SCHEDULED"] },
+            status: { in: ["LEAD", "CONTACTED", "QUOTED", "SCHEDULED"] },
           },
           select: selectFields,
           orderBy: { createdAt: "asc" },

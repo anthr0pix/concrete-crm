@@ -35,6 +35,7 @@ interface NavItem {
   icon: React.ComponentType<{ className?: string }>;
   badgeKey?:
     | "unquotedLeads"
+    | "staleContacted"
     | "staleQuotes"
     | "overdueInvoices"
     | "overdueFollowUps";
@@ -71,7 +72,7 @@ const navGroups: NavGroup[] = [
         icon: Users,
         badgeKey: "unquotedLeads",
       },
-      { href: "/jobs", label: "Jobs", icon: Briefcase },
+      { href: "/jobs", label: "Jobs", icon: Briefcase, badgeKey: "staleContacted" },
       {
         href: "/quotes",
         label: "Quotes",
@@ -98,6 +99,7 @@ const navGroups: NavGroup[] = [
 
 interface Badges {
   unquotedLeads: number;
+  staleContacted: number;
   staleQuotes: number;
   overdueInvoices: number;
   overdueFollowUps: number;
@@ -105,6 +107,7 @@ interface Badges {
 
 const BADGE_LABELS: Record<string, string> = {
   unquotedLeads: "Unquoted leads",
+  staleContacted: "Contacted, needs quote",
   staleQuotes: "Stale quotes",
   overdueInvoices: "Overdue invoices",
   overdueFollowUps: "Overdue follow-ups",
@@ -119,6 +122,7 @@ export default function Sidebar({ open = false, onClose }: SidebarProps) {
   const pathname = usePathname();
   const [badges, setBadges] = useState<Badges>({
     unquotedLeads: 0,
+    staleContacted: 0,
     staleQuotes: 0,
     overdueInvoices: 0,
     overdueFollowUps: 0,

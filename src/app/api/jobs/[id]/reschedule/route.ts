@@ -35,7 +35,7 @@ export async function PATCH(
     });
 
     const autoStatus =
-      current && (current.status === "LEAD" || current.status === "QUOTED")
+      current && (current.status === "LEAD" || current.status === "CONTACTED" || current.status === "QUOTED")
         ? "SCHEDULED"
         : undefined;
 

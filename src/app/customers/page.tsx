@@ -9,7 +9,7 @@ import { JobStatus } from "@prisma/client";
 
 export const dynamic = "force-dynamic";
 
-const ACTIVE_STATUSES: JobStatus[] = ["LEAD", "QUOTED", "SCHEDULED", "IN_PROGRESS"];
+const ACTIVE_STATUSES: JobStatus[] = ["LEAD", "CONTACTED", "QUOTED", "SCHEDULED", "IN_PROGRESS"];
 
 const AVATAR_COLORS = [
   "bg-blue-500",

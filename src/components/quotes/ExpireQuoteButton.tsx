@@ -87,7 +87,7 @@ export function ExpireAllStaleButton() {
       onClick={() => setConfirming(true)}
       className="text-xs text-muted-foreground hover:text-foreground transition-colors ml-auto"
     >
-      Expire all
+      Expire all quotes
     </button>
   );
 }

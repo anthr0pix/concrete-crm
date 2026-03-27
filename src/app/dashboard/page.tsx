@@ -45,6 +45,7 @@ export default async function DashboardPage() {
     todaysJobs,
     overdueInvoiceCount,
     unquotedLeads,
+    staleContacted,
     staleQuotes,
     expiringQuotes,
     overdueInvoices,
@@ -106,6 +107,16 @@ export default async function DashboardPage() {
       take: 10,
       include: { customer: { select: { firstName: true, lastName: true } } },
     }),
+    prisma.job.findMany({
+      where: {
+        status: "CONTACTED",
+        quotes: { none: {} },
+        updatedAt: { lt: subDays(now, 3) },
+      },
+      orderBy: { updatedAt: "asc" },
+      take: 10,
+      include: { customer: { select: { firstName: true, lastName: true } } },
+    }),
     prisma.quote.findMany({
       where: {
         status: "SENT",
@@ -152,7 +163,7 @@ export default async function DashboardPage() {
     prisma.customer.count({ where: { createdAt: { gte: monthStart, lte: monthEnd } } }),
     prisma.job.count({
       where: {
-        status: { in: ["LEAD", "QUOTED", "SCHEDULED", "IN_PROGRESS"] },
+        status: { in: ["LEAD", "CONTACTED", "QUOTED", "SCHEDULED", "IN_PROGRESS"] },
         updatedAt: { gte: prevMonthStart, lte: prevMonthEnd },
       },
     }),
@@ -167,7 +178,7 @@ export default async function DashboardPage() {
   ]);
 
   const statusMap = Object.fromEntries(jobCounts.map((j) => [j.status, j._count]));
-  const activeJobs = (statusMap["LEAD"] ?? 0) + (statusMap["QUOTED"] ?? 0) +
+  const activeJobs = (statusMap["LEAD"] ?? 0) + (statusMap["CONTACTED"] ?? 0) + (statusMap["QUOTED"] ?? 0) +
     (statusMap["SCHEDULED"] ?? 0) + (statusMap["IN_PROGRESS"] ?? 0);
 
   // Period comparisons
@@ -219,6 +230,7 @@ export default async function DashboardPage() {
 
   const STATUS_BAR_COLORS: Record<string, string> = {
     LEAD: "bg-slate-400",
+    CONTACTED: "bg-sky-400",
     QUOTED: "bg-blue-400",
     SCHEDULED: "bg-yellow-400",
     IN_PROGRESS: "bg-orange-400",
@@ -328,13 +340,13 @@ export default async function DashboardPage() {
       })()}
 
       {/* Needs Attention */}
-      {(unquotedLeads.length > 0 || staleQuotes.length > 0 || expiringQuotes.length > 0 || overdueInvoices.length > 0 || unbilledJobs.length > 0) && (
+      {(unquotedLeads.length > 0 || staleContacted.length > 0 || staleQuotes.length > 0 || expiringQuotes.length > 0 || overdueInvoices.length > 0 || unbilledJobs.length > 0) && (
         <div className="bg-card rounded-xl shadow-sm border-l-4 border-l-amber-500 p-5 mb-6">
           <div className="flex items-center gap-2 mb-3">
             <AlertTriangle className="w-4 h-4 text-amber-500" />
             <h2 className="font-semibold text-base">Needs Attention</h2>
             <span className="text-xs text-muted-foreground">
-              {unquotedLeads.length + staleQuotes.length + expiringQuotes.length + overdueInvoices.length + unbilledJobs.length} items
+              {unquotedLeads.length + staleContacted.length + staleQuotes.length + expiringQuotes.length + overdueInvoices.length + unbilledJobs.length} items
             </span>
           </div>
           <div className="space-y-4">
@@ -354,6 +366,31 @@ export default async function DashboardPage() {
                         <div className="flex items-center gap-2 shrink-0 sm:ml-2">
                           <span className="text-xs text-status-amber-text">
                             {formatDistanceToNow(new Date(job.createdAt), { addSuffix: true })}
+                          </span>
+                          <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/50 opacity-0 group-hover:opacity-100 transition-opacity" />
+                        </div>
+                      </div>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+            {staleContacted.length > 0 && (
+              <div>
+                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">Contacted — Needs Quote</p>
+                <div className="space-y-1">
+                  {staleContacted.map((job) => (
+                    <Link key={job.id} href={`/jobs/${job.id}`}>
+                      <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-0 hover:bg-muted rounded-lg px-3 py-2 -mx-2 transition-colors group">
+                        <div className="flex items-center gap-2 min-w-0 sm:flex-1">
+                          <span className="text-sm font-medium truncate">{job.title}</span>
+                          <span className="text-xs text-muted-foreground shrink-0">
+                            {job.customer.firstName} {job.customer.lastName}
+                          </span>
+                        </div>
+                        <div className="flex items-center gap-2 shrink-0 sm:ml-2">
+                          <span className="text-xs text-status-amber-text">
+                            contacted {formatDistanceToNow(new Date(job.updatedAt), { addSuffix: true })}
                           </span>
                           <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/50 opacity-0 group-hover:opacity-100 transition-opacity" />
                         </div>
