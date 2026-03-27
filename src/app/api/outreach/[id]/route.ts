@@ -9,6 +9,10 @@ const updateSchema = z.object({
   phone: z.string().optional().nullable(),
   email: z.string().email().optional().nullable().or(z.literal("")),
   website: z.string().optional().nullable(),
+  address: z.string().optional().nullable(),
+  city: z.string().optional().nullable(),
+  state: z.string().optional().nullable(),
+  zip: z.string().optional().nullable(),
   propertyCount: z.number().int().positive().optional().nullable(),
   estimatedValue: z.number().positive().optional().nullable(),
   status: z.nativeEnum(OutreachStatus).optional(),
@@ -19,7 +23,7 @@ const updateSchema = z.object({
 
 export async function GET(
   _request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
   try {
@@ -34,14 +38,14 @@ export async function GET(
     console.error("Failed to fetch property manager:", error);
     return NextResponse.json(
       { error: "Failed to fetch property manager" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function PATCH(
   request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
   let body;
@@ -55,7 +59,7 @@ export async function PATCH(
   if (!parsed.success) {
     return NextResponse.json(
       { error: parsed.error.flatten() },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -71,7 +75,11 @@ export async function PATCH(
           ? { nextFollowUpAt: nextFollowUpAt ? new Date(nextFollowUpAt) : null }
           : {}),
         ...(lastContactedAt !== undefined
-          ? { lastContactedAt: lastContactedAt ? new Date(lastContactedAt) : null }
+          ? {
+              lastContactedAt: lastContactedAt
+                ? new Date(lastContactedAt)
+                : null,
+            }
           : {}),
       },
     });
@@ -80,14 +88,14 @@ export async function PATCH(
     console.error("Failed to update property manager:", error);
     return NextResponse.json(
       { error: "Failed to update property manager" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
 
 export async function DELETE(
   _request: Request,
-  { params }: { params: Promise<{ id: string }> }
+  { params }: { params: Promise<{ id: string }> },
 ) {
   const { id } = await params;
   try {
@@ -97,7 +105,7 @@ export async function DELETE(
     console.error("Failed to delete property manager:", error);
     return NextResponse.json(
       { error: "Failed to delete property manager" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

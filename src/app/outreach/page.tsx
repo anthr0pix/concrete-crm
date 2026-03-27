@@ -39,6 +39,8 @@ export default async function OutreachPage() {
         phone: m.phone,
         email: m.email,
         website: m.website,
+        city: m.city,
+        state: m.state,
         propertyCount: m.propertyCount,
         nextFollowUpAt: m.nextFollowUpAt?.toISOString() ?? null,
       })),

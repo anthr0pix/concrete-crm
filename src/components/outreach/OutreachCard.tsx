@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useDraggable } from "@dnd-kit/core";
 import { format, isPast } from "date-fns";
-import { Phone, Mail, Building2, Globe } from "lucide-react";
+import { Phone, Mail, Building2, Globe, MapPin } from "lucide-react";
 import type { OutreachItem } from "./OutreachBoard";
 
 export default function OutreachCard({ item }: { item: OutreachItem }) {
@@ -18,6 +18,7 @@ export default function OutreachCard({ item }: { item: OutreachItem }) {
     : undefined;
 
   const overdue = item.nextFollowUpAt && isPast(new Date(item.nextFollowUpAt));
+  const location = [item.city, item.state].filter(Boolean).join(", ");
 
   return (
     <div
@@ -44,6 +45,13 @@ export default function OutreachCard({ item }: { item: OutreachItem }) {
           <p className="text-xs text-muted-foreground mt-0.5 truncate">
             {item.contactName}
           </p>
+        )}
+
+        {location && (
+          <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground mt-1 truncate">
+            <MapPin className="w-3 h-3 shrink-0" />
+            {location}
+          </div>
         )}
 
         <div className="mt-2 space-y-1">

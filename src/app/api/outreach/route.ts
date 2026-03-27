@@ -9,6 +9,10 @@ const createSchema = z.object({
   phone: z.string().optional(),
   email: z.string().email("Invalid email").optional().or(z.literal("")),
   website: z.string().optional(),
+  address: z.string().optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
+  zip: z.string().optional(),
   propertyCount: z.number().int().positive().optional().nullable(),
   estimatedValue: z.number().positive().optional().nullable(),
   status: z.nativeEnum(OutreachStatus).optional(),
@@ -26,7 +30,7 @@ export async function GET() {
     console.error("Failed to fetch property managers:", error);
     return NextResponse.json(
       { error: "Failed to fetch property managers" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }
@@ -43,7 +47,7 @@ export async function POST(request: Request) {
   if (!parsed.success) {
     return NextResponse.json(
       { error: parsed.error.flatten() },
-      { status: 400 }
+      { status: 400 },
     );
   }
 
@@ -62,7 +66,7 @@ export async function POST(request: Request) {
     console.error("Failed to create property manager:", error);
     return NextResponse.json(
       { error: "Failed to create property manager" },
-      { status: 500 }
+      { status: 500 },
     );
   }
 }

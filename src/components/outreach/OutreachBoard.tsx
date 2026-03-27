@@ -21,6 +21,8 @@ export interface OutreachItem {
   phone: string | null;
   email: string | null;
   website: string | null;
+  city: string | null;
+  state: string | null;
   propertyCount: number | null;
   nextFollowUpAt: string | null;
 }

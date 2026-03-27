@@ -30,6 +30,10 @@ interface ParsedRecord {
   phone: string;
   email: string;
   website: string;
+  address: string;
+  city: string;
+  state: string;
+  zip: string;
   propertyCount: number | null;
   estimatedValue: number | null;
   notes: string;
@@ -48,6 +52,10 @@ const COLUMN_MAP: Record<string, keyof ParsedRecord> = {
   phone: "phone",
   email: "email",
   website: "website",
+  address: "address",
+  city: "city",
+  state: "state",
+  zip: "zip",
   "property count": "propertyCount",
   "est. properties": "propertyCount",
   properties: "propertyCount",
@@ -79,6 +87,10 @@ function parseRow(
     phone: "",
     email: "",
     website: "",
+    address: "",
+    city: "",
+    state: "",
+    zip: "",
     propertyCount: null,
     estimatedValue: null,
     notes: "",
@@ -204,6 +216,10 @@ export default function ImportCSVButton() {
         phone: r.record.phone || undefined,
         email: r.record.email || undefined,
         website: r.record.website || undefined,
+        address: r.record.address || undefined,
+        city: r.record.city || undefined,
+        state: r.record.state || undefined,
+        zip: r.record.zip || undefined,
         propertyCount: r.record.propertyCount,
         estimatedValue: r.record.estimatedValue,
         notes: r.record.notes || undefined,
