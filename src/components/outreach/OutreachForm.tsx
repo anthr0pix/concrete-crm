@@ -29,7 +29,16 @@ const schema = z.object({
   phone: z.string().optional(),
   email: z.string().email("Invalid email").optional().or(z.literal("")),
   website: z.string().optional(),
-  propertyCount: z.coerce.number().int().positive().optional().or(z.literal("")),
+  address: z.string().optional(),
+  city: z.string().optional(),
+  state: z.string().optional(),
+  zip: z.string().optional(),
+  propertyCount: z.coerce
+    .number()
+    .int()
+    .positive()
+    .optional()
+    .or(z.literal("")),
   estimatedValue: z.coerce.number().positive().optional().or(z.literal("")),
   status: z.string().optional(),
   nextFollowUpAt: z.string().optional(),
@@ -134,7 +143,10 @@ export default function OutreachForm({ defaultValues, managerId }: Props) {
             placeholder="(555) 123-4567"
             onChange={(e) => {
               const formatted = formatPhoneInput(e.target.value);
-              setValue("phone", formatted, { shouldDirty: true, shouldValidate: true });
+              setValue("phone", formatted, {
+                shouldDirty: true,
+                shouldValidate: true,
+              });
             }}
           />
         </div>
@@ -150,6 +162,26 @@ export default function OutreachForm({ defaultValues, managerId }: Props) {
       <div className="space-y-1">
         <Label>Website</Label>
         <Input {...register("website")} placeholder="https://..." />
+      </div>
+
+      <div className="space-y-1">
+        <Label>Address</Label>
+        <Input {...register("address")} placeholder="123 Main St" />
+      </div>
+
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
+        <div className="space-y-1 col-span-2 sm:col-span-2">
+          <Label>City</Label>
+          <Input {...register("city")} />
+        </div>
+        <div className="space-y-1">
+          <Label>State</Label>
+          <Input {...register("state")} placeholder="UT" />
+        </div>
+        <div className="space-y-1">
+          <Label>Zip</Label>
+          <Input {...register("zip")} placeholder="84060" />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">

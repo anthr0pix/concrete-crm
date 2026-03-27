@@ -5,7 +5,16 @@ import { useRouter, useParams } from "next/navigation";
 import Link from "next/link";
 import { toast } from "sonner";
 import { format, isPast } from "date-fns";
-import { Pencil, Trash2, Phone, Mail, Globe, Building2, ArrowLeft } from "lucide-react";
+import {
+  Pencil,
+  Trash2,
+  Phone,
+  Mail,
+  Globe,
+  Building2,
+  MapPin,
+  ArrowLeft,
+} from "lucide-react";
 import { Button } from "@/components/ui/button";
 import {
   Select,
@@ -23,6 +32,10 @@ interface PropertyManager {
   phone: string | null;
   email: string | null;
   website: string | null;
+  address: string | null;
+  city: string | null;
+  state: string | null;
+  zip: string | null;
   propertyCount: number | null;
   estimatedValue: number | null;
   status: string;
@@ -158,6 +171,15 @@ export default function OutreachDetailPage() {
                 Website
               </a>
             )}
+            {(manager.address || manager.city) && (
+              <span className="flex items-center gap-1">
+                <MapPin className="w-3.5 h-3.5" />
+                {[manager.address, manager.city, manager.state]
+                  .filter(Boolean)
+                  .join(", ")}
+                {manager.zip ? ` ${manager.zip}` : ""}
+              </span>
+            )}
           </div>
         </div>
         <div className="flex items-center gap-2 shrink-0">
@@ -168,11 +190,7 @@ export default function OutreachDetailPage() {
           </Link>
           {confirmDelete ? (
             <div className="flex items-center gap-1">
-              <Button
-                variant="destructive"
-                size="sm"
-                onClick={handleDelete}
-              >
+              <Button variant="destructive" size="sm" onClick={handleDelete}>
                 Confirm Delete
               </Button>
               <Button
@@ -202,10 +220,7 @@ export default function OutreachDetailPage() {
             <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
               Status
             </p>
-            <Select
-              value={manager.status}
-              onValueChange={handleStatusChange}
-            >
+            <Select value={manager.status} onValueChange={handleStatusChange}>
               <SelectTrigger className="w-48">
                 <SelectValue />
               </SelectTrigger>
