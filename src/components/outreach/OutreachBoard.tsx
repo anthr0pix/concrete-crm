@@ -18,8 +18,10 @@ export interface OutreachItem {
   id: string;
   companyName: string;
   contactName: string;
+  phone: string | null;
+  email: string | null;
+  website: string | null;
   propertyCount: number | null;
-  estimatedValue: number | null;
   nextFollowUpAt: string | null;
 }
 
@@ -48,7 +50,7 @@ export default function OutreachBoard({
   const sensors = useSensors(
     useSensor(PointerSensor, {
       activationConstraint: { distance: 8 },
-    })
+    }),
   );
 
   const handleDragStart = useCallback((event: DragStartEvent) => {
@@ -102,7 +104,7 @@ export default function OutreachBoard({
         toast.error("Failed to move prospect. Please try again.");
       }
     },
-    [itemsByStatus]
+    [itemsByStatus],
   );
 
   const columns = showClosed

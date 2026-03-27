@@ -58,10 +58,6 @@ export default function OutreachColumn({
   const { isOver, setNodeRef } = useDroppable({ id: status });
 
   const colors = COLUMN_COLORS[status] || COLUMN_COLORS.PROSPECT;
-  const totalValue = items.reduce(
-    (sum, i) => sum + (i.estimatedValue ?? 0),
-    0
-  );
 
   return (
     <div
@@ -73,22 +69,11 @@ export default function OutreachColumn({
       {/* Column header */}
       <div className="flex items-center justify-between px-3 py-2.5 border-b border-border">
         <h3 className="text-sm font-semibold text-foreground">{label}</h3>
-        <div className="flex items-center gap-1.5">
-          {totalValue > 0 && (
-            <span className="text-[11px] font-semibold text-muted-foreground tabular-nums">
-              ${totalValue.toLocaleString("en-US", {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0,
-              })}
-              /yr
-            </span>
-          )}
-          <span
-            className={`text-xs font-medium px-2 py-0.5 rounded-full ${colors.badge}`}
-          >
-            {items.length}
-          </span>
-        </div>
+        <span
+          className={`text-xs font-medium px-2 py-0.5 rounded-full ${colors.badge}`}
+        >
+          {items.length}
+        </span>
       </div>
 
       {/* Scrollable list */}

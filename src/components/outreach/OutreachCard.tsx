@@ -3,6 +3,7 @@
 import Link from "next/link";
 import { useDraggable } from "@dnd-kit/core";
 import { format, isPast } from "date-fns";
+import { Phone, Mail, Building2, Globe } from "lucide-react";
 import type { OutreachItem } from "./OutreachBoard";
 
 export default function OutreachCard({ item }: { item: OutreachItem }) {
@@ -16,8 +17,7 @@ export default function OutreachCard({ item }: { item: OutreachItem }) {
     ? { transform: `translate3d(${transform.x}px, ${transform.y}px, 0)` }
     : undefined;
 
-  const overdue =
-    item.nextFollowUpAt && isPast(new Date(item.nextFollowUpAt));
+  const overdue = item.nextFollowUpAt && isPast(new Date(item.nextFollowUpAt));
 
   return (
     <div
@@ -39,18 +39,44 @@ export default function OutreachCard({ item }: { item: OutreachItem }) {
         <p className="font-semibold text-sm text-foreground truncate">
           {item.companyName}
         </p>
-        <p className="text-xs text-muted-foreground mt-0.5 truncate">
-          {item.contactName}
-        </p>
-        <div className="flex items-center gap-2 mt-2">
-          {item.propertyCount && (
-            <span className="inline-flex items-center text-[11px] font-medium px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
-              {item.propertyCount} properties
-            </span>
+
+        {item.contactName && (
+          <p className="text-xs text-muted-foreground mt-0.5 truncate">
+            {item.contactName}
+          </p>
+        )}
+
+        <div className="mt-2 space-y-1">
+          {item.phone && (
+            <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground truncate">
+              <Phone className="w-3 h-3 shrink-0" />
+              {item.phone}
+            </div>
+          )}
+          {item.email && (
+            <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground truncate">
+              <Mail className="w-3 h-3 shrink-0" />
+              {item.email}
+            </div>
+          )}
+          {item.website && (
+            <div className="flex items-center gap-1.5 text-[11px] text-muted-foreground truncate">
+              <Globe className="w-3 h-3 shrink-0" />
+              {item.website.replace(/^https?:\/\/(www\.)?/, "")}
+            </div>
           )}
         </div>
+
         <div className="flex items-center justify-between mt-2">
-          {item.nextFollowUpAt ? (
+          {item.propertyCount ? (
+            <span className="inline-flex items-center gap-1 text-[11px] font-medium px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+              <Building2 className="w-3 h-3" />
+              {item.propertyCount}
+            </span>
+          ) : (
+            <span />
+          )}
+          {item.nextFollowUpAt && (
             <span
               className={`text-[11px] ${
                 overdue
@@ -60,17 +86,6 @@ export default function OutreachCard({ item }: { item: OutreachItem }) {
             >
               {overdue ? "Overdue: " : "Follow-up: "}
               {format(new Date(item.nextFollowUpAt), "MMM d")}
-            </span>
-          ) : (
-            <span />
-          )}
-          {item.estimatedValue != null && item.estimatedValue > 0 && (
-            <span className="text-sm font-bold text-foreground">
-              ${item.estimatedValue.toLocaleString("en-US", {
-                minimumFractionDigits: 0,
-                maximumFractionDigits: 0,
-              })}
-              /yr
             </span>
           )}
         </div>
