@@ -7,6 +7,7 @@ import Breadcrumbs from "@/components/layout/Breadcrumbs";
 import { JOB_STATUS_LABELS, SERVICE_TYPE_LABELS, STATUS_COLORS, QUOTE_STATUS_LABELS, INVOICE_STATUS_LABELS } from "@/types";
 import { format } from "date-fns";
 import DeleteCustomerButton from "@/components/customers/DeleteCustomerButton";
+import { formatPhone } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
 
@@ -28,17 +29,17 @@ export default async function CustomerDetailPage({
   if (!customer) notFound();
 
   return (
-    <div className="p-6 max-w-4xl mx-auto">
+    <div className="p-4 sm:p-6 max-w-4xl mx-auto">
       <Breadcrumbs items={[{ label: "Customers", href: "/customers" }, { label: `${customer.firstName} ${customer.lastName}` }]} />
 
       {/* Header */}
-      <div className="flex items-start justify-between mb-6">
+      <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-4 mb-6">
         <div>
-          <h1 className="text-3xl font-bold">
+          <h1 className="text-2xl sm:text-3xl font-bold">
             {customer.firstName} {customer.lastName}
           </h1>
           <div className="flex flex-wrap items-center gap-4 mt-2 text-sm text-muted-foreground">
-            <span className="flex items-center gap-1"><Phone className="w-3.5 h-3.5" />{customer.phone}</span>
+            <span className="flex items-center gap-1"><Phone className="w-3.5 h-3.5" />{formatPhone(customer.phone)}</span>
             {customer.email && <span className="flex items-center gap-1"><Mail className="w-3.5 h-3.5" />{customer.email}</span>}
             <span className="flex items-center gap-1">
               <MapPin className="w-3.5 h-3.5" />
@@ -70,7 +71,7 @@ export default async function CustomerDetailPage({
       )}
 
       {/* Jobs */}
-      <div className="mb-8">
+      <div className="mb-6">
         <div className="flex items-center justify-between mb-3 border-b pb-2">
           <div className="flex items-center gap-2">
             <h2 className="font-semibold text-base">Jobs</h2>
@@ -83,15 +84,15 @@ export default async function CustomerDetailPage({
           </Link>
         </div>
         {customer.jobs.length === 0 ? (
-          <div className="text-center py-8">
-            <Briefcase className="w-8 h-8 text-muted-foreground/50 mx-auto mb-2" />
+          <div className="text-center py-10 rounded-xl border border-dashed border-border">
+            <Briefcase className="w-10 h-10 text-muted-foreground/30 mx-auto mb-2" />
             <p className="text-sm text-muted-foreground">No jobs yet. Click &quot;New Job&quot; above to create one for this customer.</p>
           </div>
         ) : (
           <div className="space-y-2">
             {customer.jobs.map((job) => (
               <Link key={job.id} href={`/jobs/${job.id}`}>
-                <div className="flex items-center justify-between bg-card rounded-xl shadow-sm px-4 py-3 hover:shadow-md hover:-translate-y-px transition-all duration-150">
+                <div className="flex items-center justify-between bg-card rounded-xl shadow-sm px-4 py-3 hover:shadow-md hover:-translate-y-px active:scale-[0.98] transition-all duration-150">
                   <div>
                     <p className="font-medium text-sm">{job.title}</p>
                     <p className="text-xs text-muted-foreground mt-0.5">
@@ -99,7 +100,7 @@ export default async function CustomerDetailPage({
                       {job.scheduledDate ? format(new Date(job.scheduledDate), "MMM d, yyyy") : "Not scheduled"}
                     </p>
                   </div>
-                  <span className={`text-xs font-medium px-2 py-1 rounded-full ${STATUS_COLORS[job.status]}`}>
+                  <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${STATUS_COLORS[job.status]}`}>
                     {JOB_STATUS_LABELS[job.status]}
                   </span>
                 </div>
@@ -110,7 +111,7 @@ export default async function CustomerDetailPage({
       </div>
 
       {/* Quotes */}
-      <div className="mb-8">
+      <div className="mb-6">
         <div className="flex items-center justify-between mb-3 border-b pb-2">
           <div className="flex items-center gap-2">
             <h2 className="font-semibold text-base">Recent Quotes</h2>
@@ -118,8 +119,8 @@ export default async function CustomerDetailPage({
           </div>
         </div>
         {customer.quotes.length === 0 ? (
-          <div className="text-center py-8">
-            <FileText className="w-8 h-8 text-muted-foreground/50 mx-auto mb-2" />
+          <div className="text-center py-10 rounded-xl border border-dashed border-border">
+            <FileText className="w-10 h-10 text-muted-foreground/30 mx-auto mb-2" />
             <p className="text-sm text-muted-foreground">No quotes yet</p>
           </div>
         ) : (
@@ -127,14 +128,14 @@ export default async function CustomerDetailPage({
             <div className="space-y-2">
               {customer.quotes.map((q) => (
                 <Link key={q.id} href={`/quotes/${q.id}`}>
-                  <div className="flex items-center justify-between bg-card rounded-xl shadow-sm px-4 py-3 hover:shadow-md hover:-translate-y-px transition-all duration-150">
+                  <div className="flex items-center justify-between bg-card rounded-xl shadow-sm px-4 py-3 hover:shadow-md hover:-translate-y-px active:scale-[0.98] transition-all duration-150">
                     <div>
                       <p className="font-medium text-sm">{q.quoteNumber}</p>
                       <p className="text-xs text-muted-foreground">{format(new Date(q.createdAt), "MMM d, yyyy")}</p>
                     </div>
                     <div className="text-right">
                       <p className="font-semibold text-sm">${q.total.toFixed(2)}</p>
-                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_COLORS[q.status]}`}>{QUOTE_STATUS_LABELS[q.status] ?? q.status}</span>
+                      <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${STATUS_COLORS[q.status]}`}>{QUOTE_STATUS_LABELS[q.status] ?? q.status}</span>
                     </div>
                   </div>
                 </Link>
@@ -158,8 +159,8 @@ export default async function CustomerDetailPage({
           </div>
         </div>
         {customer.invoices.length === 0 ? (
-          <div className="text-center py-8">
-            <Receipt className="w-8 h-8 text-muted-foreground/50 mx-auto mb-2" />
+          <div className="text-center py-10 rounded-xl border border-dashed border-border">
+            <Receipt className="w-10 h-10 text-muted-foreground/30 mx-auto mb-2" />
             <p className="text-sm text-muted-foreground">No invoices yet</p>
           </div>
         ) : (
@@ -167,14 +168,14 @@ export default async function CustomerDetailPage({
             <div className="space-y-2">
               {customer.invoices.map((inv) => (
                 <Link key={inv.id} href={`/invoices/${inv.id}`}>
-                  <div className="flex items-center justify-between bg-card rounded-xl shadow-sm px-4 py-3 hover:shadow-md hover:-translate-y-px transition-all duration-150">
+                  <div className="flex items-center justify-between bg-card rounded-xl shadow-sm px-4 py-3 hover:shadow-md hover:-translate-y-px active:scale-[0.98] transition-all duration-150">
                     <div>
                       <p className="font-medium text-sm">{inv.invoiceNumber}</p>
                       <p className="text-xs text-muted-foreground">{format(new Date(inv.createdAt), "MMM d, yyyy")}</p>
                     </div>
                     <div className="text-right">
                       <p className="font-semibold text-sm">${inv.total.toFixed(2)}</p>
-                      <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${STATUS_COLORS[inv.status]}`}>{INVOICE_STATUS_LABELS[inv.status] ?? inv.status}</span>
+                      <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${STATUS_COLORS[inv.status]}`}>{INVOICE_STATUS_LABELS[inv.status] ?? inv.status}</span>
                     </div>
                   </div>
                 </Link>

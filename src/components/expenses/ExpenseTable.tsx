@@ -3,8 +3,9 @@
 import { useState, useMemo } from "react";
 import Link from "next/link";
 import { format } from "date-fns";
-import { Pencil } from "lucide-react";
+import { DollarSign, Pencil } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import {
   Table,
   TableHeader,
@@ -16,14 +17,14 @@ import {
 import { EXPENSE_CATEGORY_LABELS } from "@/types";
 
 const CATEGORY_COLORS: Record<string, string> = {
-  MATERIALS: "bg-blue-100 text-blue-700",
-  FUEL: "bg-orange-100 text-orange-700",
-  EQUIPMENT: "bg-purple-100 text-purple-700",
-  LABOR: "bg-green-100 text-green-700",
-  INSURANCE: "bg-yellow-100 text-yellow-700",
-  MARKETING: "bg-pink-100 text-pink-700",
-  OFFICE: "bg-slate-100 text-slate-700",
-  OTHER: "bg-gray-100 text-gray-700",
+  MATERIALS: "bg-blue-500/10 text-blue-700 dark:text-blue-400",
+  FUEL: "bg-orange-500/10 text-orange-700 dark:text-orange-400",
+  EQUIPMENT: "bg-purple-500/10 text-purple-700 dark:text-purple-400",
+  LABOR: "bg-green-500/10 text-green-700 dark:text-green-400",
+  INSURANCE: "bg-yellow-500/10 text-yellow-700 dark:text-yellow-400",
+  MARKETING: "bg-pink-500/10 text-pink-700 dark:text-pink-400",
+  OFFICE: "bg-slate-500/10 text-slate-700 dark:text-slate-400",
+  OTHER: "bg-gray-500/10 text-gray-700 dark:text-gray-400",
 };
 
 interface Expense {
@@ -50,7 +51,7 @@ export default function ExpenseTable({ expenses }: Props) {
 
   const filtered = useMemo(() => {
     return expenses.filter((e) => {
-      if (categoryFilter && e.category !== categoryFilter) return false;
+      if (categoryFilter && categoryFilter !== "all" && e.category !== categoryFilter) return false;
       if (startDate && e.date < startDate) return false;
       if (endDate && e.date.slice(0, 10) > endDate) return false;
       return true;
@@ -65,18 +66,17 @@ export default function ExpenseTable({ expenses }: Props) {
     <div>
       {/* Filters */}
       <div className="flex flex-wrap gap-3 mb-6">
-        <select
-          value={categoryFilter}
-          onChange={(e) => setCategoryFilter(e.target.value)}
-          className="border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-        >
-          <option value="">All Categories</option>
-          {Object.entries(EXPENSE_CATEGORY_LABELS).map(([val, label]) => (
-            <option key={val} value={val}>
-              {label}
-            </option>
-          ))}
-        </select>
+        <Select value={categoryFilter || "all"} onValueChange={(v) => setCategoryFilter(v === "all" ? "" : v)}>
+          <SelectTrigger className="w-[180px]">
+            <SelectValue placeholder="All Categories" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="all">All Categories</SelectItem>
+            {Object.entries(EXPENSE_CATEGORY_LABELS).map(([val, label]) => (
+              <SelectItem key={val} value={val}>{label}</SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
         <div className="flex items-center gap-2">
           <label className="text-sm text-muted-foreground">From</label>
           <input
@@ -98,8 +98,10 @@ export default function ExpenseTable({ expenses }: Props) {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="text-center py-16 text-muted-foreground">
-          <p className="text-lg font-medium">No expenses found</p>
+        <div className="text-center py-16 rounded-xl border-2 border-dashed border-border">
+          <DollarSign className="w-10 h-10 text-muted-foreground/30 mx-auto mb-2" />
+          <p className="text-base font-semibold text-foreground mb-1">No expenses found</p>
+          <p className="text-sm text-muted-foreground">Try adjusting your filters.</p>
         </div>
       ) : (
         <>
@@ -142,7 +144,7 @@ export default function ExpenseTable({ expenses }: Props) {
                       {expense.job ? (
                         <Link
                           href={`/jobs/${expense.job.id}`}
-                          className="text-sm text-blue-600 hover:underline"
+                          className="text-sm text-primary hover:underline"
                         >
                           {expense.job.title}
                         </Link>
@@ -169,7 +171,7 @@ export default function ExpenseTable({ expenses }: Props) {
             {filtered.map((expense) => (
               <div
                 key={expense.id}
-                className="bg-card border rounded-lg p-4 space-y-2"
+                className="bg-card border rounded-xl p-4 space-y-2"
               >
                 <div className="flex items-center justify-between">
                   <Badge
@@ -194,7 +196,7 @@ export default function ExpenseTable({ expenses }: Props) {
                 {expense.job && (
                   <Link
                     href={`/jobs/${expense.job.id}`}
-                    className="text-sm text-blue-600 hover:underline"
+                    className="text-sm text-primary hover:underline"
                   >
                     {expense.job.title}
                   </Link>

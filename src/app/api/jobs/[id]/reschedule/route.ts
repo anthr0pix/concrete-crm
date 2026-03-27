@@ -28,10 +28,22 @@ export async function PATCH(
   }
 
   try {
+    // Auto-transition LEAD/QUOTED → SCHEDULED when rescheduling
+    const current = await prisma.job.findUnique({
+      where: { id },
+      select: { status: true },
+    });
+
+    const autoStatus =
+      current && (current.status === "LEAD" || current.status === "QUOTED")
+        ? "SCHEDULED"
+        : undefined;
+
     const job = await prisma.job.update({
       where: { id },
       data: {
         scheduledDate: new Date(parsed.data.scheduledDate),
+        ...(autoStatus ? { status: autoStatus } : {}),
       },
     });
     return NextResponse.json(job);

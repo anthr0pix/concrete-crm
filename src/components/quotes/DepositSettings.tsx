@@ -3,6 +3,8 @@
 import { useState } from "react";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Switch } from "@/components/ui/switch";
 
 interface Props {
   depositAmount: number | null;
@@ -39,13 +41,14 @@ export default function DepositSettings({ depositAmount, depositType, quoteTotal
 
   return (
     <div className="space-y-3">
-      <div className="flex items-center gap-2">
-        <input
-          type="checkbox"
+      <div className="flex items-center gap-3">
+        <Switch
           id="deposit-toggle"
           checked={enabled}
-          onChange={handleToggle}
-          className="h-4 w-4 rounded border-border text-foreground focus:ring-ring"
+          onCheckedChange={(checked) => {
+            if (checked) { setEnabled(true); onChange(0, "FIXED"); }
+            else { setEnabled(false); onChange(null, null); }
+          }}
         />
         <Label htmlFor="deposit-toggle" className="cursor-pointer">
           Require deposit before approval
@@ -57,14 +60,15 @@ export default function DepositSettings({ depositAmount, depositType, quoteTotal
           <div className="grid grid-cols-2 gap-3">
             <div className="space-y-1">
               <Label>Type</Label>
-              <select
-                value={depositType ?? "FIXED"}
-                onChange={(e) => handleTypeChange(e.target.value as "FIXED" | "PERCENTAGE")}
-                className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-              >
-                <option value="FIXED">Fixed Amount ($)</option>
-                <option value="PERCENTAGE">Percentage (%)</option>
-              </select>
+              <Select value={depositType ?? "FIXED"} onValueChange={(v) => handleTypeChange(v as "FIXED" | "PERCENTAGE")}>
+                <SelectTrigger className="w-full">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="FIXED">Fixed Amount ($)</SelectItem>
+                  <SelectItem value="PERCENTAGE">Percentage (%)</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
             <div className="space-y-1">
               <Label>Amount</Label>

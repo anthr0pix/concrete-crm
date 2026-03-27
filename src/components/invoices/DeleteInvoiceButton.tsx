@@ -25,7 +25,7 @@ export default function DeleteInvoiceButton({ invoiceId }: { invoiceId: string }
   if (state === "confirming") {
     return (
       <div className="flex items-center gap-2">
-        <span className="text-sm text-slate-600">Delete this invoice?</span>
+        <span className="text-sm text-muted-foreground">Delete this invoice?</span>
         <Button size="sm" variant="destructive" onClick={handleDelete}>Yes, delete</Button>
         <Button size="sm" variant="outline" onClick={() => setState("idle")}>Cancel</Button>
       </div>

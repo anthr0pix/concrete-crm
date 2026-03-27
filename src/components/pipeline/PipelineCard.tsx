@@ -25,7 +25,7 @@ export default function PipelineCard({ job }: { job: PipelineJob }) {
       style={style}
       {...listeners}
       {...attributes}
-      className={`bg-card border border-border rounded-lg p-3 cursor-grab active:cursor-grabbing transition-shadow hover:shadow-sm ${
+      className={`bg-card border border-border rounded-xl p-3 cursor-grab active:cursor-grabbing transition-shadow hover:shadow-sm ${
         isDragging ? "opacity-50 shadow-md" : ""
       }`}
     >
@@ -46,7 +46,7 @@ export default function PipelineCard({ job }: { job: PipelineJob }) {
               : format(new Date(job.createdAt), "MMM d, yyyy")}
           </span>
           {job.quoteTotal !== null && job.quoteTotal > 0 && (
-            <span className="text-xs font-semibold text-foreground">
+            <span className="text-sm font-bold text-foreground">
               ${job.quoteTotal.toLocaleString("en-US", { minimumFractionDigits: 2 })}
             </span>
           )}

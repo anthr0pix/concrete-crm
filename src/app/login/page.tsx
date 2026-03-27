@@ -6,6 +6,7 @@ import Image from "next/image";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
+import { Loader2 } from "lucide-react";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -37,8 +38,8 @@ export default function LoginPage() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-background">
-      <div className="bg-card border rounded-xl shadow-sm p-6 sm:p-8 w-full max-w-sm">
+    <div className="min-h-screen flex items-center justify-center" style={{ background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%)" }}>
+      <div className="bg-card border rounded-xl shadow-xl p-6 sm:p-8 w-full max-w-sm">
         <div className="mb-8 text-center">
           <Image src="/logo.png" alt="Mountain West Surface" width={180} height={60} className="mx-auto mb-3" priority />
           <h1 className="text-2xl font-bold">Mountain West Surface</h1>
@@ -73,7 +74,7 @@ export default function LoginPage() {
           )}
 
           <Button type="submit" className="w-full" disabled={loading}>
-            {loading ? "Signing in..." : "Sign In"}
+            {loading ? <><Loader2 className="w-4 h-4 animate-spin" /> Signing in...</> : "Sign In"}
           </Button>
         </form>
       </div>

@@ -5,6 +5,8 @@ import { toast } from "sonner";
 import { useRouter } from "next/navigation";
 import { INVOICE_STATUS_LABELS, STATUS_COLORS } from "@/types";
 import { InvoiceStatus } from "@prisma/client";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { cn } from "@/lib/utils";
 
 const STATUS_DESCRIPTIONS: Record<string, string> = {
   DRAFT: "Still editing — not sent yet",
@@ -31,16 +33,17 @@ export default function InvoiceStatusSelect({ invoiceId, currentStatus }: { invo
 
   return (
     <div>
-      <select
-        value={status}
-        onChange={(e) => onChange(e.target.value as InvoiceStatus)}
-        className={`text-sm font-medium px-3 py-1.5 rounded-md border-0 focus:outline-none focus:ring-2 focus:ring-slate-900 cursor-pointer ${STATUS_COLORS[status]}`}
-      >
-        {Object.entries(INVOICE_STATUS_LABELS).map(([val, label]) => (
-          <option key={val} value={val}>{label}</option>
-        ))}
-      </select>
-      <p className="text-xs text-slate-400 mt-1">{STATUS_DESCRIPTIONS[status]}</p>
+      <Select value={status} onValueChange={(v) => onChange(v as InvoiceStatus)}>
+        <SelectTrigger className={cn("w-fit gap-2 border-0 font-medium text-sm", STATUS_COLORS[status])}>
+          <SelectValue />
+        </SelectTrigger>
+        <SelectContent>
+          {Object.entries(INVOICE_STATUS_LABELS).map(([val, label]) => (
+            <SelectItem key={val} value={val}>{label}</SelectItem>
+          ))}
+        </SelectContent>
+      </Select>
+      <p className="text-xs text-muted-foreground mt-1">{STATUS_DESCRIPTIONS[status]}</p>
     </div>
   );
 }

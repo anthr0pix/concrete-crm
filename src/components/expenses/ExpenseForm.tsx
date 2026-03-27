@@ -1,14 +1,18 @@
 "use client";
 
-import { useForm } from "react-hook-form";
+import { useEffect } from "react";
+import { useForm, Controller } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { z } from "zod";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { Loader2 } from "lucide-react";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { ExpenseCategory } from "@prisma/client";
 import { EXPENSE_CATEGORY_LABELS } from "@/types";
 
@@ -38,7 +42,9 @@ export default function ExpenseForm({ jobs, defaultValues, expenseId }: Props) {
   const {
     register,
     handleSubmit,
-    formState: { errors, isSubmitting },
+    control,
+    setFocus,
+    formState: { errors, isSubmitting, isDirty },
   } = useForm<FormData>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -47,6 +53,9 @@ export default function ExpenseForm({ jobs, defaultValues, expenseId }: Props) {
       ...defaultValues,
     },
   });
+
+  useUnsavedChanges(isDirty);
+  useEffect(() => { setFocus("description"); }, [setFocus]);
 
   const onSubmit = async (data: FormData) => {
     const url = isEdit ? `/api/expenses/${expenseId}` : "/api/expenses";
@@ -80,26 +89,32 @@ export default function ExpenseForm({ jobs, defaultValues, expenseId }: Props) {
 
   return (
     <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1">
           <Label>Date</Label>
           <Input {...register("date")} type="date" />
           {errors.date && (
-            <p className="text-xs text-red-500">{errors.date.message}</p>
+            <p className="text-xs text-destructive">{errors.date.message}</p>
           )}
         </div>
         <div className="space-y-1">
           <Label>Category</Label>
-          <select
-            {...register("category")}
-            className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-          >
-            {Object.entries(EXPENSE_CATEGORY_LABELS).map(([val, label]) => (
-              <option key={val} value={val}>
-                {label}
-              </option>
-            ))}
-          </select>
+          <Controller
+            name="category"
+            control={control}
+            render={({ field }) => (
+              <Select onValueChange={field.onChange} value={field.value}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select category..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {Object.entries(EXPENSE_CATEGORY_LABELS).map(([val, label]) => (
+                    <SelectItem key={val} value={val}>{label}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          />
         </div>
       </div>
 
@@ -110,11 +125,11 @@ export default function ExpenseForm({ jobs, defaultValues, expenseId }: Props) {
           placeholder="e.g. 5-gallon sealer, diesel fuel"
         />
         {errors.description && (
-          <p className="text-xs text-red-500">{errors.description.message}</p>
+          <p className="text-xs text-destructive">{errors.description.message}</p>
         )}
       </div>
 
-      <div className="grid grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1">
           <Label>Amount</Label>
           <div className="relative">
@@ -131,7 +146,7 @@ export default function ExpenseForm({ jobs, defaultValues, expenseId }: Props) {
             />
           </div>
           {errors.amount && (
-            <p className="text-xs text-red-500">{errors.amount.message}</p>
+            <p className="text-xs text-destructive">{errors.amount.message}</p>
           )}
         </div>
         <div className="space-y-1">
@@ -145,17 +160,23 @@ export default function ExpenseForm({ jobs, defaultValues, expenseId }: Props) {
 
       <div className="space-y-1">
         <Label>Link to Job (optional)</Label>
-        <select
-          {...register("jobId")}
-          className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
-        >
-          <option value="">None — general business expense</option>
-          {jobs.map((job) => (
-            <option key={job.id} value={job.id}>
-              {job.title}
-            </option>
-          ))}
-        </select>
+        <Controller
+          name="jobId"
+          control={control}
+          render={({ field }) => (
+            <Select onValueChange={(v) => field.onChange(v === "none" ? "" : v)} value={field.value || "none"}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="None — general business expense" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">None — general business expense</SelectItem>
+                {jobs.map((job) => (
+                  <SelectItem key={job.id} value={job.id}>{job.title}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+          )}
+        />
         <p className="text-xs text-muted-foreground">Link this expense to a specific job to track job-level costs.</p>
       </div>
 
@@ -168,7 +189,7 @@ export default function ExpenseForm({ jobs, defaultValues, expenseId }: Props) {
         />
         <p className="text-xs text-muted-foreground">Paste a link to a photo or scan of the receipt, if you have one.</p>
         {errors.receiptUrl && (
-          <p className="text-xs text-red-500">{errors.receiptUrl.message}</p>
+          <p className="text-xs text-destructive">{errors.receiptUrl.message}</p>
         )}
       </div>
 
@@ -181,13 +202,16 @@ export default function ExpenseForm({ jobs, defaultValues, expenseId }: Props) {
         />
       </div>
 
-      <div className="flex gap-3">
-        <Button type="submit" disabled={isSubmitting}>
-          {isSubmitting ? "Saving..." : isEdit ? "Save Changes" : "Add Expense"}
-        </Button>
-        <Button type="button" variant="outline" onClick={() => router.back()}>
-          Cancel
-        </Button>
+      {/* Sticky submit bar on mobile, normal on desktop */}
+      <div className="sticky bottom-0 bg-background py-3 -mx-4 px-4 sm:-mx-6 sm:px-6 border-t md:static md:border-0 md:py-0 md:mx-0 md:px-0">
+        <div className="flex gap-3">
+          <Button type="submit" disabled={isSubmitting} className="h-11 md:h-9 flex-1 md:flex-none">
+            {isSubmitting ? <><Loader2 className="w-4 h-4 animate-spin" /> Saving...</> : isEdit ? "Save Changes" : "Add Expense"}
+          </Button>
+          <Button type="button" variant="outline" onClick={() => router.back()} className="h-11 md:h-9">
+            Cancel
+          </Button>
+        </div>
       </div>
     </form>
   );

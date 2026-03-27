@@ -3,14 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import Breadcrumbs from "@/components/layout/Breadcrumbs";
 import { format } from "date-fns";
-import InvoiceStatusSelect from "@/components/invoices/InvoiceStatusSelect";
-import SendInvoiceButton from "@/components/invoices/SendInvoiceButton";
-import MarkPaidButton from "@/components/invoices/MarkPaidButton";
-import PayNowButton from "@/components/invoices/PayNowButton";
-import DuplicateInvoiceButton from "@/components/invoices/DuplicateInvoiceButton";
-import DeleteInvoiceButton from "@/components/invoices/DeleteInvoiceButton";
-import { Download } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import InvoiceDetailActions from "@/components/invoices/InvoiceDetailActions";
 
 export const dynamic = "force-dynamic";
 
@@ -27,12 +20,12 @@ export default async function InvoiceDetailPage({
   if (!invoice) notFound();
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
+    <div className="p-4 sm:p-6 max-w-3xl mx-auto">
       <Breadcrumbs items={[{ label: "Invoices", href: "/invoices" }, { label: invoice.invoiceNumber }]} />
 
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-6">
         <div>
-          <h1 className="text-3xl font-bold">{invoice.invoiceNumber}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">{invoice.invoiceNumber}</h1>
           <p className="text-muted-foreground text-sm mt-1">
             <Link href={`/customers/${invoice.customer.id}`} className="hover:underline">
               {invoice.customer.firstName} {invoice.customer.lastName}
@@ -63,24 +56,7 @@ export default async function InvoiceDetailPage({
             </p>
           )}
         </div>
-        <div className="flex flex-wrap items-center gap-2 bg-card rounded-xl shadow-sm px-3 py-2">
-          <InvoiceStatusSelect invoiceId={invoice.id} currentStatus={invoice.status} />
-          <SendInvoiceButton invoiceId={invoice.id} customerEmail={invoice.customer.email} />
-          <a href={`/api/invoices/${invoice.id}/pdf`} download>
-            <Button variant="outline" size="sm">
-              <Download className="w-4 h-4 mr-1.5" /> PDF
-            </Button>
-          </a>
-          <div className="hidden sm:block w-px h-6 bg-border" />
-          <DuplicateInvoiceButton invoiceId={invoice.id} />
-          {invoice.status !== "PAID" && invoice.status !== "VOID" && (
-            <>
-              <MarkPaidButton invoiceId={invoice.id} />
-              <PayNowButton invoiceId={invoice.id} />
-            </>
-          )}
-          <DeleteInvoiceButton invoiceId={invoice.id} />
-        </div>
+        <InvoiceDetailActions invoiceId={invoice.id} status={invoice.status} customerEmail={invoice.customer.email} />
       </div>
 
       {/* Workflow hint */}
@@ -96,9 +72,9 @@ export default async function InvoiceDetailPage({
       )}
 
       {/* Line Items — Desktop Table */}
-      <div className="hidden sm:block bg-card rounded-xl shadow-sm overflow-hidden mb-4">
+      <div className="hidden sm:block bg-card border rounded-xl shadow-sm overflow-hidden mb-4">
         <table className="w-full text-sm">
-          <thead className="bg-muted border-b">
+          <thead className="bg-muted/80 border-b-2 border-border">
             <tr>
               <th className="text-left px-4 py-3 font-medium text-muted-foreground">Description</th>
               <th className="text-right px-4 py-3 font-medium text-muted-foreground">Sq Ft</th>
@@ -122,7 +98,7 @@ export default async function InvoiceDetailPage({
       {/* Line Items — Mobile Cards */}
       <div className="sm:hidden space-y-3 mb-4">
         {invoice.lineItems.map((item) => (
-          <div key={item.id} className="bg-card rounded-xl shadow-sm p-4">
+          <div key={item.id} className="bg-card border rounded-xl shadow-sm p-4">
             <p className="font-medium text-sm mb-2">{item.description}</p>
             <div className="flex justify-between text-sm text-muted-foreground">
               <span>{item.quantity} sq ft</span>
@@ -134,7 +110,7 @@ export default async function InvoiceDetailPage({
       </div>
 
       {/* Totals */}
-      <div className="max-w-xs ml-auto bg-card rounded-xl shadow-sm p-4 space-y-2 mb-6">
+      <div className="sm:max-w-xs sm:ml-auto bg-card border rounded-xl shadow-sm p-4 space-y-2 mb-6">
         <div className="flex justify-between text-sm">
           <span className="text-muted-foreground">Subtotal</span>
           <span>${invoice.subtotal.toFixed(2)}</span>
@@ -152,11 +128,11 @@ export default async function InvoiceDetailPage({
       </div>
 
       {invoice.notes && (
-        <p className="text-sm text-muted-foreground bg-card rounded-xl shadow-sm p-3">{invoice.notes}</p>
+        <p className="text-sm text-muted-foreground bg-card border rounded-xl shadow-sm p-3">{invoice.notes}</p>
       )}
 
       {invoice.paymentEvents.length > 0 && (
-        <div className="bg-card rounded-xl shadow-sm p-4 mt-4">
+        <div className="bg-card border rounded-xl shadow-sm p-4 mt-4">
           <div className="flex items-center gap-2 mb-3 border-b pb-2">
             <h2 className="font-semibold text-base">Payment History</h2>
             <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full">{invoice.paymentEvents.length}</span>

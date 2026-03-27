@@ -15,7 +15,7 @@ export default async function EditCustomerPage({
   if (!customer) notFound();
 
   return (
-    <div className="p-6 max-w-2xl mx-auto">
+    <div className="p-4 sm:p-6 max-w-2xl mx-auto">
       <Breadcrumbs items={[
         { label: "Customers", href: "/customers" },
         { label: `${customer.firstName} ${customer.lastName}`, href: `/customers/${id}` },

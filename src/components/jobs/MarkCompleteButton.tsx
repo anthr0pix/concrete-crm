@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, Loader2 } from "lucide-react";
 
 export default function MarkCompleteButton({ jobId }: { jobId: string }) {
   const router = useRouter();
@@ -50,7 +50,7 @@ export default function MarkCompleteButton({ jobId }: { jobId: string }) {
       disabled={state === "saving"}
       className="bg-status-success-bg hover:bg-status-success-bg/80 text-status-success-text"
     >
-      <CheckCircle className="w-4 h-4 mr-1.5" />
+      {state === "saving" ? <Loader2 className="w-4 h-4 mr-1.5 animate-spin" /> : <CheckCircle className="w-4 h-4 mr-1.5" />}
       {state === "saving" ? "Saving..." : "Mark Complete"}
     </Button>
   );

@@ -1,18 +1,11 @@
 "use client";
 
+import { formatCurrency } from "@/lib/utils";
+
 const MONTH_NAMES = [
   "Jan", "Feb", "Mar", "Apr", "May", "Jun",
   "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
 ];
-
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
-}
 
 interface MonthData {
   month: number;
@@ -67,7 +60,7 @@ export default function ProfitLossChart({ data }: ProfitLossChartProps) {
                   />
                 </div>
                 <span className="text-xs text-muted-foreground w-16 text-right shrink-0">
-                  {formatCurrency(d.revenue)}
+                  {formatCurrency(d.revenue, false)}
                 </span>
               </div>
 
@@ -80,7 +73,7 @@ export default function ProfitLossChart({ data }: ProfitLossChartProps) {
                   />
                 </div>
                 <span className="text-xs text-muted-foreground w-16 text-right shrink-0">
-                  {formatCurrency(d.expenses)}
+                  {formatCurrency(d.expenses, false)}
                 </span>
               </div>
             </div>
@@ -92,7 +85,7 @@ export default function ProfitLossChart({ data }: ProfitLossChartProps) {
               }`}
             >
               {d.profit >= 0 ? "+" : ""}
-              {formatCurrency(d.profit)}
+              {formatCurrency(d.profit, false)}
             </div>
           </div>
         );
@@ -106,10 +99,10 @@ export default function ProfitLossChart({ data }: ProfitLossChartProps) {
         <div className="flex-1 min-w-0">
           <div className="flex justify-between text-sm">
             <span className="text-muted-foreground">
-              Revenue: {formatCurrency(data.reduce((s, d) => s + d.revenue, 0))}
+              Revenue: {formatCurrency(data.reduce((s, d) => s + d.revenue, 0), false)}
             </span>
             <span className="text-muted-foreground">
-              Expenses: {formatCurrency(data.reduce((s, d) => s + d.expenses, 0))}
+              Expenses: {formatCurrency(data.reduce((s, d) => s + d.expenses, 0), false)}
             </span>
           </div>
         </div>
@@ -121,7 +114,7 @@ export default function ProfitLossChart({ data }: ProfitLossChartProps) {
           }`}
         >
           {data.reduce((s, d) => s + d.profit, 0) >= 0 ? "+" : ""}
-          {formatCurrency(data.reduce((s, d) => s + d.profit, 0))}
+          {formatCurrency(data.reduce((s, d) => s + d.profit, 0), false)}
         </div>
       </div>
     </div>

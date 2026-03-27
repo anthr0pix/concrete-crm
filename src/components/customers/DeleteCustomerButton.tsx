@@ -25,7 +25,7 @@ export default function DeleteCustomerButton({ customerId, customerName }: { cus
   if (state === "confirming") {
     return (
       <div className="flex items-center gap-2">
-        <span className="text-sm text-slate-600">Delete {customerName}?</span>
+        <span className="text-sm text-muted-foreground">Delete {customerName}?</span>
         <Button size="sm" variant="destructive" onClick={handleDelete}>Yes, delete</Button>
         <Button size="sm" variant="outline" onClick={() => setState("idle")}>Cancel</Button>
       </div>

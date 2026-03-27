@@ -1,14 +1,16 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useCallback } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
+import { useUnsavedChanges } from "@/hooks/useUnsavedChanges";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { RequiredLabel } from "@/components/ui/required-label";
 import { Textarea } from "@/components/ui/textarea";
-import { Plus, Trash2 } from "lucide-react";
+import { Plus, Trash2, Loader2 } from "lucide-react";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import DepositSettings from "@/components/quotes/DepositSettings";
 import NewCustomerDialog from "@/components/customers/NewCustomerDialog";
 
@@ -52,14 +54,20 @@ export default function QuoteBuilder({ customers, jobs = [], defaultCustomerId, 
   const [depositAmount, setDepositAmount] = useState<number | null>(defaultDepositAmount ?? null);
   const [depositType, setDepositType] = useState<"FIXED" | "PERCENTAGE" | null>(defaultDepositType ?? null);
   const [submitting, setSubmitting] = useState(false);
+  const [touched, setTouched] = useState(false);
   const [lineItems, setLineItems] = useState<LineItem[]>(
     defaultLineItems ?? [{ description: "", quantity: 1, unitPrice: 0 }]
   );
 
-  const addLine = () => setLineItems([...lineItems, { description: "", quantity: 1, unitPrice: 0 }]);
-  const removeLine = (i: number) => setLineItems(lineItems.filter((_, idx) => idx !== i));
-  const updateLine = (i: number, field: keyof LineItem, value: string | number) =>
+  useUnsavedChanges(touched);
+  const markTouched = useCallback(() => setTouched(true), []);
+
+  const addLine = () => { setLineItems([...lineItems, { description: "", quantity: 1, unitPrice: 0 }]); markTouched(); };
+  const removeLine = (i: number) => { setLineItems(lineItems.filter((_, idx) => idx !== i)); markTouched(); };
+  const updateLine = (i: number, field: keyof LineItem, value: string | number) => {
     setLineItems(lineItems.map((item, idx) => idx === i ? { ...item, [field]: value } : item));
+    markTouched();
+  };
 
   const subtotal = lineItems.reduce((s, item) => s + item.quantity * item.unitPrice, 0);
   const taxAmount = subtotal * (taxRate / 100);
@@ -90,6 +98,7 @@ export default function QuoteBuilder({ customers, jobs = [], defaultCustomerId, 
     setSubmitting(false);
 
     if (!res.ok) { toast.error(isEdit ? "Failed to update quote" : "Failed to create quote"); return; }
+    setTouched(false);
     const quote = await res.json();
     toast.success(isEdit ? "Quote updated" : `Quote ${quote.quoteNumber} created`);
     router.push(`/quotes/${isEdit ? quoteId : quote.id}`);
@@ -97,17 +106,23 @@ export default function QuoteBuilder({ customers, jobs = [], defaultCustomerId, 
   };
 
   return (
-    <form onSubmit={onSubmit} className="bg-card rounded-xl shadow-sm p-4 sm:p-6 space-y-6">
+    <form onSubmit={onSubmit} onChangeCapture={markTouched} className="bg-card border rounded-xl shadow-sm p-4 sm:p-6 space-y-6">
       <p className="text-xs text-muted-foreground"><span className="text-destructive">*</span> Required</p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         {!isEdit && (
           <div className="space-y-1">
             <RequiredLabel>Customer</RequiredLabel>
             <div className="flex gap-2">
-              <select value={customerId} onChange={(e) => setCustomerId(e.target.value)} className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
-                <option value="">Select customer...</option>
-                {customerList.map((c) => <option key={c.id} value={c.id}>{c.lastName}, {c.firstName}</option>)}
-              </select>
+              <Select value={customerId || undefined} onValueChange={setCustomerId}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="Select customer..." />
+                </SelectTrigger>
+                <SelectContent>
+                  {customerList.map((c) => (
+                    <SelectItem key={c.id} value={c.id}>{c.lastName}, {c.firstName}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
               <NewCustomerDialog onCustomerCreated={(c) => {
                 setCustomerList((prev) => [...prev, c].sort((a, b) => a.lastName.localeCompare(b.lastName)));
                 setCustomerId(c.id);
@@ -118,10 +133,17 @@ export default function QuoteBuilder({ customers, jobs = [], defaultCustomerId, 
         {jobs.length > 0 && (
           <div className="space-y-1">
             <Label>Link to Job (optional)</Label>
-            <select value={jobId} onChange={(e) => setJobId(e.target.value)} className="w-full border rounded-md px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring">
-              <option value="">No job</option>
-              {jobs.map((j) => <option key={j.id} value={j.id}>{j.title}</option>)}
-            </select>
+            <Select value={jobId || "none"} onValueChange={(v) => setJobId(v === "none" ? "" : v)}>
+              <SelectTrigger className="w-full">
+                <SelectValue placeholder="No job" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="none">No job</SelectItem>
+                {jobs.map((j) => (
+                  <SelectItem key={j.id} value={j.id}>{j.title}</SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
         )}
       </div>
@@ -297,7 +319,7 @@ export default function QuoteBuilder({ customers, jobs = [], defaultCustomerId, 
       <div className="sticky bottom-0 bg-card py-3 -mx-4 px-4 sm:-mx-6 sm:px-6 border-t md:static md:border-0 md:py-0 md:mx-0 md:px-0">
         <div className="flex gap-3">
           <Button type="submit" disabled={submitting} className="h-11 md:h-9 flex-1 md:flex-none">
-            {submitting ? (isEdit ? "Saving..." : "Creating...") : (isEdit ? "Save Changes" : "Create Quote")}
+            {submitting ? <><Loader2 className="w-4 h-4 animate-spin" /> {isEdit ? "Saving..." : "Creating..."}</> : (isEdit ? "Save Changes" : "Create Quote")}
           </Button>
           <Button type="button" variant="outline" onClick={() => router.back()} className="h-11 md:h-9">Cancel</Button>
         </div>

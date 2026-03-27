@@ -2,7 +2,7 @@ import { Skeleton } from "@/components/ui/skeleton";
 
 export default function InvoiceDetailLoading() {
   return (
-    <div className="p-6 max-w-3xl mx-auto">
+    <div className="p-4 sm:p-6 max-w-3xl mx-auto">
       {/* Breadcrumb */}
       <Skeleton className="h-4 w-44 mb-4" />
 
@@ -22,7 +22,7 @@ export default function InvoiceDetailLoading() {
       </div>
 
       {/* Line items table */}
-      <div className="hidden sm:block bg-card border rounded-lg overflow-hidden mb-4">
+      <div className="hidden sm:block bg-card border rounded-xl shadow-sm overflow-hidden mb-4">
         <div className="bg-muted/50 border-b px-4 py-3 flex justify-between">
           <Skeleton className="h-4 w-24" />
           <div className="flex gap-12">
@@ -43,8 +43,21 @@ export default function InvoiceDetailLoading() {
         ))}
       </div>
 
+      {/* Mobile line items */}
+      <div className="sm:hidden space-y-3 mb-4">
+        {Array.from({ length: 3 }).map((_, i) => (
+          <div key={i} className="bg-card border rounded-xl shadow-sm p-4">
+            <Skeleton className="h-4 w-40 mb-2" />
+            <div className="flex justify-between">
+              <Skeleton className="h-3 w-16" />
+              <Skeleton className="h-3 w-20" />
+            </div>
+          </div>
+        ))}
+      </div>
+
       {/* Totals */}
-      <div className="max-w-xs ml-auto space-y-2 mb-6">
+      <div className="sm:max-w-xs sm:ml-auto bg-card border rounded-xl shadow-sm p-4 space-y-2 mb-6">
         <div className="flex justify-between">
           <Skeleton className="h-4 w-16" />
           <Skeleton className="h-4 w-20" />

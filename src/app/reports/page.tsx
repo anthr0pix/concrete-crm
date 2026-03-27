@@ -151,8 +151,10 @@ export default async function ReportsPage({ searchParams }: PageProps) {
 
   return (
     <div className="p-4 sm:p-6 max-w-5xl mx-auto">
-      <h1 className="text-2xl font-bold mb-1">Reports</h1>
-      <p className="text-sm text-muted-foreground mb-6">Revenue, expenses, and profit at a glance. Select a year to filter.</p>
+      <div className="mb-6 bg-muted/40 rounded-xl px-5 py-4 -mx-1">
+        <h1 className="text-2xl font-bold">Reports</h1>
+        <p className="text-sm text-muted-foreground mt-1">Revenue, expenses, and profit at a glance. Select a year to filter.</p>
+      </div>
 
       {/* Year selector */}
       <div className="flex gap-2 mb-6">
@@ -172,19 +174,19 @@ export default async function ReportsPage({ searchParams }: PageProps) {
       </div>
 
       {/* P&L Chart */}
-      <div className="bg-card border rounded-xl p-5 mb-6">
-        <h2 className="font-semibold text-lg mb-4">Profit &amp; Loss</h2>
+      <div className="bg-card border rounded-xl shadow-sm p-5 mb-6">
+        <h2 className="font-semibold text-base mb-4">Profit &amp; Loss</h2>
         <ProfitLossChart data={plData} />
       </div>
 
       {/* Two-column grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 mb-6">
-        <div className="bg-card border rounded-xl p-5">
-          <h2 className="font-semibold text-lg mb-4">Revenue by Service</h2>
+        <div className="bg-card border rounded-xl shadow-sm p-5">
+          <h2 className="font-semibold text-base mb-4">Revenue by Service</h2>
           <RevenueByCategoryChart data={revenueData} />
         </div>
-        <div className="bg-card border rounded-xl p-5">
-          <h2 className="font-semibold text-lg mb-4">Unpaid Invoice Aging</h2>
+        <div className="bg-card border rounded-xl shadow-sm p-5">
+          <h2 className="font-semibold text-base mb-4">Unpaid Invoice Aging</h2>
           <ARAgingTable
             buckets={arBuckets}
             totalOutstanding={totalOutstanding}
@@ -193,8 +195,8 @@ export default async function ReportsPage({ searchParams }: PageProps) {
       </div>
 
       {/* Tax Summary */}
-      <div className="bg-card border rounded-xl p-5">
-        <h2 className="font-semibold text-lg mb-4">Tax Summary</h2>
+      <div className="bg-card border rounded-xl shadow-sm p-5">
+        <h2 className="font-semibold text-base mb-4">Tax Summary</h2>
         <TaxSummaryCard quarters={taxQuarters} />
       </div>
     </div>

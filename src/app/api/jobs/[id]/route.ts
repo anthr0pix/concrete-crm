@@ -86,6 +86,7 @@ export async function DELETE(_req: Request, { params }: { params: Promise<{ id: 
     await prisma.$transaction(async (tx) => {
       await tx.quote.updateMany({ where: { jobId: id }, data: { jobId: null } });
       await tx.invoice.updateMany({ where: { jobId: id }, data: { jobId: null } });
+      await tx.expense.updateMany({ where: { jobId: id }, data: { jobId: null } });
       await tx.job.delete({ where: { id } });
     });
     return NextResponse.json({ success: true });

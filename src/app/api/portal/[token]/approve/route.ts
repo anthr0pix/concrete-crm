@@ -41,6 +41,25 @@ export async function POST(
       data: { status: "ACCEPTED" },
     });
 
+    // Auto-transition linked job from LEAD → QUOTED
+    if (quote.jobId) {
+      try {
+        const linkedJob = await prisma.job.findUnique({
+          where: { id: quote.jobId },
+          select: { status: true },
+        });
+        if (linkedJob && linkedJob.status === "LEAD") {
+          await prisma.job.update({
+            where: { id: quote.jobId },
+            data: { status: "QUOTED" },
+          });
+        }
+      } catch (err) {
+        // Log but don't fail the approval if job transition fails
+        console.error("[portal/approve] Job auto-transition error:", err);
+      }
+    }
+
     return NextResponse.json({ success: true });
   } catch (err) {
     console.error("[portal/approve] DB error:", err);

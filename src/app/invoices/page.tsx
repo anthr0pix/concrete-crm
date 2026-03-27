@@ -2,6 +2,7 @@ import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
 import { Plus, Search, Receipt } from "lucide-react";
 import { INVOICE_STATUS_LABELS, STATUS_COLORS } from "@/types";
 import { InvoiceStatus } from "@prisma/client";
@@ -105,11 +106,11 @@ export default async function InvoicesPage({
           {sort && <input type="hidden" name="sort" value={sort} />}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input
+            <Input
               name="search"
               defaultValue={search}
               placeholder="Search by invoice number or customer name..."
-              className="w-full border rounded-md pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              className="pl-9"
             />
           </div>
         </form>
@@ -166,7 +167,7 @@ export default async function InvoicesPage({
             return (
               <Link key={inv.id} href={`/invoices/${inv.id}`}>
                 <div className={cn(
-                  "flex items-center justify-between bg-card rounded-xl shadow-sm px-5 py-4 hover:shadow-md hover:-translate-y-px active:scale-[0.98] transition-all duration-150 cursor-pointer",
+                  "flex items-center justify-between bg-card border rounded-xl shadow-sm px-4 py-3 sm:px-5 sm:py-4 hover:shadow-md hover:-translate-y-px active:scale-[0.98] transition-all duration-150 cursor-pointer",
                   isOverdue && "border-l-4 border-l-red-500 bg-status-danger-bg/50",
                 )}>
                   <div>

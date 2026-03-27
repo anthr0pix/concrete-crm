@@ -29,21 +29,21 @@ export default function MobileBottomNav({ onMoreTap }: MobileBottomNavProps) {
               key={href}
               href={href}
               className={cn(
-                "flex-1 flex flex-col items-center gap-0.5 py-2.5 text-xs font-medium transition-colors relative",
+                "flex-1 flex flex-col items-center justify-center gap-0.5 min-h-[52px] text-xs font-medium transition-colors active:opacity-70 relative",
                 isActive ? "text-primary" : "text-muted-foreground"
               )}
             >
               <Icon className="w-5 h-5" />
               {label}
               {isActive && (
-                <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full bg-primary" />
+                <span className="absolute bottom-1 left-1/2 -translate-x-1/2 w-5 h-1 rounded-full bg-primary" />
               )}
             </Link>
           );
         })}
         <button
           onClick={onMoreTap}
-          className="flex-1 flex flex-col items-center gap-0.5 py-2.5 text-xs font-medium text-muted-foreground transition-colors"
+          className="flex-1 flex flex-col items-center justify-center gap-0.5 min-h-[52px] text-xs font-medium text-muted-foreground transition-colors active:opacity-70"
         >
           <Menu className="w-5 h-5" />
           More

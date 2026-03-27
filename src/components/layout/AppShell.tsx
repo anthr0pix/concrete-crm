@@ -6,6 +6,8 @@ import Image from "next/image";
 import { Menu } from "lucide-react";
 import Sidebar from "./Sidebar";
 import MobileBottomNav from "./MobileBottomNav";
+import CommandPalette from "@/components/CommandPalette";
+import { TooltipProvider } from "@/components/ui/tooltip";
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
@@ -20,43 +22,46 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   if (isFullscreenPage) return <>{children}</>;
 
   return (
-    <div className="flex min-h-screen bg-background">
-      {/* Mobile backdrop */}
-      {sidebarOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-30 md:hidden"
-          onClick={() => setSidebarOpen(false)}
-        />
-      )}
-
-      <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
-
-      <div className="flex-1 flex flex-col min-w-0">
-        {/* Mobile top bar */}
-        <div className="md:hidden flex items-center gap-3 px-4 py-3 border-b bg-card sticky top-0 z-20 shadow-sm">
-          <button
-            onClick={() => setSidebarOpen(true)}
-            className="p-1.5 rounded-md hover:bg-muted transition-colors"
-            aria-label="Open menu"
-          >
-            <Menu className="w-5 h-5 text-muted-foreground" />
-          </button>
-          <Image
-            src="/logo-white.png"
-            alt="Mountain West Surface"
-            width={100}
-            height={32}
-            className="object-contain invert"
-            style={{ maxHeight: 28 }}
+    <TooltipProvider>
+      <div className="flex min-h-screen bg-background">
+        {/* Mobile backdrop */}
+        {sidebarOpen && (
+          <div
+            className="fixed inset-0 bg-black/50 z-30 md:hidden"
+            onClick={() => setSidebarOpen(false)}
           />
+        )}
+
+        <Sidebar open={sidebarOpen} onClose={() => setSidebarOpen(false)} />
+
+        <div className="flex-1 flex flex-col min-w-0">
+          {/* Mobile top bar */}
+          <div className="md:hidden flex items-center gap-3 px-4 py-3 border-b sticky top-0 z-20 shadow-sm" style={{ background: "linear-gradient(135deg, #1a1a2e 0%, #16213e 100%)" }}>
+            <button
+              onClick={() => setSidebarOpen(true)}
+              className="p-2 rounded-md hover:bg-white/10 transition-colors"
+              aria-label="Open menu"
+            >
+              <Menu className="w-5 h-5 text-white/80" />
+            </button>
+            <Image
+              src="/logo-white.png"
+              alt="Mountain West Surface"
+              width={100}
+              height={32}
+              className="object-contain"
+              style={{ maxHeight: 28 }}
+            />
+          </div>
+
+          <main className="flex-1 overflow-auto pb-20 md:pb-0">
+            {children}
+          </main>
         </div>
 
-        <main className="flex-1 overflow-auto pb-16 md:pb-0">
-          {children}
-        </main>
+        <MobileBottomNav onMoreTap={() => setSidebarOpen(true)} />
+        <CommandPalette />
       </div>
-
-      <MobileBottomNav onMoreTap={() => setSidebarOpen(true)} />
-    </div>
+    </TooltipProvider>
   );
 }

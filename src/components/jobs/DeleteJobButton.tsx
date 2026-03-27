@@ -25,7 +25,7 @@ export default function DeleteJobButton({ jobId, redirectTo = "/jobs" }: { jobId
   if (state === "confirming") {
     return (
       <div className="flex items-center gap-2">
-        <span className="text-sm text-slate-600">Delete this job?</span>
+        <span className="text-sm text-muted-foreground">Delete this job?</span>
         <Button size="sm" variant="destructive" onClick={handleDelete}>Yes, delete</Button>
         <Button size="sm" variant="outline" onClick={() => setState("idle")}>Cancel</Button>
       </div>

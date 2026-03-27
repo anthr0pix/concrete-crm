@@ -18,8 +18,10 @@ export default async function SettingsPage() {
 
   return (
     <div className="p-4 sm:p-6 max-w-2xl mx-auto">
-      <h1 className="text-2xl font-bold mb-1">Settings</h1>
-      <p className="text-sm text-muted-foreground mb-6">Configure automated emails that go out to your customers.</p>
+      <div className="mb-6 bg-muted/40 rounded-xl px-5 py-4 -mx-1">
+        <h1 className="text-2xl font-bold">Settings</h1>
+        <p className="text-sm text-muted-foreground mt-1">Configure automated emails that go out to your customers.</p>
+      </div>
       <SettingsForm defaults={defaults} />
     </div>
   );

@@ -1,9 +1,11 @@
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
-import { Users, Briefcase, FileText, Receipt, TrendingUp, Clock, ArrowRight, Phone, MapPin, AlertTriangle } from "lucide-react";
+import { Users, Briefcase, FileText, Receipt, TrendingUp, TrendingDown, Clock, ArrowRight, Phone, MapPin, AlertTriangle, Megaphone } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { JOB_STATUS_LABELS, SERVICE_TYPE_LABELS, STATUS_COLORS } from "@/types";
-import { format, startOfMonth, endOfMonth, startOfDay, endOfDay, subDays, addDays, formatDistanceToNow } from "date-fns";
+import { cn } from "@/lib/utils";
+import { format, startOfMonth, endOfMonth, startOfDay, endOfDay, subDays, addDays, subMonths, formatDistanceToNow } from "date-fns";
+import { ExpireQuoteButton, ExpireAllStaleButton } from "@/components/quotes/ExpireQuoteButton";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +27,8 @@ export default async function DashboardPage() {
   const now = new Date();
   const monthStart = startOfMonth(now);
   const monthEnd = endOfMonth(now);
+  const prevMonthStart = startOfMonth(subMonths(now, 1));
+  const prevMonthEnd = endOfMonth(subMonths(now, 1));
 
   const todayStart = startOfDay(now);
   const todayEnd = endOfDay(now);
@@ -45,6 +49,12 @@ export default async function DashboardPage() {
     expiringQuotes,
     overdueInvoices,
     unbilledJobs,
+    customersThisMonth,
+    prevMonthActiveJobs,
+    prevMonthRevenue,
+    outreachCounts,
+    outreachPipelineValue,
+    overdueFollowUps,
   ] = await Promise.all([
     prisma.customer.count(),
     prisma.job.groupBy({ by: ["status"], _count: true }),
@@ -99,7 +109,10 @@ export default async function DashboardPage() {
     prisma.quote.findMany({
       where: {
         status: "SENT",
-        updatedAt: { lt: subDays(now, 7) },
+        OR: [
+          { lastFollowUpAt: { not: null, lt: subDays(now, 7) } },
+          { lastFollowUpAt: null, updatedAt: { lt: subDays(now, 7) } },
+        ],
       },
       orderBy: { updatedAt: "asc" },
       take: 10,
@@ -135,17 +148,43 @@ export default async function DashboardPage() {
       take: 10,
       include: { customer: { select: { firstName: true, lastName: true } } },
     }),
+    // Period comparison queries
+    prisma.customer.count({ where: { createdAt: { gte: monthStart, lte: monthEnd } } }),
+    prisma.job.count({
+      where: {
+        status: { in: ["LEAD", "QUOTED", "SCHEDULED", "IN_PROGRESS"] },
+        updatedAt: { gte: prevMonthStart, lte: prevMonthEnd },
+      },
+    }),
+    prisma.invoice.aggregate({
+      where: { status: "PAID", paidDate: { gte: prevMonthStart, lte: prevMonthEnd } },
+      _sum: { total: true },
+    }),
+    // Outreach pipeline
+    prisma.propertyManager.groupBy({ by: ["status"], _count: true }),
+    prisma.propertyManager.aggregate({ _sum: { estimatedValue: true }, where: { status: { notIn: ["WON", "LOST"] } } }),
+    prisma.propertyManager.count({ where: { status: { notIn: ["WON", "LOST"] }, nextFollowUpAt: { lt: now } } }),
   ]);
 
   const statusMap = Object.fromEntries(jobCounts.map((j) => [j.status, j._count]));
   const activeJobs = (statusMap["LEAD"] ?? 0) + (statusMap["QUOTED"] ?? 0) +
     (statusMap["SCHEDULED"] ?? 0) + (statusMap["IN_PROGRESS"] ?? 0);
 
+  // Period comparisons
+  const currentMonthRevenue = monthlyPaidInvoices.reduce((sum, inv) => sum + inv.total, 0);
+  const prevMonthRevenueTotal = prevMonthRevenue._sum.total ?? 0;
+  const revenuePctChange = prevMonthRevenueTotal > 0
+    ? Math.round(((currentMonthRevenue - prevMonthRevenueTotal) / prevMonthRevenueTotal) * 100)
+    : null;
+  const activeJobsPctChange = prevMonthActiveJobs > 0
+    ? Math.round(((activeJobs - prevMonthActiveJobs) / prevMonthActiveJobs) * 100)
+    : null;
+
   const stats = [
-    { label: "Total Customers", value: totalCustomers, icon: Users, href: "/customers", color: "text-status-info-text" },
-    { label: "Active Jobs", subtitle: "Lead, Quoted, Scheduled & In Progress", value: activeJobs, icon: Briefcase, href: "/jobs", color: "text-status-orange-text" },
-    { label: "Revenue Collected", value: `$${(revenue._sum.total ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, icon: TrendingUp, href: "/invoices", color: "text-status-success-text" },
-    { label: "Unpaid Invoices", subtitle: overdueInvoiceCount > 0 ? `${overdueInvoiceCount} overdue` : undefined, value: `$${(openInvoices._sum.total ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, icon: Receipt, href: "/invoices", color: "text-status-danger-text" },
+    { label: "Total Customers", value: totalCustomers, icon: Users, href: "/customers", color: "text-status-info-text", trend: customersThisMonth > 0 ? `+${customersThisMonth} this month` : null, trendUp: true },
+    { label: "Active Jobs", subtitle: "Lead, Quoted, Scheduled & In Progress", value: activeJobs, icon: Briefcase, href: "/jobs", color: "text-status-orange-text", trend: activeJobsPctChange !== null && activeJobsPctChange !== 0 ? `${Math.abs(activeJobsPctChange)}% vs last month` : null, trendUp: activeJobsPctChange !== null ? activeJobsPctChange > 0 : null },
+    { label: "Revenue Collected", value: `$${(revenue._sum.total ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, icon: TrendingUp, href: "/invoices", color: "text-status-success-text", trend: revenuePctChange !== null && revenuePctChange !== 0 ? `${Math.abs(revenuePctChange)}% vs last month` : null, trendUp: revenuePctChange !== null ? revenuePctChange > 0 : null },
+    { label: "Unpaid Invoices", subtitle: overdueInvoiceCount > 0 ? `${overdueInvoiceCount} overdue` : undefined, value: `$${(openInvoices._sum.total ?? 0).toLocaleString("en-US", { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`, icon: Receipt, href: "/invoices", color: "text-status-danger-text", trend: null, trendUp: null },
   ];
 
   const monthlyRevenue = monthlyPaidInvoices.reduce((sum, inv) => sum + inv.total, 0);
@@ -192,13 +231,15 @@ export default async function DashboardPage() {
       {/* Page header */}
       <div className="mb-6 bg-muted/40 rounded-xl px-5 py-4 -mx-1">
         <h1 className="text-2xl sm:text-3xl font-bold">{getGreeting()}</h1>
-        <p className="text-sm text-muted-foreground mt-1">{format(now, "EEEE, MMMM d, yyyy")}</p>
+        <p className="text-sm text-muted-foreground mt-1">
+          {format(now, "EEEE, MMMM d, yyyy")} &middot; Updated {format(now, "h:mm a")}
+        </p>
       </div>
 
       {/* Getting Started — only shown for new users */}
       {isNewUser && (
-        <div className="bg-card rounded-xl shadow-sm border-2 border-dashed border-border p-6 mb-8">
-          <h2 className="font-semibold text-lg mb-1">Welcome to Mountain West Surface CRM</h2>
+        <div className="bg-card rounded-xl shadow-sm border-2 border-dashed border-border p-6 mb-6">
+          <h2 className="font-semibold text-base mb-1">Welcome to Mountain West Surface CRM</h2>
           <p className="text-sm text-muted-foreground mb-4">Here&apos;s how to get started. Follow these steps in order:</p>
           <div className="space-y-3">
             {gettingStartedSteps.map((step, i) => (
@@ -224,7 +265,7 @@ export default async function DashboardPage() {
       )}
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-8">
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-6">
         {stats.map((stat) => {
           const accent = ACCENT_COLORS[stat.label];
           return (
@@ -236,11 +277,55 @@ export default async function DashboardPage() {
                 <p className="text-2xl sm:text-3xl font-bold">{stat.value}</p>
                 <p className="text-sm text-muted-foreground mt-0.5">{stat.label}</p>
                 {"subtitle" in stat && stat.subtitle && <p className="text-xs text-muted-foreground mt-0.5">{stat.subtitle}</p>}
+                {stat.trend && (
+                  <p className={cn("text-xs mt-1 font-medium flex items-center gap-1",
+                    stat.trendUp ? "text-emerald-600" : "text-red-600"
+                  )}>
+                    {stat.trendUp ? <TrendingUp className="w-3 h-3" /> : <TrendingDown className="w-3 h-3" />}
+                    {stat.trend}
+                  </p>
+                )}
               </div>
             </Link>
           );
         })}
       </div>
+
+      {/* Outreach Pipeline */}
+      {(() => {
+        const outreachMap = Object.fromEntries(outreachCounts.map((c) => [c.status, c._count]));
+        const pipelineTotal = outreachPipelineValue._sum.estimatedValue ?? 0;
+        const totalOutreach = outreachCounts.reduce((sum, c) => sum + c._count, 0);
+        if (totalOutreach === 0) return null;
+        return (
+          <Link href="/outreach">
+            <div className="bg-card rounded-xl shadow-sm border-l-4 border-l-purple-500 p-5 mb-6 hover:shadow-md transition-shadow">
+              <div className="flex items-center gap-2 mb-3">
+                <Megaphone className="w-4 h-4 text-purple-500" />
+                <h2 className="font-semibold text-base">Outreach Pipeline</h2>
+              </div>
+              <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-sm">
+                <span>Prospects: <strong>{outreachMap["PROSPECT"] ?? 0}</strong></span>
+                <span>Contacted: <strong>{outreachMap["CONTACTED"] ?? 0}</strong></span>
+                <span>In Conversation: <strong>{outreachMap["IN_CONVERSATION"] ?? 0}</strong></span>
+                <span>Proposals: <strong>{outreachMap["PROPOSAL_SENT"] ?? 0}</strong></span>
+              </div>
+              <div className="flex flex-wrap items-center gap-4 mt-2 text-sm text-muted-foreground">
+                {pipelineTotal > 0 && (
+                  <span>
+                    Total pipeline value: <strong className="text-foreground">${pipelineTotal.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}/yr</strong>
+                  </span>
+                )}
+                {overdueFollowUps > 0 && (
+                  <span className="text-status-danger-text font-medium">
+                    {overdueFollowUps} follow-up{overdueFollowUps !== 1 ? "s" : ""} overdue
+                  </span>
+                )}
+              </div>
+            </div>
+          </Link>
+        );
+      })()}
 
       {/* Needs Attention */}
       {(unquotedLeads.length > 0 || staleQuotes.length > 0 || expiringQuotes.length > 0 || overdueInvoices.length > 0 || unbilledJobs.length > 0) && (
@@ -280,25 +365,26 @@ export default async function DashboardPage() {
             )}
             {staleQuotes.length > 0 && (
               <div>
-                <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1.5">Stale Quotes</p>
+                <div className="flex items-center mb-1.5">
+                  <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide">Stale Quotes</p>
+                  <ExpireAllStaleButton />
+                </div>
                 <div className="space-y-1">
                   {staleQuotes.map((quote) => (
-                    <Link key={quote.id} href={`/quotes/${quote.id}`}>
-                      <div className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-0 hover:bg-muted rounded-lg px-3 py-2 -mx-2 transition-colors group">
-                        <div className="flex items-center gap-2 min-w-0 sm:flex-1">
-                          <span className="text-sm font-medium">{quote.quoteNumber}</span>
-                          <span className="text-xs text-muted-foreground shrink-0">
-                            {quote.customer.firstName} {quote.customer.lastName}
-                          </span>
-                        </div>
-                        <div className="flex items-center gap-2 shrink-0 sm:ml-2">
-                          <span className="text-xs text-status-amber-text">
-                            sent {formatDistanceToNow(new Date(quote.updatedAt), { addSuffix: true })}
-                          </span>
-                          <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/50 opacity-0 group-hover:opacity-100 transition-opacity" />
-                        </div>
+                    <div key={quote.id} className="flex flex-col sm:flex-row sm:items-center gap-0.5 sm:gap-0 hover:bg-muted rounded-lg px-3 py-2 -mx-2 transition-colors group">
+                      <Link href={`/quotes/${quote.id}`} className="flex items-center gap-2 min-w-0 sm:flex-1">
+                        <span className="text-sm font-medium">{quote.quoteNumber}</span>
+                        <span className="text-xs text-muted-foreground shrink-0">
+                          {quote.customer.firstName} {quote.customer.lastName}
+                        </span>
+                      </Link>
+                      <div className="flex items-center gap-2 shrink-0 sm:ml-2">
+                        <span className="text-xs text-status-amber-text">
+                          sent {formatDistanceToNow(new Date(quote.updatedAt), { addSuffix: true })}
+                        </span>
+                        <ExpireQuoteButton quoteId={quote.id} />
                       </div>
-                    </Link>
+                    </div>
                   ))}
                 </div>
               </div>
@@ -446,7 +532,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Monthly Profitability */}
-      <div className="bg-card rounded-xl shadow-sm p-5 mb-6">
+      <div className="bg-card border rounded-xl shadow-sm p-5 mb-6">
         <h2 className="font-semibold text-base mb-1">This Month</h2>
         <p className="text-xs text-muted-foreground mb-3">{format(now, "MMMM yyyy")} — based on paid invoices and completed job costs.</p>
         <div className="grid grid-cols-2 sm:grid-cols-4 gap-4">
@@ -472,7 +558,7 @@ export default async function DashboardPage() {
       </div>
 
       {/* Job Status Breakdown — horizontal bar chart */}
-      <div className="bg-card rounded-xl shadow-sm p-5 mb-6">
+      <div className="bg-card border rounded-xl shadow-sm p-5 mb-6">
         <div className="flex items-center justify-between mb-4">
           <h2 className="font-semibold text-base">Jobs by Status</h2>
           <span className="text-xs text-muted-foreground">{totalJobs} total</span>
@@ -497,7 +583,7 @@ export default async function DashboardPage() {
 
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-6">
         {/* Upcoming Jobs */}
-        <div className="bg-card rounded-xl shadow-sm p-5">
+        <div className="bg-card border rounded-xl shadow-sm p-5">
           <div className="flex items-center gap-2 mb-4">
             <Clock className="w-4 h-4 text-muted-foreground" />
             <h2 className="font-semibold text-base">Upcoming Scheduled</h2>
@@ -529,7 +615,7 @@ export default async function DashboardPage() {
         </div>
 
         {/* Recent Jobs */}
-        <div className="bg-card rounded-xl shadow-sm p-5">
+        <div className="bg-card border rounded-xl shadow-sm p-5">
           <div className="flex items-center gap-2 mb-4">
             <FileText className="w-4 h-4 text-muted-foreground" />
             <h2 className="font-semibold text-base">Recent Jobs</h2>

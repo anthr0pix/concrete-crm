@@ -276,6 +276,15 @@ model AppSettings {
   resealReminderEnabled Boolean @default(true)
 }
 
+enum OutreachStatus {
+  PROSPECT
+  CONTACTED
+  IN_CONVERSATION
+  PROPOSAL_SENT
+  WON
+  LOST
+}
+
 // Phase 4: Expenses
 model Expense {
   id        String   @id @default(cuid())
@@ -295,4 +304,26 @@ model Expense {
   @@index([date])
   @@index([category])
   @@index([jobId])
+}
+
+// Outreach Pipeline — B2B property management sales
+model PropertyManager {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  companyName     String
+  contactName     String
+  phone           String?
+  email           String?
+  website         String?
+  propertyCount   Int?
+  estimatedValue  Float?
+
+  status          OutreachStatus @default(PROSPECT)
+  lastContactedAt DateTime?
+  nextFollowUpAt  DateTime?
+  notes           String?
+
+  @@index([status])
 }

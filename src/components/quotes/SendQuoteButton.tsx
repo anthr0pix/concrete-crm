@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { Send, Mail, CheckCircle } from "lucide-react";
+import { Send, Mail, CheckCircle, Loader2 } from "lucide-react";
 import { toast } from "sonner";
 
 interface Props {
@@ -78,7 +78,7 @@ export default function SendQuoteButton({ quoteId, customerEmail }: Props) {
       className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-md text-sm font-medium text-white bg-primary hover:bg-primary/90 transition-colors disabled:opacity-60"
       title={`Send quote to ${customerEmail}`}
     >
-      <Send className="w-3.5 h-3.5" />
+      {state === "sending" ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Send className="w-3.5 h-3.5" />}
       {state === "sending" ? "Sending..." : "Send"}
     </button>
   );

@@ -5,6 +5,7 @@ import { Button } from "@/components/ui/button";
 import { User, MapPin, Calendar, Ruler, Phone, Navigation, FileText, Receipt, Camera, DollarSign, Clock } from "lucide-react";
 import Breadcrumbs from "@/components/layout/Breadcrumbs";
 import { SERVICE_TYPE_LABELS } from "@/types";
+import { formatPhone } from "@/lib/utils";
 import { format } from "date-fns";
 import PhotoUpload from "@/components/jobs/PhotoUpload";
 import JobDetailActions from "@/components/jobs/JobDetailActions";
@@ -62,14 +63,14 @@ export default async function JobDetailPage({
 
       {/* Quick actions — all jobs with address/phone */}
       {(job.customer.phone || jobAddress) && (
-        <div className="flex flex-wrap items-center gap-3 bg-card rounded-xl shadow-sm px-4 py-3 mb-6">
+        <div className="flex flex-wrap items-center gap-3 bg-card border rounded-xl shadow-sm px-4 py-3 mb-6">
           {(job.status === "SCHEDULED" || job.status === "IN_PROGRESS") && (
             <MarkCompleteButton jobId={job.id} />
           )}
           {job.customer.phone && (
             <a href={`tel:${job.customer.phone}`}>
               <Button size="sm" variant="outline">
-                <Phone className="w-4 h-4 mr-1.5" /> Call Customer
+                <Phone className="w-4 h-4 mr-1.5" /> {formatPhone(job.customer.phone)}
               </Button>
             </a>
           )}
@@ -182,7 +183,7 @@ export default async function JobDetailPage({
       )}
 
       {/* Photos */}
-      <div className="bg-card rounded-xl shadow-sm p-4 sm:p-6 mb-6">
+      <div className="bg-card border rounded-xl shadow-sm p-4 sm:p-6 mb-6">
         <div className="flex items-center gap-2 mb-4 border-b pb-2">
           <h2 className="font-semibold text-base">Photos</h2>
           <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full">{job.photos.length}</span>
@@ -197,7 +198,7 @@ export default async function JobDetailPage({
       </div>
 
       {/* Expenses */}
-      <div className="bg-card rounded-xl shadow-sm p-4 mb-6">
+      <div className="bg-card border rounded-xl shadow-sm p-4 mb-6">
         <div className="flex items-center justify-between mb-3 border-b pb-2">
           <div className="flex items-center gap-2">
             <h2 className="font-semibold text-base">Expenses</h2>
@@ -229,7 +230,7 @@ export default async function JobDetailPage({
 
       {/* Quotes & Invoices */}
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-        <div className="bg-card rounded-xl shadow-sm p-4">
+        <div className="bg-card border rounded-xl shadow-sm p-4">
           <div className="flex items-center justify-between mb-3 border-b pb-2">
             <div className="flex items-center gap-2">
               <h2 className="font-semibold text-base">Quotes</h2>
@@ -256,7 +257,7 @@ export default async function JobDetailPage({
           )}
         </div>
 
-        <div className="bg-card rounded-xl shadow-sm p-4">
+        <div className="bg-card border rounded-xl shadow-sm p-4">
           <div className="flex items-center justify-between mb-3 border-b pb-2">
             <div className="flex items-center gap-2">
               <h2 className="font-semibold text-base">Invoices</h2>

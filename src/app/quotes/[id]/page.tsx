@@ -3,13 +3,7 @@ import { notFound } from "next/navigation";
 import Link from "next/link";
 import Breadcrumbs from "@/components/layout/Breadcrumbs";
 import { format } from "date-fns";
-import QuoteStatusSelect from "@/components/quotes/QuoteStatusSelect";
-import SendQuoteButton from "@/components/quotes/SendQuoteButton";
-import ConvertToInvoiceButton from "@/components/quotes/ConvertToInvoiceButton";
-import DuplicateQuoteButton from "@/components/quotes/DuplicateQuoteButton";
-import DeleteQuoteButton from "@/components/quotes/DeleteQuoteButton";
-import { Download } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import QuoteDetailActions from "@/components/quotes/QuoteDetailActions";
 
 export const dynamic = "force-dynamic";
 
@@ -26,13 +20,13 @@ export default async function QuoteDetailPage({
   if (!quote) notFound();
 
   return (
-    <div className="p-6 max-w-3xl mx-auto">
+    <div className="p-4 sm:p-6 max-w-3xl mx-auto">
       <Breadcrumbs items={[{ label: "Quotes", href: "/quotes" }, { label: quote.quoteNumber }]} />
 
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 mb-6">
         <div>
-          <h1 className="text-3xl font-bold">{quote.quoteNumber}</h1>
+          <h1 className="text-2xl sm:text-3xl font-bold">{quote.quoteNumber}</h1>
           <p className="text-muted-foreground text-sm mt-1">
             <Link href={`/customers/${quote.customer.id}`} className="hover:underline">
               {quote.customer.firstName} {quote.customer.lastName}
@@ -45,21 +39,7 @@ export default async function QuoteDetailPage({
             </p>
           )}
         </div>
-        <div className="flex flex-wrap items-center gap-2 bg-card rounded-xl shadow-sm px-3 py-2">
-          <QuoteStatusSelect quoteId={quote.id} currentStatus={quote.status} />
-          <SendQuoteButton quoteId={quote.id} customerEmail={quote.customer.email} />
-          <a href={`/api/quotes/${quote.id}/pdf`} download>
-            <Button variant="outline" size="sm">
-              <Download className="w-4 h-4 mr-1.5" /> PDF
-            </Button>
-          </a>
-          <div className="hidden sm:block w-px h-6 bg-border" />
-          <DuplicateQuoteButton quoteId={quote.id} />
-          {quote.status === "ACCEPTED" && (
-            <ConvertToInvoiceButton quoteId={quote.id} />
-          )}
-          <DeleteQuoteButton quoteId={quote.id} />
-        </div>
+        <QuoteDetailActions quoteId={quote.id} status={quote.status} customerEmail={quote.customer.email} />
       </div>
 
       {/* Workflow hint */}
@@ -75,9 +55,9 @@ export default async function QuoteDetailPage({
       )}
 
       {/* Line Items — Desktop Table */}
-      <div className="hidden sm:block bg-card rounded-xl shadow-sm overflow-hidden mb-4">
+      <div className="hidden sm:block bg-card border rounded-xl shadow-sm overflow-hidden mb-4">
         <table className="w-full text-sm">
-          <thead className="bg-muted border-b">
+          <thead className="bg-muted/80 border-b-2 border-border">
             <tr>
               <th className="text-left px-4 py-3 font-medium text-muted-foreground">Description</th>
               <th className="text-right px-4 py-3 font-medium text-muted-foreground">Sq Ft</th>
@@ -101,7 +81,7 @@ export default async function QuoteDetailPage({
       {/* Line Items — Mobile Cards */}
       <div className="sm:hidden space-y-3 mb-4">
         {quote.lineItems.map((item) => (
-          <div key={item.id} className="bg-card rounded-xl shadow-sm p-4">
+          <div key={item.id} className="bg-card border rounded-xl shadow-sm p-4">
             <p className="font-medium text-sm mb-2">{item.description}</p>
             <div className="flex justify-between text-sm text-muted-foreground">
               <span>{item.quantity} sq ft</span>
@@ -113,7 +93,7 @@ export default async function QuoteDetailPage({
       </div>
 
       {/* Totals */}
-      <div className="max-w-xs ml-auto bg-card rounded-xl shadow-sm p-4 space-y-2 mb-6">
+      <div className="sm:max-w-xs sm:ml-auto bg-card border rounded-xl shadow-sm p-4 space-y-2 mb-6">
         <div className="flex justify-between text-sm">
           <span className="text-muted-foreground">Subtotal</span>
           <span>${quote.subtotal.toFixed(2)}</span>
@@ -155,7 +135,7 @@ export default async function QuoteDetailPage({
       {/* Meta */}
       <div className="text-sm text-muted-foreground space-y-1">
         {quote.validUntil && <p>Valid until: {format(new Date(quote.validUntil), "MMMM d, yyyy")}</p>}
-        {quote.notes && <p className="text-muted-foreground bg-card rounded-xl shadow-sm p-3 mt-3">{quote.notes}</p>}
+        {quote.notes && <p className="text-muted-foreground bg-card border rounded-xl shadow-sm p-3 mt-3">{quote.notes}</p>}
       </div>
     </div>
   );

@@ -49,13 +49,13 @@ export default function JobStatusSelect({ jobId, currentStatus }: Props) {
         value={status}
         disabled={saving}
         onChange={(e) => onChange(e.target.value as JobStatus)}
-        className={`text-sm font-medium px-3 py-1.5 rounded-md border-0 focus:outline-none focus:ring-2 focus:ring-slate-900 cursor-pointer ${STATUS_COLORS[status]}`}
+        className={`text-sm font-medium px-3 py-1.5 rounded-md border-0 focus:outline-none focus:ring-2 focus:ring-ring cursor-pointer ${STATUS_COLORS[status]}`}
       >
         {Object.entries(JOB_STATUS_LABELS).map(([val, label]) => (
           <option key={val} value={val}>{label}</option>
         ))}
       </select>
-      <p className="text-xs text-slate-400 mt-1">{STATUS_DESCRIPTIONS[status]}</p>
+      <p className="text-xs text-muted-foreground mt-1">{STATUS_DESCRIPTIONS[status]}</p>
     </div>
   );
 }

@@ -25,7 +25,7 @@ export default function DeleteQuoteButton({ quoteId }: { quoteId: string }) {
   if (state === "confirming") {
     return (
       <div className="flex items-center gap-2">
-        <span className="text-sm text-slate-600">Delete this quote?</span>
+        <span className="text-sm text-muted-foreground">Delete this quote?</span>
         <Button size="sm" variant="destructive" onClick={handleDelete}>Yes, delete</Button>
         <Button size="sm" variant="outline" onClick={() => setState("idle")}>Cancel</Button>
       </div>

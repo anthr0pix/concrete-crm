@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { CheckCircle } from "lucide-react";
+import { CheckCircle, Loader2 } from "lucide-react";
 
 export default function MarkPaidButton({ invoiceId }: { invoiceId: string }) {
   const router = useRouter();
@@ -24,7 +24,7 @@ export default function MarkPaidButton({ invoiceId }: { invoiceId: string }) {
 
   return (
     <Button size="sm" onClick={markPaid} disabled={loading} className="bg-status-success-text text-white hover:bg-status-success-text/90">
-      <CheckCircle className="w-3.5 h-3.5 mr-1" />
+      {loading ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : <CheckCircle className="w-3.5 h-3.5 mr-1" />}
       {loading ? "Updating..." : "Mark as Paid"}
     </Button>
   );

@@ -1,43 +1,33 @@
-import { Suspense } from "react";
 import { prisma } from "@/lib/prisma";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { Plus, Search, FileText } from "lucide-react";
+import { Input } from "@/components/ui/input";
+import { Plus, Search, FileText, User, Calendar, ArrowRight } from "lucide-react";
 import { QUOTE_STATUS_LABELS, STATUS_COLORS } from "@/types";
 import { QuoteStatus } from "@prisma/client";
 import { format, subDays } from "date-fns";
-import { cn } from "@/lib/utils";
-import SortSelect from "@/components/ui/sort-select";
-import Pagination from "@/components/ui/pagination";
+import { cn, formatCurrency } from "@/lib/utils";
+import { ExpireQuoteButton, ExpireAllStaleButton } from "@/components/quotes/ExpireQuoteButton";
 
 export const dynamic = "force-dynamic";
 
-const PAGE_SIZE = 20;
 const STATUS_TABS = ["ALL", ...Object.keys(QUOTE_STATUS_LABELS)] as const;
 
-const SORT_OPTIONS = [
-  { value: "newest", label: "Newest" },
-  { value: "oldest", label: "Oldest" },
-  { value: "amount_high", label: "Amount High\u2192Low" },
-  { value: "amount_low", label: "Amount Low\u2192High" },
-];
-
-const SORT_MAP: Record<string, object> = {
-  newest: { createdAt: "desc" },
-  oldest: { createdAt: "asc" },
-  amount_high: { total: "desc" },
-  amount_low: { total: "asc" },
+const STATUS_BORDER: Record<string, string> = {
+  DRAFT: "border-l-amber-400",
+  SENT: "border-l-blue-400",
+  ACCEPTED: "border-l-green-400",
+  DECLINED: "border-l-red-400",
+  EXPIRED: "border-l-orange-400",
 };
 
 export default async function QuotesPage({
   searchParams,
 }: {
-  searchParams: Promise<{ search?: string; status?: string; sort?: string; page?: string }>;
+  searchParams: Promise<{ search?: string; status?: string }>;
 }) {
-  const { search, status, sort, page } = await searchParams;
+  const { search, status } = await searchParams;
   const activeStatus = status && status !== "ALL" ? (status as QuoteStatus) : undefined;
-  const currentPage = Math.max(1, parseInt(page || "1", 10) || 1);
-  const orderBy = SORT_MAP[sort || "newest"] || SORT_MAP.newest;
 
   const where = {
     ...(activeStatus ? { status: activeStatus } : {}),
@@ -52,19 +42,31 @@ export default async function QuotesPage({
       : {}),
   };
 
-  const [quotes, totalCount] = await Promise.all([
+  const now = new Date();
+  const [quotes, statusCounts, staleCount] = await Promise.all([
     prisma.quote.findMany({
       where,
-      orderBy,
-      take: PAGE_SIZE,
-      skip: (currentPage - 1) * PAGE_SIZE,
+      orderBy: { createdAt: "desc" },
       include: {
         customer: { select: { firstName: true, lastName: true } },
         lineItems: true,
+        job: { select: { id: true, title: true } },
       },
     }),
-    prisma.quote.count({ where }),
+    prisma.quote.groupBy({ by: ["status"], _count: true }),
+    prisma.quote.count({
+      where: {
+        status: "SENT",
+        OR: [
+          { lastFollowUpAt: { not: null, lt: subDays(now, 7) } },
+          { lastFollowUpAt: null, updatedAt: { lt: subDays(now, 7) } },
+        ],
+      },
+    }),
   ]);
+
+  const countMap = Object.fromEntries(statusCounts.map((s) => [s.status, s._count]));
+  const totalCount = statusCounts.reduce((sum, s) => sum + s._count, 0);
 
   return (
     <div className="p-4 sm:p-6 max-w-5xl mx-auto">
@@ -78,24 +80,20 @@ export default async function QuotesPage({
         </Link>
       </div>
 
-      {/* Search + Sort */}
-      <div className="flex gap-3 mb-4">
-        <form className="flex-1">
+      {/* Search */}
+      <div className="mb-4">
+        <form>
           {activeStatus && <input type="hidden" name="status" value={activeStatus} />}
-          {sort && <input type="hidden" name="sort" value={sort} />}
           <div className="relative">
             <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground" />
-            <input
+            <Input
               name="search"
               defaultValue={search}
               placeholder="Search by quote number or customer name..."
-              className="w-full border rounded-md pl-9 pr-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-ring"
+              className="pl-9"
             />
           </div>
         </form>
-        <Suspense fallback={<div className="border rounded-md px-2 py-2 sm:py-1.5 text-sm w-28 bg-card" />}>
-          <SortSelect options={SORT_OPTIONS} basePath="/quotes" />
-        </Suspense>
       </div>
 
       {/* Status filter tabs */}
@@ -104,26 +102,36 @@ export default async function QuotesPage({
           const params = new URLSearchParams();
           if (s !== "ALL") params.set("status", s);
           if (search) params.set("search", search);
-          if (sort) params.set("sort", sort);
           const href = params.toString() ? `/quotes?${params}` : "/quotes";
           const isActive = (s === "ALL" && !activeStatus) || s === activeStatus;
+          const count = s === "ALL" ? totalCount : (countMap[s] ?? 0);
           return (
             <Link key={s} href={href}>
               <button
                 className={cn(
-                  "px-3 py-2 sm:py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition-all duration-150",
+                  "px-3 py-1.5 rounded-md text-sm font-medium whitespace-nowrap transition-all duration-150",
                   isActive
-                    ? "text-white"
-                    : "bg-card border text-muted-foreground hover:bg-muted"
+                    ? "bg-card text-foreground shadow-sm border"
+                    : "text-muted-foreground hover:text-foreground hover:bg-muted"
                 )}
-                style={isActive ? { background: "linear-gradient(135deg, var(--mws-navy) 0%, var(--secondary) 100%)" } : {}}
               >
                 {s === "ALL" ? "All" : QUOTE_STATUS_LABELS[s]}
+                <span className="ml-1.5 text-xs text-muted-foreground">{count}</span>
               </button>
             </Link>
           );
         })}
       </div>
+
+      {/* Stale banner */}
+      {staleCount > 0 && !activeStatus && (
+        <div className="flex items-center gap-2 bg-status-amber-bg rounded-lg px-4 py-2.5 mb-4">
+          <span className="text-sm text-status-amber-text">
+            <strong>{staleCount}</strong> stale quote{staleCount !== 1 ? "s" : ""} — sent over 7 days ago with no response
+          </span>
+          <ExpireAllStaleButton />
+        </div>
+      )}
 
       {quotes.length === 0 ? (
         <div className="text-center py-20 rounded-xl border-2 border-dashed border-border">
@@ -139,48 +147,87 @@ export default async function QuotesPage({
           )}
         </div>
       ) : (
-        <div className="space-y-2">
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {quotes.map((q) => {
-            const isStale = q.status === "SENT" && new Date(q.updatedAt) < subDays(new Date(), 7);
+            const lastOutreach = q.lastFollowUpAt ?? q.updatedAt;
+            const isStale = q.status === "SENT" && new Date(lastOutreach) < subDays(now, 7);
+            const borderColor = STATUS_BORDER[q.status] || "border-l-slate-400";
+
             return (
-            <Link key={q.id} href={`/quotes/${q.id}`}>
-              <div className="flex items-center justify-between bg-card rounded-xl shadow-sm px-5 py-4 hover:shadow-md hover:-translate-y-px active:scale-[0.98] transition-all duration-150 cursor-pointer">
-                <div>
-                  <div className="flex items-center gap-3">
-                    <span className="font-semibold">{q.quoteNumber}</span>
-                    <span className={`text-xs font-semibold px-2.5 py-1 rounded-full ${STATUS_COLORS[q.status]}`}>
-                      {QUOTE_STATUS_LABELS[q.status]}
-                    </span>
-                    {isStale && (
-                      <span className="text-xs font-semibold px-2.5 py-1 rounded-full bg-status-amber-bg text-status-amber-text">
-                        Stale
+              <div key={q.id} className="relative group">
+                <Link href={`/quotes/${q.id}`}>
+                  <div className={`bg-card border border-l-4 ${borderColor} rounded-xl shadow-sm p-4 hover:shadow-md hover:-translate-y-px active:scale-[0.98] transition-all duration-150 cursor-pointer h-full flex flex-col`}>
+                    {/* Header: quote number + status */}
+                    <div className="flex items-center justify-between mb-3">
+                      <span className="font-bold text-foreground">{q.quoteNumber}</span>
+                      <div className="flex items-center gap-1.5">
+                        {isStale && (
+                          <span className="text-[10px] font-medium px-1.5 py-0.5 rounded-full bg-status-amber-bg text-status-amber-text">
+                            Stale
+                          </span>
+                        )}
+                        <span className={`text-[10px] font-medium px-1.5 py-0.5 rounded-full ${STATUS_COLORS[q.status]}`}>
+                          {QUOTE_STATUS_LABELS[q.status]}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Customer + job */}
+                    <div className="space-y-1 mb-3">
+                      <p className="flex items-center gap-1.5 text-sm text-muted-foreground">
+                        <User className="w-3.5 h-3.5 shrink-0" />
+                        <span className="truncate font-medium text-foreground">
+                          {q.customer.firstName} {q.customer.lastName}
+                        </span>
+                      </p>
+                      {q.job && (
+                        <p className="text-xs text-muted-foreground truncate pl-5">
+                          {q.job.title}
+                        </p>
+                      )}
+                    </div>
+
+                    {/* Amount */}
+                    <div className="mb-3">
+                      <p className="text-2xl font-bold text-foreground">{formatCurrency(q.total)}</p>
+                      <p className="text-xs text-muted-foreground">
+                        {q.lineItems.length} line item{q.lineItems.length !== 1 ? "s" : ""}
+                      </p>
+                    </div>
+
+                    {/* Footer: date + valid until */}
+                    <div className="flex items-center justify-between mt-auto pt-3 border-t border-border">
+                      <span className="flex items-center gap-1 text-xs text-muted-foreground">
+                        <Calendar className="w-3 h-3" />
+                        {format(new Date(q.createdAt), "MMM d, yyyy")}
                       </span>
-                    )}
+                      {q.validUntil && (
+                        <span className={cn(
+                          "text-xs",
+                          new Date(q.validUntil) < now
+                            ? "text-status-danger-text"
+                            : "text-muted-foreground"
+                        )}>
+                          {new Date(q.validUntil) < now ? "Expired " : "Valid until "}
+                          {format(new Date(q.validUntil), "MMM d")}
+                        </span>
+                      )}
+                      <ArrowRight className="w-3.5 h-3.5 text-muted-foreground/30 group-hover:text-muted-foreground transition-colors" />
+                    </div>
                   </div>
-                  <p className="text-sm text-muted-foreground mt-0.5">
-                    {q.customer.firstName} {q.customer.lastName} · {format(new Date(q.createdAt), "MMM d, yyyy")}
-                  </p>
-                </div>
-                <div className="text-right">
-                  <p className="font-bold text-lg">${q.total.toFixed(2)}</p>
-                  {q.validUntil && (
-                    <p className="text-xs text-muted-foreground">Valid until {format(new Date(q.validUntil), "MMM d")}</p>
-                  )}
-                </div>
+                </Link>
+
+                {/* Expire button for stale quotes */}
+                {isStale && (
+                  <div className="absolute top-2 right-2">
+                    <ExpireQuoteButton quoteId={q.id} />
+                  </div>
+                )}
               </div>
-            </Link>
             );
           })}
         </div>
       )}
-
-      <Pagination
-        currentPage={currentPage}
-        totalCount={totalCount}
-        pageSize={PAGE_SIZE}
-        baseUrl="/quotes"
-        searchParams={{ search, status, sort }}
-      />
     </div>
   );
 }

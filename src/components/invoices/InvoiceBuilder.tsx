@@ -79,7 +79,7 @@ export default function InvoiceBuilder({ customers, jobs = [], defaultCustomerId
   };
 
   return (
-    <form onSubmit={onSubmit} className="bg-card rounded-xl shadow-sm p-4 sm:p-6 space-y-6">
+    <form onSubmit={onSubmit} className="bg-card border rounded-xl shadow-sm p-4 sm:p-6 space-y-6">
       <p className="text-xs text-muted-foreground"><span className="text-destructive">*</span> Required</p>
       <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
         <div className="space-y-1">

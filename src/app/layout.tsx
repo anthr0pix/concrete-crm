@@ -1,4 +1,4 @@
-import type { Metadata } from "next";
+import type { Metadata, Viewport } from "next";
 import { Montserrat, Inter } from "next/font/google";
 import "./globals.css";
 import { Toaster } from "@/components/ui/sonner";
@@ -17,9 +17,24 @@ const inter = Inter({
   display: "swap",
 });
 
+export const viewport: Viewport = {
+  width: "device-width",
+  initialScale: 1,
+  viewportFit: "cover",
+};
+
 export const metadata: Metadata = {
   title: "Mountain West Surface — CRM",
   description: "Business management for Mountain West Surface LLC",
+  manifest: "/manifest.json",
+  appleWebApp: {
+    capable: true,
+    statusBarStyle: "black-translucent",
+    title: "MWS CRM",
+  },
+  icons: {
+    apple: "/logo.png",
+  },
 };
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
@@ -28,7 +43,7 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <body className={`${montserrat.variable} ${inter.variable} font-[var(--font-sans)] antialiased`}>
         <ThemeProvider>
           <AppShell>{children}</AppShell>
-          <Toaster richColors position="top-right" />
+          <Toaster richColors position="bottom-center" offset="80px" />
         </ThemeProvider>
       </body>
     </html>

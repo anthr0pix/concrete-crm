@@ -29,7 +29,7 @@ export default function Pagination({ currentPage, totalCount, pageSize, baseUrl,
 
   return (
     <div className="flex items-center justify-between mt-6">
-      <p className="text-sm text-slate-500">
+      <p className="text-sm text-muted-foreground">
         Showing {start}–{end} of {totalCount}
       </p>
       <div className="flex items-center gap-2">
@@ -44,7 +44,7 @@ export default function Pagination({ currentPage, totalCount, pageSize, baseUrl,
             <ChevronLeft className="w-4 h-4 mr-1" /> Previous
           </Button>
         )}
-        <span className="text-sm text-slate-600 px-2">
+        <span className="text-sm text-muted-foreground px-2">
           {currentPage} / {totalPages}
         </span>
         {currentPage < totalPages ? (

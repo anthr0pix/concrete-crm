@@ -1,13 +1,29 @@
-import { redirect } from "next/navigation";
+import { prisma } from "@/lib/prisma";
+import Link from "next/link";
+import { ChevronLeft } from "lucide-react";
+import InvoiceBuilder from "@/components/invoices/InvoiceBuilder";
 
-// Invoice creation is primarily done by converting an accepted quote.
-// For direct invoice creation, redirect to quotes.
-export default function NewInvoicePage({
+export const dynamic = "force-dynamic";
+
+export default async function NewInvoicePage({
   searchParams,
 }: {
-  searchParams: Promise<{ jobId?: string }>;
+  searchParams: Promise<{ customerId?: string; jobId?: string }>;
 }) {
-  // Quick redirect — in a future iteration this can be a full invoice builder
-  void searchParams;
-  redirect("/quotes/new");
+  const { customerId, jobId } = await searchParams;
+
+  const [customers, jobs] = await Promise.all([
+    prisma.customer.findMany({ orderBy: { lastName: "asc" }, select: { id: true, firstName: true, lastName: true } }),
+    prisma.job.findMany({ orderBy: { createdAt: "desc" }, select: { id: true, title: true } }),
+  ]);
+
+  return (
+    <div className="p-4 sm:p-6 max-w-3xl mx-auto">
+      <Link href="/invoices" className="flex items-center gap-1 text-sm text-muted-foreground hover:text-foreground mb-6">
+        <ChevronLeft className="w-4 h-4" /> Back to Invoices
+      </Link>
+      <h1 className="text-2xl font-bold mb-6">New Invoice</h1>
+      <InvoiceBuilder customers={customers} jobs={jobs} defaultCustomerId={customerId} defaultJobId={jobId} />
+    </div>
+  );
 }

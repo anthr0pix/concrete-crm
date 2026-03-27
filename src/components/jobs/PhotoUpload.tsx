@@ -97,7 +97,7 @@ export default function PhotoUpload({ jobId, photos }: Props) {
   return (
     <div className="space-y-6">
       {/* Upload controls */}
-      <div className="flex items-center gap-3">
+      <div className="flex flex-wrap items-center gap-3">
         <div className="flex rounded-md border overflow-hidden">
           <button
             onClick={() => setIsBefore(true)}
@@ -128,10 +128,10 @@ export default function PhotoUpload({ jobId, photos }: Props) {
           className="hidden"
           onChange={(e) => { const f = e.target.files?.[0]; if (f) upload(f); }}
         />
-        <span className="text-xs text-muted-foreground">Select &quot;Before&quot; or &quot;After&quot;, then upload a photo.</span>
+        <span className="text-xs text-muted-foreground hidden sm:inline">Select &quot;Before&quot; or &quot;After&quot;, then upload a photo.</span>
 
         {/* View mode toggle */}
-        <div className="flex rounded-md border overflow-hidden ml-auto">
+        <div className="flex rounded-md border overflow-hidden sm:ml-auto">
           <button
             onClick={() => setViewMode("grid")}
             className={`px-3 py-1.5 text-sm font-medium flex items-center gap-1 ${viewMode === "grid" ? "bg-foreground text-background" : "bg-card text-muted-foreground"}`}

@@ -2,15 +2,7 @@
 
 import { useState } from "react";
 import { EXPENSE_CATEGORY_LABELS } from "@/types";
-
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(amount);
-}
+import { formatCurrency } from "@/lib/utils";
 
 const QUARTER_LABELS = ["Q1 (Jan - Mar)", "Q2 (Apr - Jun)", "Q3 (Jul - Sep)", "Q4 (Oct - Dec)"];
 

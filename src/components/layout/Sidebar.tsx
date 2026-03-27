@@ -1,5 +1,6 @@
 "use client";
 
+import { useState, useEffect } from "react";
 import Link from "next/link";
 import Image from "next/image";
 import { usePathname } from "next/navigation";
@@ -16,22 +17,63 @@ import {
   Settings,
   LogOut,
   X,
+  Search,
+  Megaphone,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ThemeToggle";
 
-const nav = [
-  { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
-  { href: "/pipeline", label: "Pipeline", icon: Kanban },
-  { href: "/customers", label: "Customers", icon: Users },
-  { href: "/jobs", label: "Jobs", icon: Briefcase },
-  { href: "/quotes", label: "Quotes", icon: FileText },
-  { href: "/schedule", label: "Schedule", icon: CalendarDays },
-  { href: "/invoices", label: "Invoices", icon: Receipt },
-  { href: "/expenses", label: "Expenses", icon: DollarSign },
-  { href: "/reports", label: "Reports", icon: BarChart3 },
-  { href: "/settings", label: "Settings", icon: Settings },
+interface NavItem {
+  href: string;
+  label: string;
+  icon: React.ComponentType<{ className?: string }>;
+  badgeKey?: "unquotedLeads" | "staleQuotes" | "overdueInvoices" | "overdueFollowUps";
+}
+
+interface NavGroup {
+  title: string;
+  items: NavItem[];
+}
+
+const navGroups: NavGroup[] = [
+  {
+    title: "Overview",
+    items: [
+      { href: "/dashboard", label: "Dashboard", icon: LayoutDashboard },
+    ],
+  },
+  {
+    title: "Sales",
+    items: [
+      { href: "/outreach", label: "Outreach", icon: Megaphone, badgeKey: "overdueFollowUps" },
+      { href: "/pipeline", label: "Pipeline", icon: Kanban },
+    ],
+  },
+  {
+    title: "CRM",
+    items: [
+      { href: "/customers", label: "Customers", icon: Users, badgeKey: "unquotedLeads" },
+      { href: "/jobs", label: "Jobs", icon: Briefcase },
+      { href: "/quotes", label: "Quotes", icon: FileText, badgeKey: "staleQuotes" },
+      { href: "/schedule", label: "Schedule", icon: CalendarDays },
+    ],
+  },
+  {
+    title: "Finance",
+    items: [
+      { href: "/invoices", label: "Invoices", icon: Receipt, badgeKey: "overdueInvoices" },
+      { href: "/expenses", label: "Expenses", icon: DollarSign },
+      { href: "/reports", label: "Reports", icon: BarChart3 },
+    ],
+  },
 ];
+
+interface Badges {
+  unquotedLeads: number;
+  staleQuotes: number;
+  overdueInvoices: number;
+  overdueFollowUps: number;
+}
 
 interface SidebarProps {
   open?: boolean;
@@ -40,6 +82,25 @@ interface SidebarProps {
 
 export default function Sidebar({ open = false, onClose }: SidebarProps) {
   const pathname = usePathname();
+  const [badges, setBadges] = useState<Badges>({ unquotedLeads: 0, staleQuotes: 0, overdueInvoices: 0, overdueFollowUps: 0 });
+
+  useEffect(() => {
+    const fetchBadges = async () => {
+      try {
+        const res = await fetch("/api/sidebar/badges");
+        if (res.ok) {
+          const data = await res.json();
+          setBadges(data);
+        }
+      } catch {
+        // silently fail
+      }
+    };
+
+    fetchBadges();
+    const interval = setInterval(fetchBadges, 60_000);
+    return () => clearInterval(interval);
+  }, []);
 
   return (
     <aside
@@ -68,41 +129,80 @@ export default function Sidebar({ open = false, onClose }: SidebarProps) {
         {/* Close button — mobile only */}
         <button
           onClick={onClose}
-          className="md:hidden p-1 rounded text-white/80 hover:text-white transition-colors"
+          className="md:hidden p-2 rounded text-white/80 hover:text-white transition-colors"
           aria-label="Close menu"
         >
-          <X className="w-4 h-4" />
+          <X className="w-5 h-5" />
+        </button>
+      </div>
+
+      {/* Search trigger */}
+      <div className="px-3 pt-4 pb-2">
+        <button
+          onClick={() => {
+            document.dispatchEvent(
+              new KeyboardEvent("keydown", { key: "k", metaKey: true })
+            );
+          }}
+          className="flex items-center gap-3 w-full px-3 py-2 rounded-lg text-sm text-white/50 hover:text-white hover:bg-white/[0.08] transition-all duration-150 border border-white/10"
+        >
+          <Search className="w-4 h-4 shrink-0" />
+          <span>Search...</span>
+          <kbd className="ml-auto text-[10px] font-medium bg-white/10 rounded px-1.5 py-0.5">⌘K</kbd>
         </button>
       </div>
 
       {/* Navigation */}
-      <nav className="flex-1 px-3 py-4">
-        <p className="px-3 mb-2 text-[10px] font-semibold uppercase tracking-widest text-white/30">Menu</p>
-        <div className="space-y-0.5">
-          {nav.map(({ href, label, icon: Icon }) => {
-            const isActive = pathname.startsWith(href);
-            return (
-              <Link
-                key={href}
-                href={href}
-                className={cn(
-                  "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150",
-                  isActive
-                    ? "text-white shadow-[0_0_12px_rgba(233,69,96,0.3)]"
-                    : "text-white/70 hover:text-white hover:bg-white/[0.08]"
-                )}
-                style={isActive ? { background: "linear-gradient(135deg, #e94560 0%, #d63851 100%)" } : {}}
-              >
-                <Icon className="w-[18px] h-[18px] shrink-0" />
-                {label}
-              </Link>
-            );
-          })}
-        </div>
+      <nav className="flex-1 px-3 py-2 space-y-4">
+        {navGroups.map((group) => (
+          <div key={group.title}>
+            <p className="px-3 mb-1.5 text-[10px] font-semibold uppercase tracking-widest text-white/30">{group.title}</p>
+            <div className="space-y-0.5">
+              {group.items.map(({ href, label, icon: Icon, badgeKey }) => {
+                const isActive = pathname.startsWith(href);
+                const count = badgeKey ? badges[badgeKey] : 0;
+                return (
+                  <Link
+                    key={href}
+                    href={href}
+                    className={cn(
+                      "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150",
+                      isActive
+                        ? "text-white shadow-[0_0_12px_rgba(233,69,96,0.3)]"
+                        : "text-white/70 hover:text-white hover:bg-white/[0.08]"
+                    )}
+                    style={isActive ? { background: "linear-gradient(135deg, #e94560 0%, #d63851 100%)" } : {}}
+                  >
+                    <Icon className="w-[18px] h-[18px] shrink-0" />
+                    {label}
+                    {count > 0 && (
+                      <span className="ml-auto text-[10px] font-bold bg-red-500 text-white rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1">
+                        {count}
+                      </span>
+                    )}
+                  </Link>
+                );
+              })}
+            </div>
+          </div>
+        ))}
       </nav>
 
-      {/* Theme Toggle + Sign Out */}
+      {/* Settings + Theme Toggle + Sign Out */}
       <div className="px-3 py-4 space-y-0.5" style={{ borderTop: "1px solid rgba(255,255,255,0.08)" }}>
+        <Link
+          href="/settings"
+          className={cn(
+            "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-all duration-150",
+            pathname.startsWith("/settings")
+              ? "text-white shadow-[0_0_12px_rgba(233,69,96,0.3)]"
+              : "text-white/70 hover:text-white hover:bg-white/[0.08]"
+          )}
+          style={pathname.startsWith("/settings") ? { background: "linear-gradient(135deg, #e94560 0%, #d63851 100%)" } : {}}
+        >
+          <Settings className="w-[18px] h-[18px] shrink-0" />
+          Settings
+        </Link>
         <ThemeToggle />
         <form action="/api/auth/logout" method="POST">
           <button

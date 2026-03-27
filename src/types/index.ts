@@ -1,5 +1,5 @@
-export type { Customer, Job, JobPhoto, Quote, QuoteLineItem, Invoice, InvoiceLineItem, PaymentEvent, AppSettings, Expense } from "@prisma/client";
-export { JobStatus, QuoteStatus, InvoiceStatus, ServiceType, DepositType, ExpenseCategory } from "@prisma/client";
+export type { Customer, Job, JobPhoto, Quote, QuoteLineItem, Invoice, InvoiceLineItem, PaymentEvent, AppSettings, Expense, PropertyManager } from "@prisma/client";
+export { JobStatus, QuoteStatus, InvoiceStatus, ServiceType, DepositType, ExpenseCategory, OutreachStatus } from "@prisma/client";
 
 export const JOB_STATUS_LABELS: Record<string, string> = {
   LEAD: "Lead",
@@ -47,6 +47,15 @@ export const EXPENSE_CATEGORY_LABELS: Record<string, string> = {
   OTHER: "Other",
 };
 
+export const OUTREACH_STATUS_LABELS: Record<string, string> = {
+  PROSPECT: "Prospect",
+  CONTACTED: "Contacted",
+  IN_CONVERSATION: "In Conversation",
+  PROPOSAL_SENT: "Proposal Sent",
+  WON: "Won",
+  LOST: "Lost",
+};
+
 export const STATUS_COLORS: Record<string, string> = {
   // Job statuses
   LEAD: "bg-status-purple-bg text-status-purple-text",
@@ -65,4 +74,11 @@ export const STATUS_COLORS: Record<string, string> = {
   PAID: "bg-status-success-bg text-status-success-text",
   OVERDUE: "bg-status-danger-bg text-status-danger-text",
   VOID: "bg-status-neutral-bg text-status-neutral-text",
+  // Outreach statuses
+  PROSPECT: "bg-status-neutral-bg text-status-neutral-text",
+  CONTACTED: "bg-status-info-bg text-status-info-text",
+  IN_CONVERSATION: "bg-status-warning-bg text-status-warning-text",
+  PROPOSAL_SENT: "bg-status-purple-bg text-status-purple-text",
+  WON: "bg-status-success-bg text-status-success-text",
+  LOST: "bg-status-danger-bg text-status-danger-text",
 };

@@ -1,5 +1,7 @@
 "use client";
 
+import { formatCurrency } from "@/lib/utils";
+
 const SERVICE_COLORS: Record<string, string> = {
   CONCRETE_SEALING: "bg-blue-500",
   PAVER_SEALING: "bg-amber-500",
@@ -9,15 +11,6 @@ const SERVICE_COLORS: Record<string, string> = {
   COMMERCIAL_SEALING: "bg-orange-500",
   OTHER: "bg-gray-400",
 };
-
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(amount);
-}
 
 interface ServiceData {
   serviceType: string;
@@ -52,7 +45,7 @@ export default function RevenueByCategoryChart({ data }: RevenueByCategoryChartP
             <div className="flex justify-between items-baseline mb-1">
               <span className="text-sm font-medium text-foreground">{d.label}</span>
               <span className="text-sm text-muted-foreground tabular-nums">
-                {formatCurrency(d.revenue)}
+                {formatCurrency(d.revenue, false)}
               </span>
             </div>
             <div className="h-6 bg-muted rounded-sm overflow-hidden">
@@ -69,7 +62,7 @@ export default function RevenueByCategoryChart({ data }: RevenueByCategoryChartP
       <div className="border-t pt-3 mt-3 flex justify-between items-baseline">
         <span className="text-sm font-bold text-foreground">Total Revenue</span>
         <span className="text-sm font-bold text-foreground tabular-nums">
-          {formatCurrency(totalRevenue)}
+          {formatCurrency(totalRevenue, false)}
         </span>
       </div>
     </div>

@@ -9,7 +9,7 @@ export function RequiredLabel({
   return (
     <Label className={cn(className)} {...props}>
       {children}
-      <span className="text-red-500 ml-0.5">*</span>
+      <span className="text-destructive ml-0.5">*</span>
     </Label>
   );
 }

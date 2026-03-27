@@ -3,6 +3,7 @@
 import { useDroppable } from "@dnd-kit/core";
 import PipelineCard from "./PipelineCard";
 import type { PipelineJob } from "./PipelineBoard";
+import { formatCurrency } from "@/lib/utils";
 
 const COLUMN_COLORS: Record<
   string,
@@ -58,22 +59,30 @@ export default function PipelineColumn({
   const { isOver, setNodeRef } = useDroppable({ id: status });
 
   const colors = COLUMN_COLORS[status] || COLUMN_COLORS.LEAD;
+  const totalRevenue = jobs.reduce((sum, j) => sum + (j.quoteTotal ?? 0), 0);
 
   return (
     <div
       ref={setNodeRef}
-      className={`flex flex-col min-w-[280px] w-[280px] rounded-lg border border-border border-t-4 ${
+      className={`flex flex-col min-w-[280px] w-[280px] rounded-xl border border-border border-t-4 ${
         colors.border
       } ${isOver ? colors.dropBg : "bg-card"} transition-colors`}
     >
       {/* Column header */}
       <div className="flex items-center justify-between px-3 py-2.5 border-b border-border">
         <h3 className="text-sm font-semibold text-foreground">{label}</h3>
-        <span
-          className={`text-xs font-medium px-2 py-0.5 rounded-full ${colors.badge}`}
-        >
-          {jobs.length}
-        </span>
+        <div className="flex items-center gap-1.5">
+          {totalRevenue > 0 && (
+            <span className="text-[11px] font-semibold text-muted-foreground tabular-nums">
+              {formatCurrency(totalRevenue, false)}
+            </span>
+          )}
+          <span
+            className={`text-xs font-medium px-2 py-0.5 rounded-full ${colors.badge}`}
+          >
+            {jobs.length}
+          </span>
+        </div>
       </div>
 
       {/* Scrollable job list */}

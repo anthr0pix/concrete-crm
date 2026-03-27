@@ -4,7 +4,7 @@ export default function CustomersLoading() {
   return (
     <div className="p-4 sm:p-6 max-w-5xl mx-auto">
       {/* Header */}
-      <div className="flex items-center justify-between mb-6">
+      <div className="flex items-center justify-between mb-6 bg-muted/40 rounded-xl px-5 py-4 -mx-1">
         <div>
           <Skeleton className="h-8 w-36 mb-1" />
           <Skeleton className="h-4 w-16" />
@@ -12,13 +12,16 @@ export default function CustomersLoading() {
         <Skeleton className="h-10 w-36 rounded-md" />
       </div>
 
-      {/* Search */}
-      <Skeleton className="h-10 w-full rounded-md mb-6" />
+      {/* Search + Sort */}
+      <div className="flex gap-3 mb-6">
+        <Skeleton className="h-10 flex-1 rounded-md" />
+        <Skeleton className="h-10 w-28 rounded-md" />
+      </div>
 
       {/* Customer list */}
       <div className="space-y-2">
         {Array.from({ length: 10 }).map((_, i) => (
-          <div key={i} className="flex items-center justify-between bg-card border rounded-lg px-5 py-4">
+          <div key={i} className="flex items-center justify-between bg-card border rounded-xl shadow-sm px-5 py-4">
             <div className="flex-1 min-w-0">
               <div className="flex items-center gap-3 mb-1">
                 <Skeleton className="h-5 w-40" />

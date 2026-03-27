@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
-import { Copy } from "lucide-react";
+import { Copy, Loader2 } from "lucide-react";
 
 export default function DuplicateQuoteButton({ quoteId }: { quoteId: string }) {
   const router = useRouter();
@@ -22,7 +22,7 @@ export default function DuplicateQuoteButton({ quoteId }: { quoteId: string }) {
 
   return (
     <Button size="sm" variant="outline" onClick={duplicate} disabled={loading}>
-      <Copy className="w-3.5 h-3.5 mr-1" />
+      {loading ? <Loader2 className="w-3.5 h-3.5 mr-1 animate-spin" /> : <Copy className="w-3.5 h-3.5 mr-1" />}
       {loading ? "Duplicating..." : "Duplicate"}
     </Button>
   );

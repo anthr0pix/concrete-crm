@@ -19,8 +19,8 @@ export default function JobCostingSection({ job }: JobCostingProps) {
   const margin = revenue > 0 ? (profit / revenue) * 100 : 0;
 
   return (
-    <div className="bg-card border rounded-xl p-4 sm:p-5">
-      <h2 className="font-semibold text-lg mb-4">Cost Breakdown</h2>
+    <div className="bg-card border rounded-xl shadow-sm p-4 sm:p-5">
+      <h2 className="font-semibold text-base mb-4">Cost Breakdown</h2>
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-4 mb-4">
         <div>
           <p className="text-xs text-muted-foreground mb-0.5">Labor</p>

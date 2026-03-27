@@ -1,11 +1,4 @@
-function formatCurrency(amount: number): string {
-  return new Intl.NumberFormat("en-US", {
-    style: "currency",
-    currency: "USD",
-    minimumFractionDigits: 2,
-    maximumFractionDigits: 2,
-  }).format(amount);
-}
+import { formatCurrency } from "@/lib/utils";
 
 const BUCKET_STYLES: Record<string, string> = {
   "0-30": "text-status-success-text bg-status-success-bg",
