@@ -162,7 +162,11 @@ export default function OutreachDetailPage() {
             )}
             {manager.website && (
               <a
-                href={manager.website}
+                href={
+                  manager.website.match(/^https?:\/\//)
+                    ? manager.website
+                    : `https://${manager.website}`
+                }
                 target="_blank"
                 rel="noopener noreferrer"
                 className="flex items-center gap-1 hover:text-foreground"
