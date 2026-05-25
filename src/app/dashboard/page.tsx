@@ -54,7 +54,6 @@ export default async function DashboardPage() {
     prevMonthActiveJobs,
     prevMonthRevenue,
     outreachCounts,
-    outreachPipelineValue,
     overdueFollowUps,
   ] = await Promise.all([
     prisma.customer.count(),
@@ -173,7 +172,6 @@ export default async function DashboardPage() {
     }),
     // Outreach pipeline
     prisma.propertyManager.groupBy({ by: ["status"], _count: true }),
-    prisma.propertyManager.aggregate({ _sum: { estimatedValue: true }, where: { status: { notIn: ["WON", "LOST"] } } }),
     prisma.propertyManager.count({ where: { status: { notIn: ["WON", "LOST"] }, nextFollowUpAt: { lt: now } } }),
   ]);
 
@@ -306,7 +304,6 @@ export default async function DashboardPage() {
       {/* Outreach Pipeline */}
       {(() => {
         const outreachMap = Object.fromEntries(outreachCounts.map((c) => [c.status, c._count]));
-        const pipelineTotal = outreachPipelineValue._sum.estimatedValue ?? 0;
         const totalOutreach = outreachCounts.reduce((sum, c) => sum + c._count, 0);
         if (totalOutreach === 0) return null;
         return (
@@ -322,18 +319,11 @@ export default async function DashboardPage() {
                 <span>In Conversation: <strong>{outreachMap["IN_CONVERSATION"] ?? 0}</strong></span>
                 <span>Proposals: <strong>{outreachMap["PROPOSAL_SENT"] ?? 0}</strong></span>
               </div>
-              <div className="flex flex-wrap items-center gap-4 mt-2 text-sm text-muted-foreground">
-                {pipelineTotal > 0 && (
-                  <span>
-                    Total pipeline value: <strong className="text-foreground">${pipelineTotal.toLocaleString("en-US", { minimumFractionDigits: 0, maximumFractionDigits: 0 })}/yr</strong>
-                  </span>
-                )}
-                {overdueFollowUps > 0 && (
-                  <span className="text-status-danger-text font-medium">
-                    {overdueFollowUps} follow-up{overdueFollowUps !== 1 ? "s" : ""} overdue
-                  </span>
-                )}
-              </div>
+              {overdueFollowUps > 0 && (
+                <p className="mt-2 text-sm text-status-danger-text font-medium">
+                  {overdueFollowUps} follow-up{overdueFollowUps !== 1 ? "s" : ""} overdue
+                </p>
+              )}
             </div>
           </Link>
         );

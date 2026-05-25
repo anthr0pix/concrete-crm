@@ -5,6 +5,7 @@ import { getResend } from "@/lib/email";
 import { ResealReminderEmail } from "@/components/emails/ResealReminderEmail";
 import { format } from "date-fns";
 import React from "react";
+import { logActivity } from "@/lib/activity";
 
 const FROM_EMAIL = process.env.FROM_EMAIL ?? "Mountain West Surface <reminders@mountainwestsurface.com>";
 const REPLY_TO_EMAIL = process.env.REPLY_TO_EMAIL ?? "mwsurfaceco@gmail.com";
@@ -84,6 +85,14 @@ export async function GET(req: NextRequest) {
         await prisma.job.update({
           where: { id: job.id },
           data: { resealReminderSentAt: new Date() },
+        });
+
+        logActivity({
+          type: "RESEAL_REMINDER_SENT",
+          customerId: job.customerId,
+          jobId: job.id,
+          description: `Reseal reminder sent to ${customerEmail}`,
+          metadata: { recipient: customerEmail },
         });
 
         sentCount++;

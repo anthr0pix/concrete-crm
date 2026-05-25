@@ -1,6 +1,7 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyPortalToken } from "@/lib/portal-token";
 import { prisma } from "@/lib/prisma";
+import { logActivity } from "@/lib/activity";
 
 export async function POST(
   _req: NextRequest,
@@ -20,7 +21,10 @@ export async function POST(
   }
 
   try {
-    const quote = await prisma.quote.findUnique({ where: { id: payload.id } });
+    const quote = await prisma.quote.findUnique({
+      where: { id: payload.id },
+      select: { id: true, status: true, customerId: true, quoteNumber: true, jobId: true },
+    });
     if (!quote) {
       return NextResponse.json({ error: "Quote not found." }, { status: 404 });
     }
@@ -46,6 +50,14 @@ export async function POST(
     await prisma.quote.update({
       where: { id: payload.id },
       data: { status: "DECLINED" },
+    });
+
+    logActivity({
+      type: "QUOTE_DECLINED",
+      customerId: quote.customerId,
+      jobId: quote.jobId ?? undefined,
+      quoteId: quote.id,
+      description: `Quote ${quote.quoteNumber} declined by customer`,
     });
 
     return NextResponse.json({ success: true });

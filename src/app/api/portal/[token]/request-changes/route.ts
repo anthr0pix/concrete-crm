@@ -2,6 +2,7 @@ import { NextRequest, NextResponse } from "next/server";
 import { verifyPortalToken } from "@/lib/portal-token";
 import { prisma } from "@/lib/prisma";
 import { getResend } from "@/lib/email";
+import { logActivity } from "@/lib/activity";
 import { z } from "zod";
 
 const bodySchema = z.object({
@@ -81,6 +82,15 @@ export async function POST(
       console.error("[portal/request-changes] Email send error:", emailError);
       return NextResponse.json({ error: "Failed to send request. Please try again." }, { status: 500 });
     }
+
+    logActivity({
+      type: "QUOTE_CHANGES_REQUESTED",
+      customerId: quote.customerId,
+      jobId: quote.jobId ?? undefined,
+      quoteId: quote.id,
+      description: `Customer requested changes to quote ${quote.quoteNumber}`,
+      metadata: { message: parsed.data.message },
+    });
 
     return NextResponse.json({ success: true });
   } catch (err) {

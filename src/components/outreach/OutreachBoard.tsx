@@ -11,6 +11,13 @@ import {
   useSensors,
 } from "@dnd-kit/core";
 import { toast } from "sonner";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import OutreachColumn from "./OutreachColumn";
 import OutreachCard from "./OutreachCard";
 
@@ -25,6 +32,9 @@ export interface OutreachItem {
   state: string | null;
   propertyCount: number | null;
   nextFollowUpAt: string | null;
+  lastContactedAt: string | null;
+  noteCount: number;
+  jobCount: number;
 }
 
 const ACTIVE_STATUSES = [
@@ -48,6 +58,7 @@ export default function OutreachBoard({
     useState<Record<string, OutreachItem[]>>(initialItems);
   const [activeItem, setActiveItem] = useState<OutreachItem | null>(null);
   const [showClosed, setShowClosed] = useState(false);
+  const [mobileStatus, setMobileStatus] = useState("PROSPECT");
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -119,16 +130,33 @@ export default function OutreachBoard({
       onDragStart={handleDragStart}
       onDragEnd={handleDragEnd}
     >
-      <div className="mb-4">
+      <div className="mb-4 flex items-center gap-4">
         <button
           onClick={() => setShowClosed((v) => !v)}
           className="text-sm text-muted-foreground hover:text-foreground transition-colors"
         >
           {showClosed ? "Hide Won/Lost" : "Show Won/Lost"}
         </button>
+
+        {/* Mobile column picker */}
+        <div className="md:hidden flex-1">
+          <Select value={mobileStatus} onValueChange={setMobileStatus}>
+            <SelectTrigger className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {columns.map(({ key, label }) => (
+                <SelectItem key={key} value={key}>
+                  {label} ({(itemsByStatus[key] || []).length})
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
-      <div className="flex gap-4 overflow-x-auto pb-4">
+      {/* Desktop: horizontal kanban */}
+      <div className="hidden md:flex gap-4 overflow-x-auto pb-4">
         {columns.map(({ key, label }) => (
           <OutreachColumn
             key={key}
@@ -137,6 +165,20 @@ export default function OutreachBoard({
             items={itemsByStatus[key] || []}
           />
         ))}
+      </div>
+
+      {/* Mobile: single column */}
+      <div className="md:hidden pb-4">
+        {columns
+          .filter(({ key }) => key === mobileStatus)
+          .map(({ key, label }) => (
+            <OutreachColumn
+              key={key}
+              status={key}
+              label={label}
+              items={itemsByStatus[key] || []}
+            />
+          ))}
       </div>
 
       <DragOverlay>

@@ -1,7 +1,9 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
-import { QuoteStatus } from "@prisma/client";
+import { QuoteStatus, ServiceType } from "@prisma/client";
 import { z } from "zod";
+import { ensureJobForAcceptedQuote, QuoteAlreadyLinkedError } from "@/lib/quote-to-job";
+import { logActivity } from "@/lib/activity";
 
 const lineItemSchema = z.object({
   description: z.string().min(1),
@@ -11,6 +13,7 @@ const lineItemSchema = z.object({
 
 const updateSchema = z.object({
   status: z.nativeEnum(QuoteStatus).optional(),
+  serviceType: z.nativeEnum(ServiceType).optional(),
   notes: z.string().optional(),
   validUntil: z.string().nullable().optional(),
   taxRate: z.number().min(0).max(100).optional(),
@@ -49,14 +52,18 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   try {
     const { validUntil, lineItems, taxRate, depositAmount, depositType, jobId, ...rest } = parsed.data;
 
-    // If editing line items, only allow on DRAFT quotes
-    if (lineItems) {
-      const existing = await prisma.quote.findUnique({ where: { id }, select: { status: true } });
-      if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
-      if (existing.status !== "DRAFT") {
-        return NextResponse.json({ error: "Can only edit line items on DRAFT quotes" }, { status: 400 });
-      }
+    const existing = await prisma.quote.findUnique({
+      where: { id },
+      select: { status: true, jobId: true },
+    });
+    if (!existing) return NextResponse.json({ error: "Not found" }, { status: 404 });
+
+    if (lineItems && existing.status !== "DRAFT") {
+      return NextResponse.json({ error: "Can only edit line items on DRAFT quotes" }, { status: 400 });
     }
+
+    const becomingAccepted =
+      rest.status === "ACCEPTED" && existing.status !== "ACCEPTED";
 
     // Recalculate totals if line items or tax rate changed
     let totals: { subtotal: number; taxAmount: number; total: number } | undefined;
@@ -67,13 +74,14 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
       totals = { subtotal, taxAmount, total: subtotal + taxAmount };
     }
 
+    let spawnedJobId: string | null = null;
+
     const quote = await prisma.$transaction(async (tx) => {
-      // Delete existing line items if replacing them
       if (lineItems) {
         await tx.quoteLineItem.deleteMany({ where: { quoteId: id } });
       }
 
-      return tx.quote.update({
+      const updated = await tx.quote.update({
         where: { id },
         data: {
           ...rest,
@@ -94,12 +102,44 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
             },
           } : {}),
         },
-        include: { lineItems: true },
+        include: {
+          lineItems: true,
+          customer: { select: { address: true, city: true, state: true, zip: true } },
+        },
       });
+
+      if (becomingAccepted) {
+        const { created, jobId: newJobId } = await ensureJobForAcceptedQuote(tx, {
+          id: updated.id,
+          quoteNumber: updated.quoteNumber,
+          customerId: updated.customerId,
+          serviceType: updated.serviceType,
+          jobId: updated.jobId,
+          notes: updated.notes,
+          customer: updated.customer,
+        });
+        if (created) spawnedJobId = newJobId;
+      }
+
+      return updated;
     });
+
+    if (spawnedJobId) {
+      logActivity({
+        type: "JOB_CREATED",
+        customerId: quote.customerId,
+        jobId: spawnedJobId,
+        quoteId: quote.id,
+        description: `Job auto-created from quote ${quote.quoteNumber}`,
+        metadata: { quoteNumber: quote.quoteNumber, source: "auto-accepted" },
+      });
+    }
 
     return NextResponse.json(quote);
   } catch (err) {
+    if (err instanceof QuoteAlreadyLinkedError) {
+      return NextResponse.json({ error: "Quote already linked to a job." }, { status: 409 });
+    }
     console.error("[PATCH quote]", err);
     return NextResponse.json({ error: "Failed to update quote." }, { status: 500 });
   }

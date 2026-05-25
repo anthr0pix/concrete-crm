@@ -5,6 +5,7 @@ import { getResend } from "@/lib/email";
 import { ServiceType } from "@prisma/client";
 import { z } from "zod";
 import React from "react";
+import { logActivity } from "@/lib/activity";
 import NewLeadNotificationEmail from "@/components/emails/NewLeadNotificationEmail";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.mountainwestsurface.com";
@@ -248,6 +249,15 @@ export async function POST(req: NextRequest) {
           },
         },
       },
+      include: { jobs: { select: { id: true } } },
+    });
+
+    logActivity({
+      type: "JOB_CREATED",
+      customerId: customer.id,
+      jobId: customer.jobs[0]?.id,
+      description: `New lead from website: ${data.name}`,
+      metadata: { source: referralSource },
     });
 
     // Fire and forget — don't await, don't block the response

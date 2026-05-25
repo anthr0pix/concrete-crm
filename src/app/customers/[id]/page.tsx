@@ -7,6 +7,7 @@ import Breadcrumbs from "@/components/layout/Breadcrumbs";
 import { JOB_STATUS_LABELS, SERVICE_TYPE_LABELS, STATUS_COLORS, QUOTE_STATUS_LABELS, INVOICE_STATUS_LABELS } from "@/types";
 import { format } from "date-fns";
 import DeleteCustomerButton from "@/components/customers/DeleteCustomerButton";
+import ActivityFeed from "@/components/activity/ActivityFeed";
 import { formatPhone } from "@/lib/utils";
 
 export const dynamic = "force-dynamic";
@@ -117,6 +118,11 @@ export default async function CustomerDetailPage({
             <h2 className="font-semibold text-base">Recent Quotes</h2>
             <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full">{customer.quotes.length}</span>
           </div>
+          <Link href={`/quotes/new?customerId=${customer.id}`}>
+            <Button size="sm" variant="outline">
+              <Plus className="w-3.5 h-3.5 mr-1" /> New Quote
+            </Button>
+          </Link>
         </div>
         {customer.quotes.length === 0 ? (
           <div className="text-center py-10 rounded-xl border border-dashed border-border">
@@ -157,6 +163,11 @@ export default async function CustomerDetailPage({
             <h2 className="font-semibold text-base">Recent Invoices</h2>
             <span className="text-xs bg-muted text-muted-foreground px-2 py-0.5 rounded-full">{customer.invoices.length}</span>
           </div>
+          <Link href={`/invoices/new?customerId=${customer.id}`}>
+            <Button size="sm" variant="outline">
+              <Plus className="w-3.5 h-3.5 mr-1" /> New Invoice
+            </Button>
+          </Link>
         </div>
         {customer.invoices.length === 0 ? (
           <div className="text-center py-10 rounded-xl border border-dashed border-border">
@@ -188,6 +199,11 @@ export default async function CustomerDetailPage({
             )}
           </>
         )}
+      </div>
+
+      {/* Activity Log */}
+      <div className="mt-6">
+        <ActivityFeed customerId={customer.id} />
       </div>
     </div>
   );

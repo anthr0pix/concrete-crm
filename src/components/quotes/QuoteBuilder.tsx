@@ -13,6 +13,8 @@ import { Plus, Trash2, Loader2 } from "lucide-react";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import DepositSettings from "@/components/quotes/DepositSettings";
 import NewCustomerDialog from "@/components/customers/NewCustomerDialog";
+import { ServiceType } from "@prisma/client";
+import { SERVICE_TYPE_LABELS } from "@/types";
 
 interface LineItem {
   description: string;
@@ -28,6 +30,7 @@ interface Props {
   jobs?: Job[];
   defaultCustomerId?: string;
   defaultJobId?: string;
+  defaultServiceType?: ServiceType;
   quoteId?: string;
   defaultLineItems?: LineItem[];
   defaultTaxRate?: number;
@@ -37,12 +40,13 @@ interface Props {
   defaultDepositType?: "FIXED" | "PERCENTAGE" | null;
 }
 
-export default function QuoteBuilder({ customers, jobs = [], defaultCustomerId, defaultJobId, quoteId, defaultLineItems, defaultTaxRate, defaultNotes, defaultValidUntil, defaultDepositAmount, defaultDepositType }: Props) {
+export default function QuoteBuilder({ customers, jobs = [], defaultCustomerId, defaultJobId, defaultServiceType, quoteId, defaultLineItems, defaultTaxRate, defaultNotes, defaultValidUntil, defaultDepositAmount, defaultDepositType }: Props) {
   const isEdit = !!quoteId;
   const router = useRouter();
   const [customerList, setCustomerList] = useState<Customer[]>(customers);
   const [customerId, setCustomerId] = useState(defaultCustomerId ?? "");
   const [jobId, setJobId] = useState(defaultJobId ?? "");
+  const [serviceType, setServiceType] = useState<ServiceType>(defaultServiceType ?? "CONCRETE_SEALING");
   const [taxRate, setTaxRate] = useState(defaultTaxRate ?? 0);
   const [notes, setNotes] = useState(defaultNotes ?? "");
   const [validUntil, setValidUntil] = useState(() => {
@@ -87,6 +91,7 @@ export default function QuoteBuilder({ customers, jobs = [], defaultCustomerId, 
       body: JSON.stringify({
         ...(isEdit ? {} : { customerId }),
         jobId: jobId || null,
+        serviceType,
         taxRate,
         notes,
         validUntil: validUntil || undefined,
@@ -130,6 +135,19 @@ export default function QuoteBuilder({ customers, jobs = [], defaultCustomerId, 
             </div>
           </div>
         )}
+        <div className="space-y-1">
+          <RequiredLabel>Service Type</RequiredLabel>
+          <Select value={serviceType} onValueChange={(v) => setServiceType(v as ServiceType)}>
+            <SelectTrigger className="w-full">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {Object.entries(SERVICE_TYPE_LABELS).map(([value, label]) => (
+                <SelectItem key={value} value={value}>{label}</SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
         {jobs.length > 0 && (
           <div className="space-y-1">
             <Label>Link to Job (optional)</Label>

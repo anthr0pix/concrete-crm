@@ -39,7 +39,13 @@ export default async function QuoteDetailPage({
             </p>
           )}
         </div>
-        <QuoteDetailActions quoteId={quote.id} status={quote.status} customerEmail={quote.customer.email} />
+        <QuoteDetailActions
+          quoteId={quote.id}
+          quoteNumber={quote.quoteNumber}
+          status={quote.status}
+          customerEmail={quote.customer.email}
+          linkedJobId={quote.jobId}
+        />
       </div>
 
       {/* Workflow hint */}
@@ -50,7 +56,15 @@ export default async function QuoteDetailPage({
       )}
       {quote.status === "ACCEPTED" && (
         <div className="border-l-4 border-l-green-400 bg-status-success-bg rounded-r-lg px-4 py-3 mb-6 text-sm text-status-success-text">
-          The customer accepted this quote. Click <strong>&quot;Create Invoice from Quote&quot;</strong> above to bill them.
+          {quote.jobId ? (
+            <>
+              The customer accepted this quote. Click <strong>&quot;Create Invoice from Quote&quot;</strong> above to bill them.
+            </>
+          ) : (
+            <>
+              The customer accepted this quote. Click <strong>&quot;Create Job from Quote&quot;</strong> above to schedule the work.
+            </>
+          )}
         </div>
       )}
 

@@ -8,6 +8,7 @@ import { InvoicePDF } from "@/components/pdf/InvoicePDF";
 import { InvoiceEmail } from "@/components/emails/InvoiceEmail";
 import { format } from "date-fns";
 import React from "react";
+import { logActivity } from "@/lib/activity";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.mountainwestsurface.com";
 const FROM_EMAIL = process.env.FROM_EMAIL ?? "Mountain West Surface <invoices@mountainwestsurface.com>";
@@ -83,6 +84,16 @@ export async function POST(
       console.error("[send/invoice] Resend error:", sendError);
       return NextResponse.json({ error: "Failed to send email. Please try again." }, { status: 502 });
     }
+
+    // Log activity
+    logActivity({
+      type: "EMAIL_SENT",
+      customerId: invoice.customerId,
+      jobId: invoice.jobId ?? undefined,
+      invoiceId: invoice.id,
+      description: `Invoice ${invoice.invoiceNumber} sent to ${invoice.customer.email}`,
+      metadata: { recipient: invoice.customer.email, invoiceNumber: invoice.invoiceNumber },
+    });
 
     // Update status to SENT if still in DRAFT
     if (invoice.status === "DRAFT") {

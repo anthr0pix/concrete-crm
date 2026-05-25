@@ -10,6 +10,7 @@ import { format, isPast, startOfDay } from "date-fns";
 import { cn } from "@/lib/utils";
 import SortSelect from "@/components/ui/sort-select";
 import Pagination from "@/components/ui/pagination";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export const dynamic = "force-dynamic";
 
@@ -147,18 +148,20 @@ export default async function InvoicesPage({
       </div>
 
       {invoices.length === 0 ? (
-        <div className="text-center py-20 rounded-xl border-2 border-dashed border-border">
-          <Receipt className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
-          <p className="text-lg font-semibold text-foreground mb-1">No invoices found</p>
-          <p className="text-sm text-muted-foreground mb-5">
-            {search || activeStatus
+        <EmptyState
+          icon={Receipt}
+          title="No invoices found"
+          description={
+            search || activeStatus
               ? "Try adjusting your search or filter."
-              : "Invoices are created from accepted quotes, or you can create one manually."}
-          </p>
-          {!search && !activeStatus && (
-            <Link href="/invoices/new"><Button>+ New Invoice</Button></Link>
-          )}
-        </div>
+              : "Invoices are created from accepted quotes, or you can create one manually."
+          }
+          action={
+            !search && !activeStatus
+              ? { label: "+ New Invoice", href: "/invoices/new" }
+              : undefined
+          }
+        />
       ) : (
         <div className="space-y-2">
           {invoices.map((inv) => {

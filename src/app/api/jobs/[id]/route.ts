@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
 import { ServiceType, JobStatus } from "@prisma/client";
+import { logActivity } from "@/lib/activity";
 
 const updateSchema = z.object({
   title: z.string().min(1).optional(),
@@ -21,6 +22,7 @@ const updateSchema = z.object({
   laborRate: z.number().nullable().optional(),
   materialCost: z.number().nullable().optional(),
   crewAssignment: z.string().nullable().optional(),
+  propertyManagerId: z.string().nullable().optional(),
 });
 
 export async function GET(_req: Request, { params }: { params: Promise<{ id: string }> }) {
@@ -30,6 +32,7 @@ export async function GET(_req: Request, { params }: { params: Promise<{ id: str
       where: { id },
       include: {
         customer: true,
+        propertyManager: { select: { id: true, companyName: true } },
         photos: { orderBy: { createdAt: "asc" } },
         quotes: { orderBy: { createdAt: "desc" } },
         invoices: { orderBy: { createdAt: "desc" } },
@@ -52,13 +55,19 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
   if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
 
   try {
-    const { scheduledDate, completedDate, resealDueDate, ...rest } = parsed.data;
+    const { scheduledDate, completedDate, resealDueDate, propertyManagerId, ...rest } = parsed.data;
+
+    // Fetch current job for auto-transition logic and status change logging
+    const current = await prisma.job.findUnique({
+      where: { id },
+      select: { status: true, customerId: true, title: true },
+    });
+    if (!current) return NextResponse.json({ error: "Not found" }, { status: 404 });
 
     // Auto-transition: setting a scheduledDate on a LEAD or QUOTED job → SCHEDULED
     let autoStatus: JobStatus | undefined;
     if (scheduledDate && !rest.status) {
-      const current = await prisma.job.findUnique({ where: { id }, select: { status: true } });
-      if (current && (current.status === "LEAD" || current.status === "CONTACTED" || current.status === "QUOTED")) {
+      if (current.status === "LEAD" || current.status === "CONTACTED" || current.status === "QUOTED") {
         autoStatus = "SCHEDULED";
       }
     }
@@ -71,8 +80,22 @@ export async function PATCH(request: Request, { params }: { params: Promise<{ id
         ...(scheduledDate !== undefined ? { scheduledDate: scheduledDate ? new Date(scheduledDate) : null } : {}),
         ...(completedDate !== undefined ? { completedDate: completedDate ? new Date(completedDate) : null } : {}),
         ...(resealDueDate !== undefined ? { resealDueDate: resealDueDate ? new Date(resealDueDate) : null } : {}),
+        ...(propertyManagerId !== undefined ? { propertyManagerId } : {}),
       },
     });
+
+    // Log status change activity
+    const newStatus = rest.status ?? autoStatus;
+    if (newStatus && newStatus !== current.status) {
+      logActivity({
+        type: "STATUS_CHANGED",
+        customerId: current.customerId,
+        jobId: id,
+        description: `Job status changed from ${current.status} to ${newStatus}`,
+        metadata: { oldStatus: current.status, newStatus },
+      });
+    }
+
     return NextResponse.json(job);
   } catch (err) {
     console.error("[PATCH job]", err);

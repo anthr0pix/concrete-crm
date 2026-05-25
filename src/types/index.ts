@@ -1,5 +1,5 @@
-export type { Customer, Job, JobPhoto, Quote, QuoteLineItem, Invoice, InvoiceLineItem, PaymentEvent, AppSettings, Expense, PropertyManager } from "@prisma/client";
-export { JobStatus, QuoteStatus, InvoiceStatus, ServiceType, DepositType, ExpenseCategory, OutreachStatus } from "@prisma/client";
+export type { Customer, Job, JobPhoto, Quote, QuoteLineItem, Invoice, InvoiceLineItem, PaymentEvent, AppSettings, Expense, PropertyManager, Activity, OutreachNote } from "@prisma/client";
+export { JobStatus, QuoteStatus, InvoiceStatus, ServiceType, DepositType, ExpenseCategory, OutreachStatus, ActivityType } from "@prisma/client";
 
 export const JOB_STATUS_LABELS: Record<string, string> = {
   LEAD: "Lead",
@@ -55,6 +55,24 @@ export const OUTREACH_STATUS_LABELS: Record<string, string> = {
   PROPOSAL_SENT: "Proposal Sent",
   WON: "Won",
   LOST: "Lost",
+};
+
+export const ACTIVITY_TYPE_LABELS: Record<string, string> = {
+  EMAIL_SENT: "Email Sent",
+  STATUS_CHANGED: "Status Changed",
+  NOTE_ADDED: "Note Added",
+  PAYMENT_RECEIVED: "Payment Received",
+  PHOTO_UPLOADED: "Photo Uploaded",
+  JOB_CREATED: "Job Created",
+  QUOTE_CREATED: "Quote Created",
+  INVOICE_CREATED: "Invoice Created",
+  QUOTE_APPROVED: "Quote Approved",
+  QUOTE_DECLINED: "Quote Declined",
+  QUOTE_CHANGES_REQUESTED: "Changes Requested",
+  FOLLOW_UP_SENT: "Follow-Up Sent",
+  REVIEW_REQUEST_SENT: "Review Request Sent",
+  RESEAL_REMINDER_SENT: "Reseal Reminder Sent",
+  DEPOSIT_RECEIVED: "Deposit Received",
 };
 
 export const STATUS_COLORS: Record<string, string> = {

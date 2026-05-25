@@ -2,6 +2,8 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getNextQuoteNumber } from "@/lib/numbering";
 import { z } from "zod";
+import { ServiceType } from "@prisma/client";
+import { logActivity } from "@/lib/activity";
 
 const lineItemSchema = z.object({
   description: z.string().min(1),
@@ -11,11 +13,14 @@ const lineItemSchema = z.object({
 
 const quoteSchema = z.object({
   customerId: z.string().min(1),
-  jobId: z.string().optional(),
+  jobId: z.string().nullable().optional(),
+  serviceType: z.nativeEnum(ServiceType),
   taxRate: z.number().min(0).max(100).default(0),
   validUntil: z.string().optional(),
   notes: z.string().optional(),
   lineItems: z.array(lineItemSchema).min(1, "At least one line item required"),
+  depositAmount: z.number().nullable().optional(),
+  depositType: z.enum(["FIXED", "PERCENTAGE"]).nullable().optional(),
 });
 
 export async function GET(request: Request) {
@@ -63,6 +68,15 @@ export async function POST(request: Request) {
         lineItems: { create: lineItems.map((item) => ({ ...item, total: item.quantity * item.unitPrice })) },
       },
       include: { lineItems: true },
+    });
+
+    logActivity({
+      type: "QUOTE_CREATED",
+      customerId: quote.customerId,
+      jobId: rest.jobId ?? undefined,
+      quoteId: quote.id,
+      description: `Quote ${quote.quoteNumber} created ($${total.toFixed(2)})`,
+      metadata: { quoteNumber: quote.quoteNumber, total },
     });
 
     // Auto-transition: creating a quote for a LEAD job → QUOTED

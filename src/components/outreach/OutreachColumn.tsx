@@ -62,7 +62,7 @@ export default function OutreachColumn({
   return (
     <div
       ref={setNodeRef}
-      className={`flex flex-col min-w-[280px] w-[280px] rounded-xl border border-border border-t-4 ${
+      className={`flex flex-col w-full md:min-w-[280px] md:w-[280px] rounded-xl border border-border border-t-4 ${
         colors.border
       } ${isOver ? colors.dropBg : "bg-card"} transition-colors`}
     >

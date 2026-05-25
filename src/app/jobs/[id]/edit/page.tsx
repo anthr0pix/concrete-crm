@@ -12,9 +12,10 @@ export default async function EditJobPage({
   params: Promise<{ id: string }>;
 }) {
   const { id } = await params;
-  const [job, customers] = await Promise.all([
+  const [job, customers, propertyManagers] = await Promise.all([
     prisma.job.findUnique({ where: { id } }),
     prisma.customer.findMany({ orderBy: { lastName: "asc" }, select: { id: true, firstName: true, lastName: true } }),
+    prisma.propertyManager.findMany({ orderBy: { companyName: "asc" }, select: { id: true, companyName: true } }),
   ]);
   if (!job) notFound();
 
@@ -28,6 +29,7 @@ export default async function EditJobPage({
       <h1 className="text-2xl font-bold mb-6">Edit Job</h1>
       <JobForm
         customers={customers}
+        propertyManagers={propertyManagers}
         jobId={id}
         defaultValues={{
           customerId: job.customerId,
@@ -47,6 +49,7 @@ export default async function EditJobPage({
           laborRate: job.laborRate ?? undefined,
           materialCost: job.materialCost ?? undefined,
           crewAssignment: job.crewAssignment ?? "",
+          propertyManagerId: job.propertyManagerId ?? "",
         }}
       />
     </div>

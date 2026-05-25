@@ -3,7 +3,7 @@
 import Link from "next/link";
 import { useDraggable } from "@dnd-kit/core";
 import { format, isPast } from "date-fns";
-import { Phone, Mail, Building2, Globe, MapPin } from "lucide-react";
+import { Phone, Mail, Building2, Globe, MapPin, MessageSquare, Clock, Briefcase } from "lucide-react";
 import type { OutreachItem } from "./OutreachBoard";
 
 export default function OutreachCard({ item }: { item: OutreachItem }) {
@@ -76,26 +76,46 @@ export default function OutreachCard({ item }: { item: OutreachItem }) {
         </div>
 
         <div className="flex items-center justify-between mt-2">
-          {item.propertyCount ? (
-            <span className="inline-flex items-center gap-1 text-[11px] font-medium px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
-              <Building2 className="w-3 h-3" />
-              {item.propertyCount}
-            </span>
-          ) : (
-            <span />
-          )}
-          {item.nextFollowUpAt && (
-            <span
-              className={`text-[11px] ${
-                overdue
-                  ? "text-status-danger-text font-medium"
-                  : "text-muted-foreground"
-              }`}
-            >
-              {overdue ? "Overdue: " : "Follow-up: "}
-              {format(new Date(item.nextFollowUpAt), "MMM d")}
-            </span>
-          )}
+          <div className="flex items-center gap-1.5">
+            {item.propertyCount ? (
+              <span className="inline-flex items-center gap-1 text-[11px] font-medium px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                <Building2 className="w-3 h-3" />
+                {item.propertyCount}
+              </span>
+            ) : null}
+            {item.jobCount > 0 && (
+              <span className="inline-flex items-center gap-1 text-[11px] font-medium px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                <Briefcase className="w-3 h-3" />
+                {item.jobCount}
+              </span>
+            )}
+            {item.noteCount > 0 && (
+              <span className="inline-flex items-center gap-1 text-[11px] font-medium px-1.5 py-0.5 rounded bg-muted text-muted-foreground">
+                <MessageSquare className="w-3 h-3" />
+                {item.noteCount}
+              </span>
+            )}
+          </div>
+          <div className="text-right">
+            {item.nextFollowUpAt && (
+              <span
+                className={`text-[11px] block ${
+                  overdue
+                    ? "text-status-danger-text font-medium"
+                    : "text-muted-foreground"
+                }`}
+              >
+                {overdue ? "Overdue: " : "Follow-up: "}
+                {format(new Date(item.nextFollowUpAt), "MMM d")}
+              </span>
+            )}
+            {item.lastContactedAt && (
+              <span className="text-[11px] text-muted-foreground flex items-center gap-1 justify-end">
+                <Clock className="w-3 h-3" />
+                {format(new Date(item.lastContactedAt), "MMM d")}
+              </span>
+            )}
+          </div>
         </div>
       </Link>
     </div>
