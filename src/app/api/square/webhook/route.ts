@@ -12,6 +12,8 @@ import { logActivity } from "@/lib/activity";
 const FROM_EMAIL =
   process.env.FROM_EMAIL ??
   "Mountain West Surface <payments@mountainwestsurface.com>";
+// Invoice payment confirmations are sent from the billing address; falls back to FROM_EMAIL if unset.
+const BILLING_FROM_EMAIL = process.env.BILLING_FROM_EMAIL ?? FROM_EMAIL;
 const REPLY_TO_EMAIL = process.env.REPLY_TO_EMAIL ?? "mwsurfaceco@gmail.com";
 
 function verifySquareWebhook(body: string, signature: string): boolean {
@@ -245,7 +247,7 @@ async function sendPaymentConfirmationEmail(
 
     const resend = getResend();
     const { error } = await resend.emails.send({
-      from: FROM_EMAIL,
+      from: BILLING_FROM_EMAIL,
       to: email,
       replyTo: REPLY_TO_EMAIL,
       subject: `Payment Received - Invoice ${invoiceNumber}`,

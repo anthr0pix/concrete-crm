@@ -183,6 +183,7 @@ AppSettings (singleton — app-wide configuration)
 - `render()` IS exported from `@react-email/components` (confirmed)
 - Check Resend's returned `{ error }` field — it doesn't throw on delivery failure
 - `FROM_EMAIL` env var controls sender address; falls back to `quotes@` or `invoices@mountainwestsurface.com`
+- `BILLING_FROM_EMAIL` overrides the sender for **invoice** emails (invoice delivery + invoice payment confirmations); falls back to `FROM_EMAIL` when unset. Quote/deposit/lead/reminder emails always use `FROM_EMAIL`.
 - Domain `mountainwestsurface.com` is verified in Resend with DKIM/SPF/DMARC records
 
 **Email templates** in `src/components/emails/`:
@@ -244,6 +245,7 @@ SUPABASE_SERVICE_ROLE_KEY       # SECRET — server only, never expose to client
 # Email
 RESEND_API_KEY                  # Resend API key (resend.com)
 FROM_EMAIL                      # Sender address, e.g. "MWS <quotes@mountainwestsurface.com>"
+BILLING_FROM_EMAIL              # Sender for invoice emails, e.g. "MWS <billing@mountainwestsurface.com>" (falls back to FROM_EMAIL)
 
 # Customer portal
 PORTAL_JWT_SECRET               # Strong random secret (openssl rand -base64 32)

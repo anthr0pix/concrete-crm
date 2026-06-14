@@ -12,6 +12,8 @@ import { logActivity } from "@/lib/activity";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.mountainwestsurface.com";
 const FROM_EMAIL = process.env.FROM_EMAIL ?? "Mountain West Surface <invoices@mountainwestsurface.com>";
+// Invoices are sent from the billing address; falls back to FROM_EMAIL if unset.
+const BILLING_FROM_EMAIL = process.env.BILLING_FROM_EMAIL ?? FROM_EMAIL;
 const REPLY_TO_EMAIL = process.env.REPLY_TO_EMAIL ?? "mwsurfaceco@gmail.com";
 
 export async function POST(
@@ -67,7 +69,7 @@ export async function POST(
     // Send via Resend
     const resend = getResend();
     const { error: sendError } = await resend.emails.send({
-      from: FROM_EMAIL,
+      from: BILLING_FROM_EMAIL,
       to: invoice.customer.email,
       replyTo: REPLY_TO_EMAIL,
       subject: `Invoice ${invoice.invoiceNumber} from Mountain West Surface`,
