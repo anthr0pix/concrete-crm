@@ -6,6 +6,7 @@ import { Plus, Phone, Mail, MapPin, Search, Users, Briefcase, ArrowRight } from 
 import { formatPhone, cn } from "@/lib/utils";
 import { JOB_STATUS_LABELS, STATUS_COLORS } from "@/types";
 import { JobStatus } from "@prisma/client";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export const dynamic = "force-dynamic";
 
@@ -181,22 +182,22 @@ export default async function CustomersPage({
 
       {/* Customer list */}
       {customers.length === 0 ? (
-        <div className="text-center py-20 rounded-xl border-2 border-dashed border-border">
-          <Users className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
-          <p className="text-lg font-semibold text-foreground mb-1">No customers found</p>
-          <p className="text-sm text-muted-foreground mb-5">
-            {search
+        <EmptyState
+          icon={Users}
+          title="No customers found"
+          description={
+            search
               ? "Try adjusting your search."
               : activeFilter !== "all"
                 ? `No ${activeFilter} customers.`
-                : "Add your first customer to get started."}
-          </p>
-          {!search && activeFilter === "all" && (
-            <Link href="/customers/new">
-              <Button>+ Add Customer</Button>
-            </Link>
-          )}
-        </div>
+                : "Add your first customer to get started."
+          }
+          action={
+            !search && activeFilter === "all"
+              ? { label: "+ Add Customer", href: "/customers/new" }
+              : undefined
+          }
+        />
       ) : (
         <div className="space-y-6">
           {letters.map((letter) => (

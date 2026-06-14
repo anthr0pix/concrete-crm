@@ -19,6 +19,7 @@ import {
   X,
   Search,
   Megaphone,
+  HardHat,
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 import { ThemeToggle } from "@/components/ThemeToggle";
@@ -80,6 +81,7 @@ const navGroups: NavGroup[] = [
         badgeKey: "staleQuotes",
       },
       { href: "/schedule", label: "Schedule", icon: CalendarDays },
+      { href: "/crew", label: "Crew View", icon: HardHat },
     ],
   },
   {

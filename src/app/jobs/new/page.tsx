@@ -8,13 +8,19 @@ export const dynamic = "force-dynamic";
 export default async function NewJobPage({
   searchParams,
 }: {
-  searchParams: Promise<{ customerId?: string }>;
+  searchParams: Promise<{ customerId?: string; propertyManagerId?: string }>;
 }) {
-  const { customerId } = await searchParams;
-  const customers = await prisma.customer.findMany({
-    orderBy: { lastName: "asc" },
-    select: { id: true, firstName: true, lastName: true, address: true, city: true, state: true, zip: true, phone: true },
-  });
+  const { customerId, propertyManagerId } = await searchParams;
+  const [customers, propertyManagers] = await Promise.all([
+    prisma.customer.findMany({
+      orderBy: { lastName: "asc" },
+      select: { id: true, firstName: true, lastName: true, address: true, city: true, state: true, zip: true, phone: true },
+    }),
+    prisma.propertyManager.findMany({
+      orderBy: { companyName: "asc" },
+      select: { id: true, companyName: true },
+    }),
+  ]);
 
   return (
     <div className="p-4 sm:p-6 max-w-2xl mx-auto">
@@ -22,7 +28,11 @@ export default async function NewJobPage({
         <ChevronLeft className="w-4 h-4" /> Back to Jobs
       </Link>
       <h1 className="text-2xl font-bold mb-6">New Job</h1>
-      <JobForm customers={customers} defaultValues={{ customerId: customerId ?? "" }} />
+      <JobForm
+        customers={customers}
+        propertyManagers={propertyManagers}
+        defaultValues={{ customerId: customerId ?? "", propertyManagerId: propertyManagerId ?? "" }}
+      />
     </div>
   );
 }

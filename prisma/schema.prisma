@@ -58,6 +58,24 @@ enum ExpenseCategory {
   OTHER
 }
 
+enum ActivityType {
+  EMAIL_SENT
+  STATUS_CHANGED
+  NOTE_ADDED
+  PAYMENT_RECEIVED
+  PHOTO_UPLOADED
+  JOB_CREATED
+  QUOTE_CREATED
+  INVOICE_CREATED
+  QUOTE_APPROVED
+  QUOTE_DECLINED
+  QUOTE_CHANGES_REQUESTED
+  FOLLOW_UP_SENT
+  REVIEW_REQUEST_SENT
+  RESEAL_REMINDER_SENT
+  DEPOSIT_RECEIVED
+}
+
 model Customer {
   id        String   @id @default(cuid())
   createdAt DateTime @default(now())
@@ -74,9 +92,10 @@ model Customer {
   notes          String?
   referralSource String?
 
-  jobs     Job[]
-  quotes   Quote[]
-  invoices Invoice[]
+  jobs       Job[]
+  quotes     Quote[]
+  invoices   Invoice[]
+  activities Activity[]
 
   @@index([lastName])
   @@index([phone])
@@ -117,14 +136,20 @@ model Job {
   materialCost   Float?
   crewAssignment String?
 
-  photos   JobPhoto[]
-  quotes   Quote[]
-  invoices Invoice[]
-  expenses Expense[]
+  // Outreach link
+  propertyManagerId String?
+  propertyManager   PropertyManager? @relation(fields: [propertyManagerId], references: [id])
+
+  photos     JobPhoto[]
+  quotes     Quote[]
+  invoices   Invoice[]
+  expenses   Expense[]
+  activities Activity[]
 
   @@index([customerId])
   @@index([status])
   @@index([scheduledDate])
+  @@index([propertyManagerId])
 }
 
 model JobPhoto {
@@ -152,8 +177,9 @@ model Quote {
   jobId       String?
   job         Job?        @relation(fields: [jobId], references: [id])
 
-  status     QuoteStatus @default(DRAFT)
-  validUntil DateTime?
+  status      QuoteStatus @default(DRAFT)
+  serviceType ServiceType @default(CONCRETE_SEALING)
+  validUntil  DateTime?
 
   lineItems QuoteLineItem[]
 
@@ -175,6 +201,7 @@ model Quote {
 
   paymentEvents PaymentEvent[]
   invoices      Invoice[]
+  activities    Activity[]
 
   @@index([customerId])
   @@index([status])
@@ -224,6 +251,7 @@ model Invoice {
   squareOrderId   String?
 
   paymentEvents PaymentEvent[]
+  activities    Activity[]
 
   @@index([customerId])
   @@index([status])
@@ -307,6 +335,32 @@ model Expense {
   @@index([jobId])
 }
 
+// Activity Log — audit trail for emails, status changes, notes, payments
+model Activity {
+  id        String       @id @default(cuid())
+  createdAt DateTime     @default(now())
+  type      ActivityType
+
+  customerId String
+  customer   Customer @relation(fields: [customerId], references: [id])
+
+  jobId     String?
+  job       Job?     @relation(fields: [jobId], references: [id])
+  quoteId   String?
+  quote     Quote?   @relation(fields: [quoteId], references: [id])
+  invoiceId String?
+  invoice   Invoice? @relation(fields: [invoiceId], references: [id])
+
+  description String
+  metadata    Json?
+
+  @@index([customerId])
+  @@index([jobId])
+  @@index([quoteId])
+  @@index([invoiceId])
+  @@index([createdAt])
+}
+
 // Outreach Pipeline — B2B property management sales
 model PropertyManager {
   id        String   @id @default(cuid())
@@ -330,5 +384,20 @@ model PropertyManager {
   nextFollowUpAt  DateTime?
   notes           String?
 
+  jobs            Job[]
+  outreachNotes   OutreachNote[]
+
   @@index([status])
+}
+
+// Outreach interaction log — calls, emails, notes, status changes per prospect
+model OutreachNote {
+  id                String   @id @default(cuid())
+  createdAt         DateTime @default(now())
+  propertyManagerId String
+  propertyManager   PropertyManager @relation(fields: [propertyManagerId], references: [id], onDelete: Cascade)
+  type              String   // "NOTE" | "CALL" | "EMAIL" | "STATUS_CHANGE" | "FOLLOW_UP"
+  content           String
+
+  @@index([propertyManagerId, createdAt])
 }

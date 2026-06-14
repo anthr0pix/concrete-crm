@@ -2,7 +2,7 @@ import { prisma } from "@/lib/prisma";
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
-import { User, MapPin, Calendar, Ruler, Phone, Mail, Navigation, FileText, Receipt, Camera, DollarSign, Clock } from "lucide-react";
+import { User, MapPin, Calendar, Ruler, Phone, Mail, Navigation, FileText, Receipt, Camera, DollarSign, Clock, Building2 } from "lucide-react";
 import Breadcrumbs from "@/components/layout/Breadcrumbs";
 import { SERVICE_TYPE_LABELS } from "@/types";
 import { formatPhone } from "@/lib/utils";
@@ -12,6 +12,7 @@ import JobDetailActions from "@/components/jobs/JobDetailActions";
 import JobCostingSection from "@/components/jobs/JobCostingSection";
 import JobProgressBar from "@/components/jobs/JobProgressBar";
 import MarkCompleteButton from "@/components/jobs/MarkCompleteButton";
+import ActivityFeed from "@/components/activity/ActivityFeed";
 
 export const dynamic = "force-dynamic";
 
@@ -25,6 +26,7 @@ export default async function JobDetailPage({
     where: { id },
     include: {
       customer: true,
+      propertyManager: { select: { id: true, companyName: true } },
       photos: { orderBy: { createdAt: "asc" } },
       quotes: { orderBy: { createdAt: "desc" } },
       invoices: { orderBy: { createdAt: "desc" } },
@@ -45,6 +47,7 @@ export default async function JobDetailPage({
     "Square Feet": "border-t-orange-400",
     "Reseal Due": "border-t-red-400",
     "Review Request": "border-t-purple-400",
+    Prospect: "border-t-indigo-400",
     Submitted: "border-t-slate-400",
   };
 
@@ -175,6 +178,16 @@ export default async function JobDetailPage({
             </p>
           </div>
         )}
+        {job.propertyManager && (
+          <div className={`bg-card rounded-xl shadow-sm border-t-2 ${INFO_CARD_BORDERS["Prospect"]} p-4`}>
+            <div className="flex items-center gap-1.5 text-muted-foreground text-xs mb-1">
+              <Building2 className="w-3.5 h-3.5" /> Prospect
+            </div>
+            <Link href={`/outreach/${job.propertyManager.id}`} className="font-medium text-sm hover:underline">
+              {job.propertyManager.companyName}
+            </Link>
+          </div>
+        )}
       </div>
 
       {/* Job Costing */}
@@ -290,6 +303,11 @@ export default async function JobDetailPage({
             ))
           )}
         </div>
+      </div>
+
+      {/* Activity Log */}
+      <div className="mt-6">
+        <ActivityFeed customerId={job.customerId} jobId={job.id} />
       </div>
     </div>
   );

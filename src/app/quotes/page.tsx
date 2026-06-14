@@ -18,6 +18,7 @@ import {
   ExpireQuoteButton,
   ExpireAllStaleButton,
 } from "@/components/quotes/ExpireQuoteButton";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export const dynamic = "force-dynamic";
 
@@ -193,22 +194,20 @@ export default async function QuotesPage({
       )}
 
       {quotes.length === 0 ? (
-        <div className="text-center py-20 rounded-xl border-2 border-dashed border-border">
-          <FileText className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
-          <p className="text-lg font-semibold text-foreground mb-1">
-            No quotes found
-          </p>
-          <p className="text-sm text-muted-foreground mb-5">
-            {search || activeStatus
+        <EmptyState
+          icon={FileText}
+          title="No quotes found"
+          description={
+            search || activeStatus
               ? "Try adjusting your search or filter."
-              : "Create a quote to send a price estimate to a customer."}
-          </p>
-          {!search && !activeStatus && (
-            <Link href="/quotes/new">
-              <Button>+ New Quote</Button>
-            </Link>
-          )}
-        </div>
+              : "Create a quote to send a price estimate to a customer."
+          }
+          action={
+            !search && !activeStatus
+              ? { label: "+ New Quote", href: "/quotes/new" }
+              : undefined
+          }
+        />
       ) : (
         <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
           {quotes.map((q) => {

@@ -1,6 +1,8 @@
 import { NextRequest, NextResponse } from "next/server";
 import { verifyPortalToken } from "@/lib/portal-token";
 import { prisma } from "@/lib/prisma";
+import { logActivity } from "@/lib/activity";
+import { ensureJobForAcceptedQuote, QuoteAlreadyLinkedError } from "@/lib/quote-to-job";
 
 export async function POST(
   _req: NextRequest,
@@ -20,7 +22,19 @@ export async function POST(
   }
 
   try {
-    const quote = await prisma.quote.findUnique({ where: { id: payload.id } });
+    const quote = await prisma.quote.findUnique({
+      where: { id: payload.id },
+      select: {
+        id: true,
+        status: true,
+        customerId: true,
+        quoteNumber: true,
+        jobId: true,
+        serviceType: true,
+        notes: true,
+        customer: { select: { address: true, city: true, state: true, zip: true } },
+      },
+    });
     if (!quote) {
       return NextResponse.json({ error: "Quote not found." }, { status: 404 });
     }
@@ -36,28 +50,51 @@ export async function POST(
       );
     }
 
-    await prisma.quote.update({
-      where: { id: payload.id },
-      data: { status: "ACCEPTED" },
+    let spawnedJobId: string | null = null;
+
+    try {
+      await prisma.$transaction(async (tx) => {
+        await tx.quote.update({
+          where: { id: quote.id },
+          data: { status: "ACCEPTED" },
+        });
+
+        const { created, jobId: newJobId } = await ensureJobForAcceptedQuote(tx, {
+          id: quote.id,
+          quoteNumber: quote.quoteNumber,
+          customerId: quote.customerId,
+          serviceType: quote.serviceType,
+          jobId: quote.jobId,
+          notes: quote.notes,
+          customer: quote.customer,
+        });
+        if (created) spawnedJobId = newJobId;
+      });
+    } catch (err) {
+      if (err instanceof QuoteAlreadyLinkedError) {
+        // Concurrent approval won the race; treat as already-accepted success.
+        return NextResponse.json({ success: true, alreadyAccepted: true });
+      }
+      throw err;
+    }
+
+    logActivity({
+      type: "QUOTE_APPROVED",
+      customerId: quote.customerId,
+      jobId: spawnedJobId ?? quote.jobId ?? undefined,
+      quoteId: quote.id,
+      description: `Quote ${quote.quoteNumber} approved by customer (via portal)`,
     });
 
-    // Auto-transition linked job from LEAD → QUOTED
-    if (quote.jobId) {
-      try {
-        const linkedJob = await prisma.job.findUnique({
-          where: { id: quote.jobId },
-          select: { status: true },
-        });
-        if (linkedJob && linkedJob.status === "LEAD") {
-          await prisma.job.update({
-            where: { id: quote.jobId },
-            data: { status: "QUOTED" },
-          });
-        }
-      } catch (err) {
-        // Log but don't fail the approval if job transition fails
-        console.error("[portal/approve] Job auto-transition error:", err);
-      }
+    if (spawnedJobId) {
+      logActivity({
+        type: "JOB_CREATED",
+        customerId: quote.customerId,
+        jobId: spawnedJobId,
+        quoteId: quote.id,
+        description: `Job auto-created from quote ${quote.quoteNumber}`,
+        metadata: { quoteNumber: quote.quoteNumber, source: "portal-auto-accepted" },
+      });
     }
 
     return NextResponse.json({ success: true });

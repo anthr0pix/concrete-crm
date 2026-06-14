@@ -19,6 +19,7 @@ const STATUSES = [
 export default async function OutreachPage() {
   const managers = await prisma.propertyManager.findMany({
     orderBy: { updatedAt: "desc" },
+    include: { _count: { select: { outreachNotes: true, jobs: true } } },
   });
 
   // Group by status
@@ -43,13 +44,16 @@ export default async function OutreachPage() {
         state: m.state,
         propertyCount: m.propertyCount,
         nextFollowUpAt: m.nextFollowUpAt?.toISOString() ?? null,
+        lastContactedAt: m.lastContactedAt?.toISOString() ?? null,
+        noteCount: m._count.outreachNotes,
+        jobCount: m._count.jobs,
       })),
     ]),
   );
 
   return (
     <div className="p-4 sm:p-6">
-      <div className="mb-6 bg-muted/40 rounded-xl px-5 py-4 -mx-1 flex items-center justify-between">
+      <div className="mb-6 bg-muted/40 rounded-xl px-5 py-4 -mx-1 flex flex-col sm:flex-row sm:items-center justify-between gap-3">
         <div>
           <h1 className="text-2xl font-bold">Outreach Pipeline</h1>
           <p className="text-sm text-muted-foreground mt-1">

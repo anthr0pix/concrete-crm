@@ -10,6 +10,7 @@ import { format, isToday } from "date-fns";
 import { cn } from "@/lib/utils";
 import SortSelect from "@/components/ui/sort-select";
 import Pagination from "@/components/ui/pagination";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export const dynamic = "force-dynamic";
 
@@ -76,7 +77,7 @@ export default async function JobsPage({
 
   const countMap = Object.fromEntries(statusCounts.map((s) => [s.status, s._count]));
   const summaryCards = [
-    { label: "Leads", count: countMap["LEAD"] ?? 0, color: "bg-status-neutral-bg text-status-neutral-text" },
+    { label: "Leads", count: (countMap["LEAD"] ?? 0) + (countMap["CONTACTED"] ?? 0), color: "bg-status-neutral-bg text-status-neutral-text" },
     { label: "Scheduled", count: countMap["SCHEDULED"] ?? 0, color: "bg-status-warning-bg text-status-warning-text" },
     { label: "In Progress", count: countMap["IN_PROGRESS"] ?? 0, color: "bg-status-orange-bg text-status-orange-text" },
     { label: "Completed", count: countMap["COMPLETED"] ?? 0, color: "bg-status-success-bg text-status-success-text" },
@@ -155,18 +156,20 @@ export default async function JobsPage({
 
       {/* Job list */}
       {jobs.length === 0 ? (
-        <div className="text-center py-20 rounded-xl border-2 border-dashed border-border">
-          <Briefcase className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
-          <p className="text-lg font-semibold text-foreground mb-1">No jobs found</p>
-          <p className="text-sm text-muted-foreground mb-5">
-            {search || activeStatus
+        <EmptyState
+          icon={Briefcase}
+          title="No jobs found"
+          description={
+            search || activeStatus
               ? "Try adjusting your search or filter."
-              : "Create your first job to start tracking work."}
-          </p>
-          {!search && !activeStatus && (
-            <Link href="/jobs/new"><Button>+ New Job</Button></Link>
-          )}
-        </div>
+              : "Create your first job to start tracking work."
+          }
+          action={
+            !search && !activeStatus
+              ? { label: "+ New Job", href: "/jobs/new" }
+              : undefined
+          }
+        />
       ) : (
         <div className="space-y-2">
           {jobs.map((job) => {

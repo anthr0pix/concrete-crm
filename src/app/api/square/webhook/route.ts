@@ -7,10 +7,13 @@ import { PaymentConfirmationEmail } from "@/components/emails/PaymentConfirmatio
 import { DepositConfirmationEmail } from "@/components/emails/DepositConfirmationEmail";
 import { format } from "date-fns";
 import React from "react";
+import { logActivity } from "@/lib/activity";
 
 const FROM_EMAIL =
   process.env.FROM_EMAIL ??
   "Mountain West Surface <payments@mountainwestsurface.com>";
+// Invoice payment confirmations are sent from the billing address; falls back to FROM_EMAIL if unset.
+const BILLING_FROM_EMAIL = process.env.BILLING_FROM_EMAIL ?? FROM_EMAIL;
 const REPLY_TO_EMAIL = process.env.REPLY_TO_EMAIL ?? "mwsurfaceco@gmail.com";
 
 function verifySquareWebhook(body: string, signature: string): boolean {
@@ -122,6 +125,16 @@ export async function POST(req: NextRequest) {
             },
           });
 
+          // Log activity
+          logActivity({
+            type: "PAYMENT_RECEIVED",
+            customerId: invoice.customerId,
+            jobId: invoice.jobId ?? undefined,
+            invoiceId: invoice.id,
+            description: `Payment of $${amountDollars.toFixed(2)} received`,
+            metadata: { amount: amountDollars, invoiceNumber: invoice.invoiceNumber, squarePaymentId },
+          });
+
           // Send payment confirmation email
           if (invoice.customer.email) {
             await sendPaymentConfirmationEmail(
@@ -152,6 +165,16 @@ export async function POST(req: NextRequest) {
               depositPaidAt: now,
               squareDepositPaymentId: squarePaymentId,
             },
+          });
+
+          // Log activity
+          logActivity({
+            type: "DEPOSIT_RECEIVED",
+            customerId: quote.customerId,
+            jobId: quote.jobId ?? undefined,
+            quoteId: quote.id,
+            description: `Deposit of $${amountDollars.toFixed(2)} received`,
+            metadata: { amount: amountDollars, quoteNumber: quote.quoteNumber, squarePaymentId },
           });
 
           // Send deposit confirmation email
@@ -224,7 +247,7 @@ async function sendPaymentConfirmationEmail(
 
     const resend = getResend();
     const { error } = await resend.emails.send({
-      from: FROM_EMAIL,
+      from: BILLING_FROM_EMAIL,
       to: email,
       replyTo: REPLY_TO_EMAIL,
       subject: `Payment Received - Invoice ${invoiceNumber}`,

@@ -66,6 +66,11 @@ export async function PATCH(
   const { nextFollowUpAt, lastContactedAt, email, ...rest } = parsed.data;
 
   try {
+    // Fetch current record to detect status change
+    const current = parsed.data.status
+      ? await prisma.propertyManager.findUnique({ where: { id }, select: { status: true } })
+      : null;
+
     const manager = await prisma.propertyManager.update({
       where: { id },
       data: {
@@ -83,6 +88,26 @@ export async function PATCH(
           : {}),
       },
     });
+
+    // Auto-log status change as OutreachNote
+    if (current && parsed.data.status && current.status !== parsed.data.status) {
+      const STATUS_LABELS: Record<string, string> = {
+        PROSPECT: "Prospect",
+        CONTACTED: "Contacted",
+        IN_CONVERSATION: "In Conversation",
+        PROPOSAL_SENT: "Proposal Sent",
+        WON: "Won",
+        LOST: "Lost",
+      };
+      await prisma.outreachNote.create({
+        data: {
+          propertyManagerId: id,
+          type: "STATUS_CHANGE",
+          content: `Status changed from ${STATUS_LABELS[current.status] || current.status} to ${STATUS_LABELS[parsed.data.status] || parsed.data.status}`,
+        },
+      });
+    }
+
     return NextResponse.json(manager);
   } catch (error) {
     console.error("Failed to update property manager:", error);

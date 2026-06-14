@@ -1,10 +1,14 @@
+import path from "path";
 import {
   Document,
   Page,
   Text,
   View,
+  Image,
   StyleSheet,
 } from "@react-pdf/renderer";
+
+const LOGO_PATH = path.join(process.cwd(), "public", "logo-horizontal-trimmed.png");
 
 const styles = StyleSheet.create({
   page: {
@@ -24,16 +28,10 @@ const styles = StyleSheet.create({
     borderBottomWidth: 3,
     borderBottomColor: "#e94560",
   },
-  companyName: {
-    fontSize: 18,
-    fontFamily: "Helvetica-Bold",
-    color: "#1a1a2e",
-    letterSpacing: 1,
-  },
-  companyTagline: {
-    fontSize: 9,
-    color: "#666",
-    marginTop: 2,
+  logo: {
+    width: 220,
+    height: 54,
+    marginBottom: 6,
   },
   companyContact: {
     fontSize: 9,
@@ -266,8 +264,7 @@ export function QuotePDF({ quote }: QuotePDFProps) {
         {/* Header */}
         <View style={styles.header}>
           <View>
-            <Text style={styles.companyName}>MOUNTAIN WEST SURFACE</Text>
-            <Text style={styles.companyTagline}>Professional Surface Cleaning & Sealing</Text>
+            <Image style={styles.logo} src={LOGO_PATH} />
             <Text style={styles.companyContact}>(435) 709-6999</Text>
             <Text style={styles.companyContact}>mwsurfaceco@gmail.com</Text>
             <Text style={styles.companyContact}>mountainwestsurface.com</Text>

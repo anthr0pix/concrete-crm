@@ -3,6 +3,7 @@ import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Plus, DollarSign } from "lucide-react";
 import ExpenseTable from "@/components/expenses/ExpenseTable";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export const dynamic = "force-dynamic";
 
@@ -39,12 +40,12 @@ export default async function ExpensesPage() {
       </div>
 
       {expenses.length === 0 ? (
-        <div className="text-center py-20 rounded-xl border-2 border-dashed border-border">
-          <DollarSign className="w-12 h-12 text-muted-foreground/30 mx-auto mb-3" />
-          <p className="text-lg font-semibold text-foreground mb-1">No expenses yet</p>
-          <p className="text-sm text-muted-foreground mb-5">Track fuel, materials, and other costs. Link them to jobs to see per-job profitability.</p>
-          <Link href="/expenses/new"><Button><Plus className="w-4 h-4 mr-2" /> New Expense</Button></Link>
-        </div>
+        <EmptyState
+          icon={DollarSign}
+          title="No expenses yet"
+          description="Track fuel, materials, and other costs. Link them to jobs to see per-job profitability."
+          action={{ label: "+ New Expense", href: "/expenses/new" }}
+        />
       ) : (
         <ExpenseTable expenses={serialized} />
       )}

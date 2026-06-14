@@ -34,6 +34,7 @@ export default async function EditQuotePage({
         quoteId={id}
         defaultCustomerId={quote.customerId}
         defaultJobId={quote.jobId ?? undefined}
+        defaultServiceType={quote.serviceType}
         defaultLineItems={quote.lineItems.map((item) => ({
           description: item.description,
           quantity: item.quantity,

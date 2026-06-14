@@ -13,16 +13,25 @@ import QuoteStatusSelect from "./QuoteStatusSelect";
 import SendQuoteButton from "./SendQuoteButton";
 import DuplicateQuoteButton from "./DuplicateQuoteButton";
 import ConvertToInvoiceButton from "./ConvertToInvoiceButton";
+import CreateJobButton from "./CreateJobButton";
 import DeleteQuoteButton from "./DeleteQuoteButton";
 import { QuoteStatus } from "@prisma/client";
 
 interface Props {
   quoteId: string;
+  quoteNumber: string;
   status: QuoteStatus;
   customerEmail: string | null;
+  linkedJobId: string | null;
 }
 
-export default function QuoteDetailActions({ quoteId, status, customerEmail }: Props) {
+export default function QuoteDetailActions({
+  quoteId,
+  quoteNumber,
+  status,
+  customerEmail,
+  linkedJobId,
+}: Props) {
   return (
     <>
       {/* Desktop: all buttons visible */}
@@ -45,7 +54,14 @@ export default function QuoteDetailActions({ quoteId, status, customerEmail }: P
         <div className="w-px h-6 bg-border" />
         <DuplicateQuoteButton quoteId={quoteId} />
         {status === "ACCEPTED" && (
-          <ConvertToInvoiceButton quoteId={quoteId} />
+          <>
+            <CreateJobButton
+              quoteId={quoteId}
+              quoteNumber={quoteNumber}
+              linkedJobId={linkedJobId}
+            />
+            <ConvertToInvoiceButton quoteId={quoteId} />
+          </>
         )}
         <DeleteQuoteButton quoteId={quoteId} />
       </div>
@@ -77,9 +93,18 @@ export default function QuoteDetailActions({ quoteId, status, customerEmail }: P
               <DuplicateQuoteButton quoteId={quoteId} />
             </DropdownMenuItem>
             {status === "ACCEPTED" && (
-              <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
-                <ConvertToInvoiceButton quoteId={quoteId} />
-              </DropdownMenuItem>
+              <>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                  <CreateJobButton
+                    quoteId={quoteId}
+                    quoteNumber={quoteNumber}
+                    linkedJobId={linkedJobId}
+                  />
+                </DropdownMenuItem>
+                <DropdownMenuItem onSelect={(e) => e.preventDefault()}>
+                  <ConvertToInvoiceButton quoteId={quoteId} />
+                </DropdownMenuItem>
+              </>
             )}
             <DropdownMenuItem
               className="text-destructive focus:text-destructive"

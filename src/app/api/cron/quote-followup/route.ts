@@ -5,6 +5,7 @@ import { signPortalToken } from "@/lib/portal-token";
 import { render } from "@react-email/components";
 import { QuoteFollowUpEmail } from "@/components/emails/QuoteFollowUpEmail";
 import React from "react";
+import { logActivity } from "@/lib/activity";
 
 export async function GET(req: NextRequest) {
   // Verify CRON_SECRET
@@ -79,6 +80,16 @@ export async function GET(req: NextRequest) {
               lastFollowUpAt: new Date(),
             },
           });
+
+          logActivity({
+            type: "FOLLOW_UP_SENT",
+            customerId: quote.customerId,
+            jobId: quote.jobId ?? undefined,
+            quoteId: quote.id,
+            description: `Follow-up #${quote.followUpCount + 1} sent for quote ${quote.quoteNumber}`,
+            metadata: { recipient: quote.customer.email, followUpNumber: quote.followUpCount + 1 },
+          });
+
           sentCount++;
         } else {
           console.error(`[quote-followup] Failed to send to ${quote.customer.email}:`, error);

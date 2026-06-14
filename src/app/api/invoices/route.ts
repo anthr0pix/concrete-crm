@@ -2,6 +2,7 @@ import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { getNextInvoiceNumber } from "@/lib/numbering";
 import { z } from "zod";
+import { logActivity } from "@/lib/activity";
 
 const lineItemSchema = z.object({
   description: z.string().min(1),
@@ -70,6 +71,17 @@ export async function POST(request: Request) {
           },
         },
       });
+
+      logActivity({
+        type: "INVOICE_CREATED",
+        customerId: quote.customerId,
+        jobId: quote.jobId ?? undefined,
+        invoiceId: invoice.id,
+        quoteId: quote.id,
+        description: `Invoice ${invoiceNumber} created ($${quote.total.toFixed(2)})`,
+        metadata: { invoiceNumber, total: quote.total },
+      });
+
       return NextResponse.json(invoice, { status: 201 });
     } catch (err) {
       console.error("[POST invoice from quote]", err);
@@ -99,6 +111,15 @@ export async function POST(request: Request) {
         dueDate: dueDate ? new Date(dueDate) : undefined,
         lineItems: { create: lineItems.map((item) => ({ ...item, total: item.quantity * item.unitPrice })) },
       },
+    });
+
+    logActivity({
+      type: "INVOICE_CREATED",
+      customerId: rest.customerId,
+      jobId: rest.jobId,
+      invoiceId: invoice.id,
+      description: `Invoice ${invoiceNumber} created ($${total.toFixed(2)})`,
+      metadata: { invoiceNumber, total },
     });
 
     return NextResponse.json(invoice, { status: 201 });

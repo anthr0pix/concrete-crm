@@ -37,6 +37,7 @@ const schema = z.object({
   laborRate: z.coerce.number().optional(),
   materialCost: z.coerce.number().optional(),
   crewAssignment: z.string().optional(),
+  propertyManagerId: z.string().optional(),
 });
 
 type FormData = z.infer<typeof schema>;
@@ -51,13 +52,19 @@ interface Customer {
   zip?: string;
 }
 
+interface PropertyManagerOption {
+  id: string;
+  companyName: string;
+}
+
 interface Props {
   customers: Customer[];
+  propertyManagers?: PropertyManagerOption[];
   defaultValues?: Partial<FormData>;
   jobId?: string;
 }
 
-export default function JobForm({ customers, defaultValues, jobId }: Props) {
+export default function JobForm({ customers, propertyManagers = [], defaultValues, jobId }: Props) {
   const router = useRouter();
   const isEdit = !!jobId;
   const [customerList, setCustomerList] = useState<Customer[]>(customers);
@@ -97,10 +104,19 @@ export default function JobForm({ customers, defaultValues, jobId }: Props) {
     const url = isEdit ? `/api/jobs/${jobId}` : "/api/jobs";
     const method = isEdit ? "PATCH" : "POST";
 
+    // Send propertyManagerId as null when clearing on edit, omit when empty on create
+    const { propertyManagerId, ...rest } = data;
+    const payload: Record<string, unknown> = { ...rest };
+    if (propertyManagerId) {
+      payload.propertyManagerId = propertyManagerId;
+    } else if (isEdit) {
+      payload.propertyManagerId = null;
+    }
+
     const res = await fetch(url, {
       method,
       headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(data),
+      body: JSON.stringify(payload),
     });
 
     if (!res.ok) { toast.error("Something went wrong."); return; }
@@ -143,6 +159,30 @@ export default function JobForm({ customers, defaultValues, jobId }: Props) {
             }} />
           </div>
           {errors.customerId && <p className="text-xs text-destructive">{errors.customerId.message}</p>}
+        </div>
+      )}
+
+      {propertyManagers.length > 0 && (
+        <div className="space-y-1">
+          <Label>Property Manager (optional)</Label>
+          <Controller
+            name="propertyManagerId"
+            control={control}
+            render={({ field }) => (
+              <Select onValueChange={(v) => field.onChange(v === "__none__" ? "" : v)} value={field.value || "__none__"}>
+                <SelectTrigger className="w-full">
+                  <SelectValue placeholder="None" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="__none__">None</SelectItem>
+                  {propertyManagers.map((pm) => (
+                    <SelectItem key={pm.id} value={pm.id}>{pm.companyName}</SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            )}
+          />
+          <p className="text-xs text-muted-foreground">Link this job to an outreach prospect.</p>
         </div>
       )}
 

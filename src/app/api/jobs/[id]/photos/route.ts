@@ -1,6 +1,7 @@
 import { NextResponse } from "next/server";
 import { prisma } from "@/lib/prisma";
 import { z } from "zod";
+import { logActivity } from "@/lib/activity";
 
 const photoSchema = z.object({
   url: z.string().url(),
@@ -16,12 +17,20 @@ export async function POST(request: Request, { params }: { params: Promise<{ id:
   if (!parsed.success) return NextResponse.json({ error: parsed.error.flatten() }, { status: 400 });
 
   try {
-    const job = await prisma.job.findUnique({ where: { id }, select: { id: true } });
+    const job = await prisma.job.findUnique({ where: { id }, select: { id: true, customerId: true } });
     if (!job) return NextResponse.json({ error: "Job not found" }, { status: 404 });
 
     const photo = await prisma.jobPhoto.create({
       data: { ...parsed.data, jobId: id },
     });
+
+    logActivity({
+      type: "PHOTO_UPLOADED",
+      customerId: job.customerId,
+      jobId: id,
+      description: `Photo uploaded (${parsed.data.isBefore ? "before" : "after"})`,
+    });
+
     return NextResponse.json(photo, { status: 201 });
   } catch (err) {
     console.error("[POST photos]", err);

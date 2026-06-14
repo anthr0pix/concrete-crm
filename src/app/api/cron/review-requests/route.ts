@@ -4,6 +4,7 @@ import { getResend } from "@/lib/email";
 import { render } from "@react-email/components";
 import { ReviewRequestEmail } from "@/components/emails/ReviewRequestEmail";
 import React from "react";
+import { logActivity } from "@/lib/activity";
 
 const FROM_EMAIL = process.env.FROM_EMAIL ?? "Mountain West Surface <reviews@mountainwestsurface.com>";
 const REPLY_TO_EMAIL = process.env.REPLY_TO_EMAIL ?? "mwsurfaceco@gmail.com";
@@ -89,6 +90,15 @@ export async function GET(req: NextRequest) {
           where: { id: job.id },
           data: { reviewRequestSentAt: new Date() },
         });
+
+        logActivity({
+          type: "REVIEW_REQUEST_SENT",
+          customerId: job.customerId,
+          jobId: job.id,
+          description: `Review request sent to ${job.customer.email}`,
+          metadata: { recipient: job.customer.email },
+        });
+
         sentCount++;
       } else {
         console.error(`[review-requests] Failed to send to ${job.customer.email}:`, error);

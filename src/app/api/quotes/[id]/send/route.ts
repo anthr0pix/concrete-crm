@@ -8,6 +8,7 @@ import { QuotePDF } from "@/components/pdf/QuotePDF";
 import { QuoteEmail } from "@/components/emails/QuoteEmail";
 import { format } from "date-fns";
 import React from "react";
+import { logActivity } from "@/lib/activity";
 
 const APP_URL = process.env.NEXT_PUBLIC_APP_URL ?? "https://app.mountainwestsurface.com";
 const FROM_EMAIL = process.env.FROM_EMAIL ?? "Mountain West Surface <quotes@mountainwestsurface.com>";
@@ -88,6 +89,16 @@ export async function POST(
     await prisma.quote.update({
       where: { id: quote.id },
       data: { status: "SENT" },
+    });
+
+    // Log activity
+    logActivity({
+      type: "EMAIL_SENT",
+      customerId: quote.customerId,
+      jobId: quote.jobId ?? undefined,
+      quoteId: quote.id,
+      description: `Quote ${quote.quoteNumber} sent to ${quote.customer.email}`,
+      metadata: { recipient: quote.customer.email, quoteNumber: quote.quoteNumber },
     });
 
     // Auto-transition: sending a quote for a LEAD job → QUOTED
